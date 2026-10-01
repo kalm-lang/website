@@ -3,6 +3,7 @@
 **/.gradle/
 **/.intellijPlatform/
 **/node_modules/
+**/.vscode-test/
 .idea/
 *.iml
 .maven-repository/
@@ -12,3 +13,17 @@
 
 /dist/
 **/__pycache__/
+**/.cache/
+
+# Local credentials and environment configuration. Keep the documented template trackable.
+.env
+.env.*
+!.env.example
+
+# OS/editor scratch files and local logs
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
