@@ -1,0 +1,10 @@
+**/target/
+**/build/
+**/.gradle/
+**/.intellijPlatform/
+**/node_modules/
+.idea/
+*.iml
+.maven-repository/
+*.vsix
+**/visits.txt
