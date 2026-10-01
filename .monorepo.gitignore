@@ -9,3 +9,6 @@
 *.vsix
 **/visits.txt
 .git-local/
+
+/dist/
+**/__pycache__/
