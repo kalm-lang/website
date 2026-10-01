@@ -8,3 +8,4 @@
 .maven-repository/
 *.vsix
 **/visits.txt
+.git-local/
