@@ -34,3 +34,6 @@ website/dist/
 website/public/source/
 website/playwright-report/
 website/test-results/
+
+# Locally generated production website delivery bundle
+website/kalm-website-production.zip

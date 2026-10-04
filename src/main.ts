@@ -1,8 +1,10 @@
-import './styles/global.css';
 import './components/theme-toggle';
 import './components/site-nav';
 import './components/code-block';
-import './components/source-tabs';
+import './components/code-tabs';
+import { revealCurrentTopic } from './components/section-nav';
+
+revealCurrentTopic();
 
 // Content remains ordinary HTML; Lit adds focused, reusable interactions.
 const observer = new IntersectionObserver(entries => {

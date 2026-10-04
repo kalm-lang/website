@@ -1,18 +1,23 @@
 :root {
   color-scheme: light;
-  --paper: #f4f1eb; --surface: #fffdf8; --ink: #181918; --muted: #67685e;
-  --line: #c6c5ba; --accent: #c53014; --accent-ink: #fffdf8; --soft: #e8e6dc;
+  --paper: #f3e8d5; --surface: #fcf5e8; --ink: #30271f; --muted: #70604f;
+  --line: #cbbb9f; --accent: #a33e25; --accent-ink: #fff8ec; --soft: #e9dcc4;
+  --shadow: #53412a12; --grain: #80633f0c;
   --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --body: 'Segoe UI', system-ui, sans-serif;
+  --heading: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
 }
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --paper: #131514; --surface: #1b1e1c; --ink: #e9e9dc; --muted: #a5aa9e;
-  --line: #454a43; --accent: #ff8066; --accent-ink: #131514; --soft: #252923;
+  --paper: #191c19; --surface: #232720; --ink: #ece5d7; --muted: #b7b5a3;
+  --line: #505748; --accent: #f4a381; --accent-ink: #241b14; --soft: #2d3329;
+  --shadow: #0003; --grain: #e8d6ac06;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']):not([data-theme='dark']) {
     color-scheme: dark;
-    --paper: #131514; --surface: #1b1e1c; --ink: #e9e9dc; --muted: #a5aa9e;
-    --line: #454a43; --accent: #ff8066; --accent-ink: #131514; --soft: #252923;
+    --paper: #191c19; --surface: #232720; --ink: #ece5d7; --muted: #b7b5a3;
+    --line: #505748; --accent: #f4a381; --accent-ink: #241b14; --soft: #2d3329;
+    --shadow: #0003; --grain: #e8d6ac06;
   }
 }

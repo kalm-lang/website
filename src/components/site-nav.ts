@@ -1,24 +1,24 @@
-import { LitElement, html } from 'lit';
-
-export class SiteNav extends LitElement {
-  static properties = { open: { state: true } };
-  open = false;
+// Keep the generated links and active section intact during enhancement.
+export class SiteNav extends HTMLElement {
+  private open = false;
+  private readonly button = document.createElement('button');
   private readonly escape = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      this.open = false;
-      this.querySelector<HTMLButtonElement>('button')?.focus();
-    }
+    if (event.key === 'Escape' && this.open) { this.setOpen(false); this.button.focus(); }
   };
-  createRenderRoot() { return this; }
-  connectedCallback() { if (!this.hasUpdated) this.replaceChildren(); super.connectedCallback(); window.addEventListener('keydown', this.escape); }
-  disconnectedCallback() { window.removeEventListener('keydown', this.escape); super.disconnectedCallback(); }
-  render() {
-    return html`<button class="menu-button" aria-controls="site-navigation" aria-expanded=${this.open}
-      @click=${() => { this.open = !this.open; }}>${this.open ? '[-] close' : '[+] menu'}</button>
-      <nav id="site-navigation" class=${this.open ? 'nav-links open' : 'nav-links'} aria-label="Main navigation">
-        ${[['/docs/quick-start/', 'docs'], ['/examples/', 'examples'], ['/tutorial/', 'learn']].map(([href, text]) =>
-          html`<a href=${href} aria-current=${location.pathname.startsWith(href) ? 'page' : 'false'}>${text}</a>`)}
-      </nav>`;
+  connectedCallback() {
+    this.button.className = 'menu-button';
+    this.button.setAttribute('aria-controls', 'site-navigation');
+    this.button.onclick = () => this.setOpen(!this.open);
+    this.prepend(this.button);
+    this.setOpen(false);
+    window.addEventListener('keydown', this.escape);
+  }
+  disconnectedCallback() { window.removeEventListener('keydown', this.escape); }
+  private setOpen(open: boolean) {
+    this.open = open;
+    this.button.textContent = open ? '[-] close' : '[+] menu';
+    this.button.setAttribute('aria-expanded', String(open));
+    this.querySelector('nav')?.classList.toggle('open', open);
   }
 }
 customElements.define('kalm-site-nav', SiteNav);

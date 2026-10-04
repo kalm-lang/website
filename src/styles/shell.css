@@ -1,0 +1,15 @@
+.site-header { min-height: 5.5rem; padding: 1rem 4vw; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 2rem; }
+.brand { font: 800 1.8rem var(--mono); letter-spacing: -.09em; text-decoration: none; }
+.brand span { color: var(--accent); }
+kalm-site-nav { margin-left: auto; }
+kalm-theme-toggle { display: block; min-width: 8.4rem; min-height: 2rem; }
+.site-footer { max-width: 88rem; margin: 5rem auto 0; padding: 1.5rem 4vw 2rem;
+  border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between;
+  gap: 1rem; color: var(--muted); font: .8rem/1.6 var(--mono); }
+.site-footer a { color: var(--ink); text-decoration: none; }
+@media (max-width: 850px) { .site-header { gap: 1rem; flex-wrap: wrap; } }
+@media (max-width: 520px) {
+  .site-header { justify-content: space-between; }
+  kalm-theme-toggle { margin-left: auto; }
+}

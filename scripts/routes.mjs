@@ -1,23 +1,16 @@
+import { discoverSection, specifications } from './content.mjs';
+
 export const routes = [
-  { path: '/docs/quick-start/', title: 'Getting started', source: 'docs/quick-start.md', group: 'docs' },
-  { path: '/docs/language/', title: 'Language guide', source: 'docs/language-guide.md', group: 'docs' },
-  { path: '/docs/java/', title: 'Java interoperability', source: 'website/content/java.md', group: 'docs' },
-  { path: '/docs/maven/', title: 'Maven', source: 'kalm-maven-plugin/README.md', group: 'docs' },
-  { path: '/docs/gradle/', title: 'Gradle', source: 'kalm-gradle-plugin/README.md', group: 'docs' },
-  { path: '/docs/editors/', title: 'Editors', source: 'website/content/editors.md', group: 'docs' },
-  { path: '/docs/status/', title: 'Implementation status', source: 'docs/conformance.md', group: 'docs' },
-  { path: '/docs/limitations/', title: 'Boundaries', source: 'docs/known-limitations.md', group: 'docs' },
-  { path: '/docs/audit/', title: 'Usability audit', source: 'docs/feature-audit.md', group: 'docs' },
-  { path: '/docs/specification/', title: '1.1 draft specification', source: 'specifications/Kalm-Language-Specification-v1.1-draft.md', group: 'reference' },
-  { path: '/examples/', title: 'Runnable projects', source: 'examples/README.md', group: 'examples' },
-  { path: '/examples/hello/', title: 'Hello, Kalm', source: 'examples/hello/README.md', group: 'examples', project: 'hello' },
-  { path: '/examples/mixed/', title: 'Java ↔ Kalm', source: 'examples/demo-mixed-project/README.md', group: 'examples', project: 'demo-mixed-project' },
-  { path: '/examples/task-report/', title: 'Task report', source: 'examples/task-report/README.md', group: 'examples', project: 'task-report' },
-  { path: '/tutorial/', title: 'Learn Kalm', source: 'website/content/tutorial-index.md', group: 'tutorial' },
-  ...[
-    ['01-hello', 'Your first greeting'], ['02-values', 'Values and absence'],
-    ['03-models', 'Model the work'], ['04-interop', 'Compose and call Java'],
-    ['05-tasks', 'Tasks, resources, and tests'], ['06-report', 'Put it together'],
-  ].map(([slug, title], index) => ({ path: `/tutorial/${slug}/`, title: `${index + 1}. ${title}`,
-    source: `website/content/tutorial/${slug}.md`, group: 'tutorial', lesson: index + 1 })),
+  ...discoverSection('docs'), ...specifications(),
+  ...discoverSection('examples'), ...discoverSection('learn'),
+];
+const seen = new Set();
+for (const route of routes) {
+  if (seen.has(route.path)) throw new Error(`Duplicate route: ${route.path}`);
+  seen.add(route.path);
+}
+export const sectionLinks = [
+  { section: 'docs', path: '/docs/quick-start/', title: 'docs' },
+  { section: 'examples', path: '/examples/', title: 'examples' },
+  { section: 'learn', path: '/learn/', title: 'learn' },
 ];

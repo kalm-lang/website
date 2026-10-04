@@ -1,0 +1,27 @@
+.page-layout { display: grid; grid-template-columns: 15rem minmax(0, 1fr); max-width: 88rem;
+  margin: auto; padding: 3rem 4vw; gap: 3.5rem; }
+.sidebar { border-right: 1px solid var(--line); padding-right: 1.5rem; min-width: 0; }
+.sidebar-inner { position: sticky; top: 1.5rem; max-height: calc(100vh - 3rem); overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.nav-group { margin-bottom: 1.75rem; }
+.nav-group h2 { font: 600 .75rem/1.6 var(--mono); letter-spacing: .04em; color: var(--muted); margin: 0 0 .75rem; }
+.sidebar a { display: block; padding: .32rem .5rem; font: .8rem/1.6 var(--mono); text-decoration: none; border-left: 2px solid transparent; }
+.sidebar a.nav-child { padding-left: 1rem; }
+.sidebar a:hover { background: var(--soft); }
+.sidebar a[aria-current='page'] { color: var(--accent); border-left-color: var(--accent); background: var(--soft); }
+.article { min-width: 0; max-width: 52rem; }
+.article-header { border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+.article-header h1 { font: 400 clamp(2rem, 4vw, 3.25rem)/1.15 var(--heading); letter-spacing: -.03em; margin: 0; overflow-wrap: anywhere; }
+.example-article { max-width: 46rem; }
+.example-article .prose > p:first-child { color: var(--muted); }
+.lesson-navigation { overflow-wrap: anywhere; display: flex; flex-wrap: wrap; justify-content: space-between;
+  gap: 1rem; margin-top: 3rem; border-top: 1px dashed var(--line); padding-top: 1.5rem; font: .85rem/1.7 var(--mono); }
+.lesson-navigation a { text-decoration: none; }
+.redirect { padding: 4rem 4vw; }
+@media (max-width: 850px) {
+  .page-layout { grid-template-columns: 1fr; gap: 2rem; padding-top: 1.5rem; }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 1rem; }
+  .sidebar-inner { position: static; max-height: 12rem; overflow-y: auto; }
+  .nav-group { margin-bottom: 1rem; }
+  .sidebar a { display: inline-block; margin: .15rem .5rem .15rem 0; }
+}

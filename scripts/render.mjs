@@ -1,29 +1,23 @@
-import { readFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { resolve, dirname, relative } from 'node:path';
 import MarkdownIt from 'markdown-it';
-import { createHighlighter } from 'shiki';
 import { routes } from './routes.mjs';
+import { repository } from './content.mjs';
+import { code, escape } from './code.mjs';
+import { tabsPlugin } from './tabs.mjs';
+export { code, escape, repository };
 
-export const repository = resolve('..');
-export const escape = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const grammar = JSON.parse(readFileSync(resolve(repository, 'extensions/vscode-kalm/syntaxes/kalm.tmLanguage.json'), 'utf8'));
-const highlighter = await createHighlighter({ themes: ['github-light', 'github-dark'], langs: [{ ...grammar, name: 'kalm' }, 'java', 'bash', 'xml', 'kotlin', 'json'] });
-export function code(source, language = 'kalm') {
-  const lang = highlighter.getLoadedLanguages().includes(language) ? language : 'text';
-  return `<kalm-code-block>${highlighter.codeToHtml(source.trimEnd(), { lang, themes: { light: 'github-light', dark: 'github-dark' } })}</kalm-code-block>`;
-}
-export function sourceLink(path) {
-  const absolute = resolve(repository, path);
-  if (!absolute.startsWith(repository + '/')) throw new Error(`Source escapes repository: ${path}`);
-  const target = resolve('public/source', path);
-  mkdirSync(dirname(target), { recursive: true });
-  copyFileSync(absolute, target);
-  return `/source/${path}`;
-}
-export function markdown(source, sourcePath) {
-  const md = new MarkdownIt({ html: false });
+export function markdown(source, sourcePath, namespace = 'article') {
+  const md = new MarkdownIt({ html: false }).use(tabsPlugin);
   const slugs = new Map();
+  let group = 0;
   md.renderer.rules.fence = (tokens, i) => code(tokens[i].content, tokens[i].info.trim().split(/\s/)[0]);
+  md.renderer.rules.code_tabs = (tokens, i) => {
+    const id = `${namespace}-tabs-${group++}`;
+    return `<kalm-code-tabs>${tokens[i].children.map((token, index) => {
+      const [language, ...label] = token.info.trim().split(/\s+/);
+      return `<section id="${id}-${index}" data-label="${escape(label.join(' ') || language)}">${code(token.content, language)}</section>`;
+    }).join('')}</kalm-code-tabs>`;
+  };
   md.renderer.rules.heading_open = (tokens, i) => {
     const base = tokens[i + 1].content.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'section';
     const count = slugs.get(base) ?? 0;
@@ -41,11 +35,13 @@ export function markdown(source, sourcePath) {
   const link = md.renderer.rules.link_open ?? ((tokens, i, options, env, renderer) => renderer.renderToken(tokens, i, options));
   md.renderer.rules.link_open = (tokens, i, options, env, renderer) => {
     const href = tokens[i].attrGet('href');
+    if (href?.startsWith('/source/')) throw new Error(`Repository file link in ${sourcePath}: ${href}`);
     if (href && !/^(https?:|mailto:|#|\/)/.test(href)) {
       const [file, fragment] = href.split('#');
       const path = relative(repository, resolve(repository, dirname(sourcePath), file));
       const route = routes.find(route => route.source === path);
-      tokens[i].attrSet('href', (route?.path ?? sourceLink(path)) + (fragment ? `#${fragment}` : ''));
+      if (!route) throw new Error(`No website page for ${href} in ${sourcePath}`);
+      tokens[i].attrSet('href', route.path + (fragment ? `#${fragment}` : ''));
     }
     return link(tokens, i, options, env, renderer);
   };

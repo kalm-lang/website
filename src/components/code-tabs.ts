@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 
-export class SourceTabs extends LitElement {
+export class CodeTabs extends LitElement {
   static properties = { selected: { state: true } };
   selected = 0;
   private panels: HTMLElement[] = [];
@@ -24,14 +24,14 @@ export class SourceTabs extends LitElement {
     if (next !== undefined) { event.preventDefault(); this.select(next, true); }
   }
   render() {
-    return html`<div class="source-tab-bar" role="tablist" aria-label="Example source files">
+    return html`<div class="source-tab-bar" role="tablist" aria-label="Code examples">
       ${this.panels.map((panel, index) => html`<button role="tab" id=${`${panel.id}-tab`}
         aria-controls=${panel.id} aria-selected=${this.selected === index} tabindex=${this.selected === index ? 0 : -1}
-        @click=${() => this.select(index)} @keydown=${(event: KeyboardEvent) => this.key(event, index)}>${panel.dataset.file}</button>`)}
+        @click=${() => this.select(index)} @keydown=${(event: KeyboardEvent) => this.key(event, index)}>${panel.dataset.label}</button>`)}
     </div>`;
   }
   updated() {
     this.panels.forEach(panel => { panel.setAttribute('role', 'tabpanel'); panel.setAttribute('aria-labelledby', `${panel.id}-tab`); });
   }
 }
-customElements.define('kalm-source-tabs', SourceTabs);
+customElements.define('kalm-code-tabs', CodeTabs);
