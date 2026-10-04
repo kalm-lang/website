@@ -38,6 +38,7 @@
   .section-menu > .icon { color: var(--accent); }
   .section-menu > .icon:last-child { transition: transform .2s; }
   .section-navigation[open] .section-menu > .icon:last-child { transform: rotate(180deg); }
+  .section-navigation[data-closing] .section-menu > .icon:last-child { transform: rotate(0); }
   .sidebar-inner { max-height: min(60dvh, 28rem); border-top: 1px solid var(--line); padding: 1rem; }
   .nav-group { margin-bottom: 1.25rem; }
   .nav-group:last-child { margin-bottom: 0; }

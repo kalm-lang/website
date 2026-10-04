@@ -12,8 +12,15 @@ export class CodeTabs extends LitElement {
   }
   private show() { this.panels.forEach((panel, index) => { panel.hidden = index !== this.selected; }); }
   private select(index: number, focus = false) {
+    const changed = index !== this.selected;
     this.selected = index;
     this.show();
+    const panel = this.panels[index];
+    if (changed && panel && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      panel.classList.remove('panel-entering');
+      void panel.offsetWidth;
+      panel.classList.add('panel-entering');
+    }
     if (focus) void this.updateComplete.then(() => this.querySelectorAll<HTMLButtonElement>('[role="tab"]')[index]?.focus());
   }
   private key(event: KeyboardEvent, index: number) {

@@ -41,8 +41,10 @@
 .feature-toggle { position: absolute; display: flex; align-items: center; justify-content: center;
   right: 1.25rem; top: 1.5rem; width: 2rem; height: 2rem; color: var(--muted); transition: transform .2s; }
 .feature[open] .feature-toggle { transform: rotate(180deg); color: var(--accent); }
+.feature[data-closing] .feature-toggle { transform: rotate(0); }
 .feature[open] summary { min-height: 0; }
 .feature[open] .feature-preview { display: none; }
+.feature[data-closing] summary { min-height: 16rem; }
 .feature-body { padding: 0 1.25rem 1.25rem; border-top: 1px dashed var(--line); }
 .feature-body kalm-code-block, .feature-body kalm-code-tabs { margin: 1rem 0 .5rem; }
 .learn-more { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px;

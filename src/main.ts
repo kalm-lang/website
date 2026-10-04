@@ -2,8 +2,10 @@ import './components/theme-toggle';
 import './components/site-nav';
 import './components/code-block';
 import './components/code-tabs';
+import { enhanceDisclosures } from './components/disclosures';
 import { enhanceSectionNavigation } from './components/section-nav';
 
+enhanceDisclosures();
 enhanceSectionNavigation();
 
 // Content remains ordinary HTML; Lit adds focused, reusable interactions.

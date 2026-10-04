@@ -33,7 +33,9 @@ export class SiteNav extends HTMLElement {
     this.button.innerHTML = `${icon(open ? 'x' : 'menu')}<span>${open ? 'Close' : 'Menu'}</span>`;
     this.button.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     this.button.setAttribute('aria-expanded', String(open));
-    this.querySelector('nav')?.classList.toggle('open', open);
+    const navigation = this.querySelector('nav');
+    navigation?.classList.toggle('open', open);
+    navigation?.toggleAttribute('inert', !open && this.mobile.matches);
   }
 }
 customElements.define('kalm-site-nav', SiteNav);
