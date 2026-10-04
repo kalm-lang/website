@@ -28,7 +28,13 @@ export function markdown(source, sourcePath) {
     const base = tokens[i + 1].content.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'section';
     const count = slugs.get(base) ?? 0;
     slugs.set(base, count + 1);
-    return `<${tokens[i].tag} id="${count ? `${base}-${count}` : base}">`;
+    const id = count ? `${base}-${count}` : base;
+    tokens[i].attrSet('id', id);
+    return `<${tokens[i].tag} id="${id}">`;
+  };
+  md.renderer.rules.heading_close = (tokens, i) => {
+    const id = tokens[i - 2].attrGet('id');
+    return `<a class="heading-anchor" aria-label="Link to this section" href="#${id}">#</a></${tokens[i].tag}>`;
   };
   md.renderer.rules.table_open = () => '<div class="table-scroll"><table>';
   md.renderer.rules.table_close = () => '</table></div>';

@@ -11,6 +11,6 @@ ${body}<footer class="site-footer"><span>kalm / ordinary JVM bytecode / MIT</spa
 }
 export function article(route, body, navigation = '') {
   const group = route.group === 'tutorial' ? 'tutorial' : 'docs';
-  const sidebar = routes.filter(item => item.group === group || item.path === '/examples/');
+  const sidebar = routes.filter(item => item.group === group || item.group === 'reference' || item.group === 'examples');
   return `<main id="main" class="page-layout"><aside class="sidebar"><div class="sidebar-inner"><p class="eyebrow">${group === 'tutorial' ? 'learning path' : 'field manual'}</p>${sidebar.map(item => `<a href="${item.path}" ${item.path === route.path ? 'aria-current="page"' : ''}>${escape(item.title)}</a>`).join('')}</div></aside><article class="article"><header class="article-header"><span class="eyebrow">${escape(route.path)}</span><h1>${escape(route.title)}</h1></header><div class="prose">${body}</div>${navigation}</article></main>`;
 }

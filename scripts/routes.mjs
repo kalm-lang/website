@@ -1,5 +1,17 @@
 export const routes = [
   { path: '/docs/quick-start/', title: 'Getting started', source: 'docs/quick-start.md', group: 'docs' },
+  { path: '/docs/language/', title: 'Language guide', source: 'docs/language-guide.md', group: 'docs' },
+  { path: '/docs/java/', title: 'Java interoperability', source: 'website/content/java.md', group: 'docs' },
+  { path: '/docs/maven/', title: 'Maven', source: 'kalm-maven-plugin/README.md', group: 'docs' },
+  { path: '/docs/gradle/', title: 'Gradle', source: 'kalm-gradle-plugin/README.md', group: 'docs' },
+  { path: '/docs/editors/', title: 'Editors', source: 'website/content/editors.md', group: 'docs' },
+  { path: '/docs/status/', title: 'Implementation status', source: 'docs/conformance.md', group: 'docs' },
+  { path: '/docs/limitations/', title: 'Boundaries', source: 'docs/known-limitations.md', group: 'docs' },
+  { path: '/docs/audit/', title: 'Usability audit', source: 'docs/feature-audit.md', group: 'docs' },
+  { path: '/docs/specification/', title: '1.1 draft specification', source: 'Kalm-Language-Specification-v1.1-draft.md', group: 'reference' },
   { path: '/examples/', title: 'Runnable projects', source: 'examples/README.md', group: 'examples' },
+  { path: '/examples/hello/', title: 'Hello, Kalm', source: 'examples/hello/README.md', group: 'examples', project: 'hello' },
+  { path: '/examples/mixed/', title: 'Java ↔ Kalm', source: 'examples/demo-mixed-project/README.md', group: 'examples', project: 'demo-mixed-project' },
+  { path: '/examples/task-report/', title: 'Task report', source: 'examples/task-report/README.md', group: 'examples', project: 'task-report' },
   { path: '/tutorial/', title: 'Learn Kalm', source: 'website/content/tutorial-index.md', group: 'tutorial' },
 ];
