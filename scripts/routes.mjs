@@ -14,4 +14,10 @@ export const routes = [
   { path: '/examples/mixed/', title: 'Java ↔ Kalm', source: 'examples/demo-mixed-project/README.md', group: 'examples', project: 'demo-mixed-project' },
   { path: '/examples/task-report/', title: 'Task report', source: 'examples/task-report/README.md', group: 'examples', project: 'task-report' },
   { path: '/tutorial/', title: 'Learn Kalm', source: 'website/content/tutorial-index.md', group: 'tutorial' },
+  ...[
+    ['01-hello', 'Your first greeting'], ['02-values', 'Values and absence'],
+    ['03-models', 'Model the work'], ['04-interop', 'Compose and call Java'],
+    ['05-tasks', 'Tasks, resources, and tests'], ['06-report', 'Put it together'],
+  ].map(([slug, title], index) => ({ path: `/tutorial/${slug}/`, title: `${index + 1}. ${title}`,
+    source: `website/content/tutorial/${slug}.md`, group: 'tutorial', lesson: index + 1 })),
 ];
