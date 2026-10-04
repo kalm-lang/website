@@ -21,7 +21,7 @@ export function layout(title, body, section = '') {
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Kalm home">kalm<span>_</span></a>
+    <a class="brand" href="/" aria-label="Kalm home">kalm<span class="brand-mark" aria-hidden="true"></span></a>
     <kalm-site-nav>${mainNavigation(section)}</kalm-site-nav>
     <kalm-theme-toggle></kalm-theme-toggle>
   </header>
