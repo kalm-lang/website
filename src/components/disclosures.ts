@@ -7,8 +7,10 @@ export function enhanceDisclosures() {
     const target = event.target;
     const summary = target instanceof Element ? target.closest('summary') : null;
     const details = summary?.parentElement;
-    const panel = details?.querySelector<HTMLElement>(':scope > .feature-body, :scope > .sidebar-inner');
-    if (!(details instanceof HTMLDetailsElement) || !panel || reducedMotion.matches || !panel.animate) return;
+    const panel = details?.querySelector<HTMLElement>(':scope > .sidebar-inner');
+    if (!(details instanceof HTMLDetailsElement) || !panel) return;
+
+    if (reducedMotion.matches || !panel.animate) return;
 
     event.preventDefault();
     const opening = !details.open;
@@ -27,14 +29,6 @@ export function enhanceDisclosures() {
     { duration: 190, easing: 'cubic-bezier(.22,.75,.25,1)' });
     const animations = [panelAnimation];
 
-    if (details.matches('.feature')) {
-      const cardSummary = details.querySelector<HTMLElement>(':scope > summary');
-      if (cardSummary) animations.push(cardSummary.animate(opening
-        ? [{ minHeight: '16rem' }, { minHeight: '0px' }]
-        : [{ minHeight: '0px' }, { minHeight: '16rem' }],
-      { duration: 190, easing: 'cubic-bezier(.22,.75,.25,1)' }));
-    }
-
     active.set(details, animations);
     void Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
       if (active.get(details) !== animations) return;
@@ -43,4 +37,5 @@ export function enhanceDisclosures() {
       active.delete(details);
     });
   });
+
 }

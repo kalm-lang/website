@@ -6,18 +6,31 @@ import { markdown } from './render.mjs';
 import { icon } from '../shared/icons.mjs';
 
 function noteCard(note, index) {
-  return `<details class="feature" data-reveal>
-    <summary>
+  const dialogId = `note-${index}-dialog`;
+  return `<article class="feature" data-reveal>
+    <a class="feature-trigger" href="${escape(note.doc)}" aria-haspopup="dialog" aria-controls="${dialogId}">
       <span class="feature-symbol">${icon(note.icon)}</span>
       <span class="feature-title">${escape(note.title)}</span>
       <span class="feature-description">${escape(note.description)}</span>
       <code class="feature-preview">${escape(note.preview)}</code>
-      <span class="feature-toggle">${icon('chevron-down')}</span>
-    </summary>
-    <div class="feature-body">${markdown(note.content, note.source, `note-${index}`)}
-      <a class="learn-more" href="${escape(note.doc)}">Learn more ${icon('arrow-up-right')}</a>
-    </div>
-  </details>`;
+      <span class="feature-prompt">See the example ${icon('arrow-up-right')}</span>
+    </a>
+    <dialog class="feature-dialog" id="${dialogId}" aria-labelledby="${dialogId}-title">
+      <div class="feature-dialog-content">
+      <div class="feature-dialog-header">
+        <div class="feature-dialog-heading">
+          <span class="feature-symbol">${icon(note.icon)}</span>
+          <span class="feature-dialog-title" id="${dialogId}-title">${escape(note.title)}</span>
+        </div>
+        <button class="feature-close" type="button" aria-label="Close ${escape(note.title)} example">${icon('x')}</button>
+      </div>
+      <p class="feature-dialog-description">${escape(note.description)}</p>
+      <code class="feature-preview">${escape(note.preview)}</code>
+      ${markdown(note.content, note.source, `note-${index}`)}
+      <a class="learn-more" href="${escape(note.doc)}">Read the full guide ${icon('arrow-up-right')}</a>
+      </div>
+    </dialog>
+  </article>`;
 }
 export function home() {
   const greeting = readDocument(resolve(contentRoot, 'home/greeting.md'));
@@ -28,8 +41,8 @@ export function home() {
   return `<main id="main" class="home">
     <section class="hero">
       <div data-reveal>
-        <h1>Less ceremony.<br><em>More JVM.</em></h1>
-        <p class="hero-description">A little room to think. Explicit nullability, steady values, and the Java libraries you already know.</p>
+        <h1>A calmer way<br><em>to write for the JVM.</em></h1>
+        <p class="hero-description">Kalm keeps the syntax out of your way and the JVM close: clear values, friendly nulls, and the Java libraries you already use.</p>
         <div class="actions">
           <a class="button primary" href="/docs/quick-start/">Start writing ${icon('arrow-up-right')}</a>
           <a class="button" href="/examples/">Explore examples ${icon('arrow-right')}</a>

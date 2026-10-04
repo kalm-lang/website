@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, nothing } from 'lit';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { icon } from '../../shared/icons.mjs';
 
@@ -24,7 +24,7 @@ export class ThemeToggle extends LitElement {
   }
 
   render() {
-    return html`<label class="theme-label">${unsafeSVG(icon(this.theme === 'light' ? 'sun' : this.theme === 'dark' ? 'moon' : 'monitor'))}
+    return html`<label class="theme-label">${this.theme === 'system' ? nothing : unsafeSVG(icon(this.theme === 'light' ? 'sun' : 'moon'))}
       <select aria-label="Color theme" .value=${this.theme} @change=${this.change}>
         <option value="system">auto</option><option value="light">light</option><option value="dark">dark</option>
       </select></label>`;

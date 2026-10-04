@@ -14,8 +14,7 @@
 .button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .button:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--soft); }
 .hero-sample { min-width: 0; position: relative; transform: rotate(.6deg); }
-.hero-sample kalm-code-block { margin: 0; border-radius: 10px;
-  box-shadow: 5px 7px 0 var(--soft), 0 15px 35px var(--shadow); }
+.hero-sample kalm-code-block { margin: 0; border-radius: 10px; box-shadow: none; }
 .section-heading { display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; margin: 1.5rem 0; }
 .section-heading h2 { min-width: 0; font: 400 2.1rem/1.25 var(--heading);
@@ -25,25 +24,36 @@
   gap: 1rem; align-items: start; }
 .feature { min-width: 0; overflow: hidden; overflow-wrap: anywhere; border: 1px solid var(--line);
   border-radius: 10px; background: var(--surface); box-shadow: 0 3px 0 var(--shadow);
-  transition: border-color .2s, box-shadow .2s; }
-.feature:hover, .feature[open] { border-color: var(--accent); box-shadow: 0 4px 0 var(--soft); }
-.feature[open] { grid-column: span 2; }
-.feature summary { list-style: none; position: relative; padding: 1.4rem; min-height: 16rem; }
-.feature summary::-webkit-details-marker { display: none; }
+  transition: border-color .2s, box-shadow .2s, transform .2s; }
+.feature:hover { border-color: var(--accent); box-shadow: 0 5px 0 var(--soft); transform: translateY(-2px); }
+.feature-trigger { display: flex; flex-direction: column; align-items: flex-start; min-height: 16rem;
+  padding: 1.4rem; text-decoration: none; }
 .feature-symbol { display: inline-flex; align-items: center; justify-content: center;
   width: 2.25rem; height: 2.25rem; background: var(--soft); border-radius: 8px; color: var(--accent); }
 .feature-title { display: block; font: 600 1.05rem/1.5 var(--body); margin: 1rem 0 .5rem; }
 .feature-description { display: block; color: var(--muted); font-size: .92rem; line-height: 1.7; }
 .feature-preview { display: block; margin-top: 1rem; font: .73rem/1.6 var(--mono); color: var(--accent); }
-.feature-toggle { position: absolute; display: flex; align-items: center; justify-content: center;
-  right: 1.25rem; top: 1.5rem; width: 2rem; height: 2rem; color: var(--muted); transition: transform .2s; }
-.feature[open] .feature-toggle { transform: rotate(180deg); color: var(--accent); }
-.feature[data-closing] .feature-toggle { transform: rotate(0); }
-.feature[open] summary { min-height: 0; }
-.feature[open] .feature-preview { display: none; }
-.feature[data-closing] summary { min-height: 16rem; }
-.feature-body { padding: 0 1.25rem 1.25rem; border-top: 1px dashed var(--line); }
-.feature-body kalm-code-block, .feature-body kalm-code-tabs { margin: 1rem 0 .5rem; }
+.feature-prompt { display: inline-flex; align-items: center; gap: .45rem; margin-top: auto;
+  padding-top: 1.25rem; color: var(--accent); font: .75rem/1.5 var(--mono); }
+.feature-prompt .icon { width: .95rem; height: .95rem; }
+.feature-dialog { width: min(46rem, calc(100vw - 2rem)); max-width: none; max-height: min(88dvh, 54rem);
+  margin: auto; padding: 0; overflow: auto; border: 1px solid var(--line); border-radius: 14px;
+  color: var(--ink); background: var(--surface); }
+.feature-dialog::backdrop { background: rgb(22 24 21 / 62%); backdrop-filter: blur(4px); }
+.feature-dialog-content { padding: 1.25rem clamp(1rem, 4vw, 2rem) 1.5rem; }
+.feature-dialog-header { position: sticky; top: -1.25rem; z-index: 2; display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem; min-height: 4rem; margin: -1.25rem calc(clamp(1rem, 4vw, 2rem) * -1) .5rem;
+  padding: .7rem clamp(1rem, 4vw, 2rem); border-bottom: 1px dashed var(--line); background: var(--surface); }
+.feature-dialog-heading { display: flex; align-items: center; gap: .85rem; min-width: 0; }
+.feature-dialog-title { min-width: 0; font: 600 .95rem/1.4 var(--body); }
+.feature-close { flex: 0 0 auto; width: 2.75rem; height: 2.75rem; padding: 0; border: 0;
+  border-radius: 7px; display: inline-grid; place-items: center; background: var(--soft); }
+.feature-close:hover { color: var(--accent); }
+.feature-dialog-description { color: var(--muted); margin: .5rem 0 0; }
+.feature-dialog .feature-preview { margin-top: .65rem; }
+.feature-dialog kalm-code-block, .feature-dialog kalm-code-tabs { margin: 1rem 0 .75rem; }
+.feature-dialog-content { animation: dialog-enter .18s cubic-bezier(.22,.75,.25,1) both; }
+@keyframes dialog-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
 .learn-more { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px;
   max-width: 100%; font: .8rem/1.6 var(--mono); text-decoration: none; color: var(--accent); }
 .start-box { border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
@@ -52,7 +62,7 @@
 .start-box > div { min-width: 0; }
 .start-box h2 { margin: 0; font: 400 2.1rem var(--heading); }
 .start-box p { max-width: 30rem; color: var(--muted); }
-.learning-sample kalm-code-tabs { margin: 0; }
+.learning-sample kalm-code-tabs { margin: 0; min-height: 18rem; }
 @media (max-width: 1100px) {
   .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -69,12 +79,12 @@
   .hero-description { font-size: 1rem; margin: 1.25rem 0 1.5rem; }
   .actions { gap: .6rem; }
   .actions .button { flex: 1 1 auto; }
-  .hero-sample kalm-code-block { box-shadow: 3px 4px 0 var(--soft); }
+  .hero-sample kalm-code-block { box-shadow: none; }
   .feature-grid { grid-template-columns: minmax(0, 1fr); gap: .85rem; }
-  .feature[open] { grid-column: auto; }
-  .feature summary { min-height: 0; padding: 1.15rem; }
-  .feature-toggle { right: 1rem; top: 1.25rem; }
-  .feature-body { padding-inline: .75rem; }
+  .feature-trigger { min-height: 0; padding: 1.15rem; }
+  .feature-dialog { max-height: calc(100dvh - 2rem); }
+  .feature-dialog-header { top: -1.25rem; }
+  .learning-sample kalm-code-tabs { min-height: 18rem; }
   .feature-title { margin-top: .75rem; }
   .start-box { padding: 1.25rem; margin-top: 2rem; }
   .section-heading h2, .start-box h2 { font-size: 1.85rem; }

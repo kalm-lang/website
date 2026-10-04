@@ -3,9 +3,11 @@ import './components/site-nav';
 import './components/code-block';
 import './components/code-tabs';
 import { enhanceDisclosures } from './components/disclosures';
+import { enhanceFeatureDialogs } from './components/feature-dialogs';
 import { enhanceSectionNavigation } from './components/section-nav';
 
 enhanceDisclosures();
+enhanceFeatureDialogs();
 enhanceSectionNavigation();
 
 // Content remains ordinary HTML; Lit adds focused, reusable interactions.
