@@ -27,3 +27,10 @@ Thumbs.db
 *.tmp
 *.swp
 *.swo
+
+# Generated website pages and browser checks
+website/.generated/
+website/dist/
+website/public/source/
+website/playwright-report/
+website/test-results/

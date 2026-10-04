@@ -1,0 +1,21 @@
+.nav-links { display: flex; gap: 1.5rem; }
+.nav-links a { font-size: .875rem; text-decoration: none; }
+.nav-links a[aria-current='page'] { color: var(--accent); }
+.menu-button { display: none; border: 0; background: none; padding: .25rem 0; }
+.theme-label { display: flex; align-items: center; gap: .4rem; font-size: .875rem; color: var(--muted); }
+.theme-label select { border: 1px solid var(--line); background: var(--surface); padding: .25rem; font-size: .875rem; }
+.copy-button { position: absolute; right: .5rem; top: .4rem; font-size: .75rem; border: 1px solid var(--line); background: var(--surface); padding: .15rem .5rem; z-index: 1; }
+.copy-button:hover { border-color: var(--accent); }
+kalm-source-tabs { display: flex; flex-direction: column; border: 1px solid var(--line); margin: 2rem 0; min-width: 0; }
+.source-tab-bar { order: -1; display: flex; overflow-x: auto; border-bottom: 1px solid var(--line); }
+.source-tab-bar button { background: transparent; border: 0; border-right: 1px solid var(--line); padding: .75rem 1rem; font-size: .875rem; white-space: nowrap; }
+.source-tab-bar button[aria-selected='true'] { background: var(--soft); color: var(--accent); }
+kalm-source-tabs section { min-width: 0; }
+kalm-source-tabs section kalm-code-block { border: 0; margin: 0; }
+@media (max-width: 520px) {
+  kalm-site-nav { width: 100%; order: 3; margin-left: 0; }
+  kalm-site-nav:defined .menu-button { display: inline-block; }
+  kalm-site-nav:defined .nav-links { display: none; }
+  kalm-site-nav:defined .nav-links.open { display: flex; padding: 1rem 0 .25rem; }
+  pre { padding: 1.75rem 1rem 1rem; font-size: .875rem; }
+}

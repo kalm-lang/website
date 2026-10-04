@@ -1,0 +1,18 @@
+:root {
+  color-scheme: light;
+  --paper: #f4f1eb; --surface: #fffdf8; --ink: #181918; --muted: #67685e;
+  --line: #c6c5ba; --accent: #c53014; --accent-ink: #fffdf8; --soft: #e8e6dc;
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #131514; --surface: #1b1e1c; --ink: #e9e9dc; --muted: #a5aa9e;
+  --line: #454a43; --accent: #ff8066; --accent-ink: #131514; --soft: #252923;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    color-scheme: dark;
+    --paper: #131514; --surface: #1b1e1c; --ink: #e9e9dc; --muted: #a5aa9e;
+    --line: #454a43; --accent: #ff8066; --accent-ink: #131514; --soft: #252923;
+  }
+}
