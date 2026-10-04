@@ -4,9 +4,10 @@
 @import './articles.css';
 @import './content.css';
 @import './components.css';
+@import './code.css';
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 3rem; }
+html { scroll-behavior: smooth; scroll-padding-top: 7rem; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 1.05rem/1.75 var(--body);
   background-image: radial-gradient(var(--grain) .7px, transparent .7px); background-size: 5px 5px; }
 a { color: inherit; text-underline-offset: .25em; }
@@ -14,6 +15,7 @@ a:hover { color: var(--accent); }
 button, select { font: inherit; color: inherit; }
 button, select, a, summary { -webkit-tap-highlight-color: transparent; }
 button, summary { cursor: pointer; }
+.icon { display: inline-block; width: 1.125rem; height: 1.125rem; flex-shrink: 0; vertical-align: middle; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 [hidden] { display: none !important; }
 ::selection { background: var(--accent); color: var(--accent-ink); }
@@ -28,4 +30,11 @@ button, summary { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (max-width: 600px) {
+  body { font-size: 1rem; line-height: 1.7; }
+  .prose h2 { font-size: 1.55rem; margin-top: 2rem; }
+  .prose blockquote { padding-inline: .85rem; }
+  th, td { padding: .55rem; }
+  .prose :not(pre) > code { overflow-wrap: anywhere; }
 }

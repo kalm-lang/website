@@ -6,3 +6,19 @@ export function revealCurrentTopic() {
   const offset = current.getBoundingClientRect().top - navigation.getBoundingClientRect().top;
   navigation.scrollTop += offset - navigation.clientHeight / 3;
 }
+
+// A native disclosure keeps long topic lists one tap away on smaller screens.
+export function enhanceSectionNavigation() {
+  const details = document.querySelector<HTMLDetailsElement>('.section-navigation');
+  if (!details) return;
+  const mobile = window.matchMedia('(max-width: 960px)');
+  const resize = () => {
+    details.open = !mobile.matches;
+    if (details.open) requestAnimationFrame(revealCurrentTopic);
+  };
+  details.addEventListener('toggle', () => {
+    if (details.open) requestAnimationFrame(revealCurrentTopic);
+  });
+  mobile.addEventListener('change', resize);
+  resize();
+}

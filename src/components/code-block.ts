@@ -1,32 +1,35 @@
-import { LitElement, html } from 'lit';
+import { icon } from '../../shared/icons.mjs';
 
-export class CodeBlock extends LitElement {
-  static properties = { copied: { state: true }, failed: { state: true } };
-  copied = false;
-  failed = false;
+export class CodeBlock extends HTMLElement {
   private timer?: ReturnType<typeof setTimeout>;
+  private readonly button = document.createElement('button');
+  private readonly status = document.createElement('span');
   private source = '';
-  createRenderRoot() { return this; }
   connectedCallback() {
     this.source = this.querySelector('code')?.textContent ?? '';
-    // Preserve build-time syntax highlighting and the readable fallback.
-    const code = this.querySelector('pre');
-    if (code) this.append(code);
-    super.connectedCallback();
+    this.button.className = 'copy-button';
+    this.button.type = 'button';
+    this.button.setAttribute('aria-label', 'Copy code');
+    this.button.onclick = () => void this.copy();
+    this.status.className = 'sr-only';
+    this.status.setAttribute('role', 'status');
+    this.querySelector('.code-actions')?.append(this.button);
+    this.append(this.status);
+    this.showCopied(false);
   }
-  disconnectedCallback() { clearTimeout(this.timer); super.disconnectedCallback(); }
+  disconnectedCallback() { clearTimeout(this.timer); }
+  private showCopied(copied: boolean) {
+    this.button.innerHTML = `${icon(copied ? 'check' : 'copy')}<span>${copied ? 'Copied' : 'Copy'}</span>`;
+    this.button.classList.toggle('copied', copied);
+  }
   private async copy() {
     try {
       await navigator.clipboard.writeText(this.source);
-      this.copied = true;
-      this.failed = false;
+      this.showCopied(true);
+      this.status.textContent = 'Code copied';
       clearTimeout(this.timer);
-      this.timer = setTimeout(() => { this.copied = false; }, 1800);
-    } catch { this.failed = true; }
-  }
-  render() {
-    return html`<button class="copy-button" aria-label="Copy code" @click=${this.copy}>${this.copied ? 'copied ✓' : 'copy'}</button>
-      <span class="sr-only" role="status">${this.failed ? 'Copy unavailable. Select the code to copy it.' : this.copied ? 'Code copied' : ''}</span>`;
+      this.timer = setTimeout(() => { this.showCopied(false); this.status.textContent = ''; }, 1800);
+    } catch { this.status.textContent = 'Copy unavailable. Select the code to copy it.'; }
   }
 }
 customElements.define('kalm-code-block', CodeBlock);

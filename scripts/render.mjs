@@ -4,13 +4,17 @@ import { routes } from './routes.mjs';
 import { repository } from './content.mjs';
 import { code, escape } from './code.mjs';
 import { tabsPlugin } from './tabs.mjs';
+import { icon } from '../shared/icons.mjs';
 export { code, escape, repository };
 
 export function markdown(source, sourcePath, namespace = 'article') {
   const md = new MarkdownIt({ html: false }).use(tabsPlugin);
   const slugs = new Map();
   let group = 0;
-  md.renderer.rules.fence = (tokens, i) => code(tokens[i].content, tokens[i].info.trim().split(/\s/)[0]);
+  md.renderer.rules.fence = (tokens, i) => {
+    const [language, ...label] = tokens[i].info.trim().split(/\s+/);
+    return code(tokens[i].content, language, label.join(' '));
+  };
   md.renderer.rules.code_tabs = (tokens, i) => {
     const id = `${namespace}-tabs-${group++}`;
     return `<kalm-code-tabs>${tokens[i].children.map((token, index) => {
@@ -28,7 +32,7 @@ export function markdown(source, sourcePath, namespace = 'article') {
   };
   md.renderer.rules.heading_close = (tokens, i) => {
     const id = tokens[i - 2].attrGet('id');
-    return `<a class="heading-anchor" aria-label="Link to this section" href="#${id}">#</a></${tokens[i].tag}>`;
+    return `<a class="heading-anchor" aria-label="Link to this section" href="#${id}">${icon('link')}</a></${tokens[i].tag}>`;
   };
   md.renderer.rules.table_open = () => '<div class="table-scroll"><table>';
   md.renderer.rules.table_close = () => '</table></div>';

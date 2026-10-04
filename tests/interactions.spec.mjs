@@ -19,7 +19,7 @@ test('language notes open independently with real examples and Handbook links', 
 test('mobile navigation and code tabs work with the keyboard', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.getByRole('button', { name: '[+] menu', exact: true }).click();
+  await page.getByRole('button', { name: 'Open menu', exact: true }).click();
   await expect(page.locator('#site-navigation')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('#site-navigation')).toBeHidden();

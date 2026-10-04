@@ -1,6 +1,7 @@
 import { routes } from './routes.mjs';
 import { escape } from './code.mjs';
 import { layout } from './layout.mjs';
+import { icon } from '../shared/icons.mjs';
 
 export function redirects() {
   const specification = routes.find(route => route.specification);
@@ -16,6 +17,6 @@ export function redirects() {
 }
 export function redirectPage(target) {
   return layout('Continue to Kalm', `<main id="main" class="redirect"><h1>This page has moved</h1>
-    <p><a href="${escape(target)}">Continue →</a></p></main>`)
+    <p><a href="${escape(target)}">Continue ${icon('arrow-right')}</a></p></main>`)
     .replace('<head>', `<head><meta http-equiv="refresh" content="0;url=${escape(target)}">`);
 }
