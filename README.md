@@ -26,7 +26,7 @@ Temporary compilation outputs are removed afterward.
 - `content/docs/`: Handbook articles.
 - `content/examples/`: short syntax topics; `topics.json` records catalog coverage.
 - `content/learn/`: the ordered text-statistics learning path and completion page.
-- `content/home/`: greeting and expandable language-note snippets.
+- `content/home/`: greeting, learning preview, and expandable language-note snippets.
 - `specifications/Kalm-Language-Specification-v*.md`: canonical specification versions.
 
 Pages and navigation are discovered from Markdown. A filename determines its URL;
@@ -49,6 +49,11 @@ A nullable value can be absent.
 sidebar; Docs always uses Handbook and Specifications. Learn lessons also have a
 consecutive `lesson` number. Optional `navSection` indents a Handbook child.
 The footer version comes from the root Maven project.
+
+Homepage notes also declare an `icon` from the curated Lucide set in
+`shared/icons.mjs` and a `doc` website URL. Icons and code headers render at build
+time; browser controls enhance that HTML. On mobile, native topic disclosures
+keep the article close and leave navigation available without JavaScript.
 
 Use fenced code with its language and optional filename. Ordinary examples have
 one block. For alternatives or Java counterparts, use two or three tabs:

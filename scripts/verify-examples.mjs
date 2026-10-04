@@ -9,7 +9,9 @@ import { tabsPlugin } from './tabs.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
 const only = process.argv.slice(2);
-const home = [readDocument(resolve(contentRoot, 'home/greeting.md')), ...readdirSync(resolve(contentRoot, 'home/notes')).map(file => readDocument(resolve(contentRoot, 'home/notes', file)))].map(document => ({ ...document, path: document.source }));
+const home = ['greeting.md', 'learning.md', ...readdirSync(resolve(contentRoot, 'home/notes')).map(file => `notes/${file}`)]
+  .map(file => readDocument(resolve(contentRoot, 'home', file)))
+  .map(document => ({ ...document, path: document.source }));
 const examples = [...routes.filter(route => route.section === 'examples' && route.path !== '/examples/'), ...home]
   .filter(route => !only.length || only.includes(route.path));
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-examples-'));
