@@ -16,7 +16,7 @@ export function redirects() {
   ].filter(([, target]) => routes.some(route => route.path === target));
 }
 export function redirectPage(target) {
-  return layout('Continue to Kalm', `<main id="main" class="redirect"><h1>This page has moved</h1>
+  return layout('Continue to Kalm', `<main id="main" tabindex="0" class="redirect"><h1>This page has moved</h1>
     <p><a href="${escape(target)}">Continue ${icon('arrow-right')}</a></p></main>`)
     .replace('<head>', `<head><meta http-equiv="refresh" content="0;url=${escape(target)}">`);
 }

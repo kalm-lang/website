@@ -16,7 +16,7 @@ function output(path, html) {
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, html);
 }
-output('/', layout('Less ceremony. More JVM.', home()));
+output('/', layout('Kalm', home()));
 for (const route of routes) output(route.path, layout(route.title,
   article(route, markdown(route.content, route.source)), route.section));
 for (const [path, target] of redirects()) output(path, redirectPage(target));

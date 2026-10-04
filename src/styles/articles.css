@@ -1,15 +1,27 @@
 .page-layout { display: grid; grid-template-columns: 14rem minmax(0, 1fr); max-width: 88rem;
   margin: auto; padding: 3rem clamp(1rem, 4vw, 3.5rem); gap: clamp(1.5rem, 4vw, 3.5rem); }
-.sidebar { border-right: 1px solid var(--line); padding-right: 1.5rem; min-width: 0; }
-.section-navigation { position: sticky; top: 6.5rem; }
+.sidebar { position: sticky; top: 6.5rem; align-self: start;
+  max-height: calc(100dvh - 7.5rem); overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+  border-right: 1px solid var(--line); padding-right: 1.5rem; min-width: 0; }
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-thumb { border: 2px solid var(--paper); border-radius: 6px; background: var(--line); }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.section-navigation { position: static; }
 .section-menu { display: none; }
-.sidebar-inner { max-height: calc(100dvh - 8rem); overflow-y: auto;
-  scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.sidebar-inner { min-width: 0; }
+.nav-branch-toggle { display: none; }
+.nav-branch-header { display: flex; align-items: center; }
+.nav-branch-header > a { flex: 1; min-width: 0; }
 .nav-group { margin-bottom: 1.75rem; }
 .nav-group h2 { font: 600 .75rem/1.6 var(--mono); letter-spacing: .04em; color: var(--muted); margin: 0 0 .75rem; }
 .sidebar a { display: flex; align-items: center; min-height: 36px; padding: .4rem .6rem;
   border-radius: 0 5px 5px 0; font: .8rem/1.6 var(--mono); text-decoration: none; border-left: 2px solid transparent; }
-.sidebar a.nav-child { padding-left: 1rem; }
+.nav-branch { margin: .35rem 0 .65rem; }
+.sidebar a.nav-parent { font-weight: 600; }
+.current-branch > .nav-parent { color: var(--accent); }
+.nav-children { margin: .25rem 0 0 .65rem; padding: 0 0 0 .65rem; list-style: none; border-left: 1px solid var(--line); }
+.sidebar a.nav-child { color: var(--muted); font-size: .76rem; }
 .sidebar a:hover { background: var(--soft); }
 .sidebar a[aria-current='page'] { color: var(--accent); border-left-color: var(--accent); background: var(--soft); }
 .article { min-width: 0; max-width: 52rem; }
@@ -25,21 +37,38 @@
 .redirect { padding: 4rem 4vw; }
 @media (max-width: 960px) {
   .page-layout { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-top: 1.25rem; }
-  .sidebar { border-right: 0; padding: 0; }
-  .section-navigation { position: static; border: 1px solid var(--line); border-radius: 10px;
-    background: var(--surface); overflow: hidden; }
+  .sidebar { position: static; max-height: none; overflow: visible; border-right: 0; padding: 0; }
+  html[data-js-enhanced] .sidebar { position: fixed; top: calc(var(--site-header-height, 4.5rem) + .5rem);
+    left: 1rem; z-index: 22; width: 0; height: 0; }
+  .section-navigation { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  html[data-js-enhanced] .section-navigation { width: 0; height: 0; border: 0; background: transparent; }
+  html[data-js-enhanced] .section-navigation:not([data-navigation-ready]) > .sidebar-inner { display: none; }
   .section-menu { display: flex; align-items: center; gap: .8rem; list-style: none;
-    padding: .85rem 1rem; min-height: 56px; }
+    padding: .6rem .85rem; min-height: 44px; border-radius: 8px; font: .8rem/1.5 var(--mono); }
+  .section-menu:hover { background: var(--soft); }
+  html[data-js-enhanced] .section-menu { display: none; }
   .section-menu::-webkit-details-marker { display: none; }
-  .section-menu > span { display: block; min-width: 0; flex: 1; }
-  .section-menu-label { display: block; color: var(--muted); font: .7rem/1.6 var(--mono); }
-  .sidebar-current { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font: .85rem/1.6 var(--body); }
+  .section-menu > span { min-width: 0; }
   .section-menu > .icon { color: var(--accent); }
-  .section-menu > .icon:last-child { transition: transform .2s; }
+  .section-menu > .icon:last-child { width: .9rem; height: .9rem; }
   .section-navigation[open] .section-menu > .icon:last-child { transform: rotate(180deg); }
-  .section-navigation[data-closing] .section-menu > .icon:last-child { transform: rotate(0); }
-  .sidebar-inner { max-height: min(60dvh, 28rem); border-top: 1px solid var(--line); padding: 1rem; }
+  .sidebar-inner { border-top: 1px solid var(--line); padding: 1rem; }
+  html[data-js-enhanced] .sidebar-inner { position: absolute; top: 0; left: 0;
+    width: min(24rem, calc(100vw - 2rem)); max-height: min(65dvh, calc(100dvh - var(--site-header-height, 4.5rem) - 1.5rem));
+    overflow-y: auto; overscroll-behavior: contain; padding: .65rem .75rem .75rem;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--surface); z-index: 24; isolation: isolate; }
+  html[data-js-enhanced] .section-navigation[open] > .sidebar-inner { opacity: 0; visibility: hidden;
+    pointer-events: none; transform: translateY(-.35rem) scale(.99); transform-origin: top;
+    transition: opacity .16s ease, transform .19s cubic-bezier(.22,.75,.25,1), visibility 0s linear .19s; }
+  html[data-js-enhanced] .section-navigation[open] > .sidebar-inner[data-open] { opacity: 1; visibility: visible;
+    pointer-events: auto; transform: translateY(0) scale(1); transition-delay: 0s; }
+  html[data-js-enhanced] .section-navigation[open] > .sidebar-inner[data-closing] { opacity: 0; visibility: hidden;
+    pointer-events: none; transform: translateY(-.35rem) scale(.99); transition-delay: 0s, 0s, .19s; }
+  html[data-js-enhanced] .nav-branch-toggle { display: inline-grid; place-items: center; flex: 0 0 44px;
+    height: 44px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+  .nav-branch-toggle:hover { color: var(--accent); background: var(--soft); }
+  .nav-branch[data-expanded] .nav-branch-toggle .icon { transform: rotate(180deg); }
+  html[data-js-enhanced] .nav-branch:not([data-expanded]) .nav-children { display: none; }
   .nav-group { margin-bottom: 1.25rem; }
   .nav-group:last-child { margin-bottom: 0; }
   .sidebar a { min-height: 44px; font-size: .8rem; }

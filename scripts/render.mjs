@@ -19,7 +19,9 @@ export function markdown(source, sourcePath, namespace = 'article') {
     const id = `${namespace}-tabs-${group++}`;
     return `<kalm-code-tabs>${tokens[i].children.map((token, index) => {
       const [language, ...label] = token.info.trim().split(/\s+/);
-      return `<section id="${id}-${index}" data-label="${escape(label.join(' ') || language)}">${code(token.content, language)}</section>`;
+      const caption = label.join(' ');
+      const filename = /\.[a-z0-9]+$/i.test(caption) ? caption : '';
+      return `<section id="${id}-${index}" data-label="${escape(caption || language)}">${code(token.content, language, filename)}</section>`;
     }).join('')}</kalm-code-tabs>`;
   };
   md.renderer.rules.heading_open = (tokens, i) => {
@@ -42,7 +44,7 @@ export function markdown(source, sourcePath, namespace = 'article') {
     if (href?.startsWith('/source/')) throw new Error(`Repository file link in ${sourcePath}: ${href}`);
     if (href && !/^(https?:|mailto:|#|\/)/.test(href)) {
       const [file, fragment] = href.split('#');
-      const path = relative(repository, resolve(repository, dirname(sourcePath), file));
+      const path = relative(repository, resolve(repository, dirname(sourcePath), file)).replaceAll('\\', '/');
       const route = routes.find(route => route.source === path);
       if (!route) throw new Error(`No website page for ${href} in ${sourcePath}`);
       tokens[i].attrSet('href', route.path + (fragment ? `#${fragment}` : ''));

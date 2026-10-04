@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { repository } from './content.mjs';
 import { escape } from './code.mjs';
 import { mainNavigation, sidebar, lessonNavigation } from './navigation.mjs';
+import { icon } from '../shared/icons.mjs';
 
 const version = readFileSync(resolve(repository, 'pom.xml'), 'utf8').match(/<version>([^<]+)<\/version>/)[1];
 export function layout(title, body, section = '') {
@@ -10,10 +11,10 @@ export function layout(title, body, section = '') {
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${escape(title)} · Kalm</title>
+  <title>${title === 'Kalm' ? 'Kalm' : `${escape(title)} · Kalm`}</title>
   <meta name="description" content="Write Kalm. Explore small syntax examples, read the handbook, or follow a guided learning path.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <script>try{const t=localStorage.getItem('kalm-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch{}</script>
+  <script>document.documentElement.dataset.jsEnhanced='';try{const t=localStorage.getItem('kalm-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;document.documentElement.dataset.scrollbarStyle=localStorage.getItem('kalm-scrollbar')==='native'?'native':'custom'}catch{}</script>
   <style>:root{background:#f3e8d5;color:#30271f;color-scheme:light}:root[data-theme=dark]{background:#191c19;color:#ece5d7;color-scheme:dark}@media(prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-theme=dark]){background:#191c19;color:#ece5d7;color-scheme:dark}}</style>
   <link rel="stylesheet" href="/src/styles/global.css">
   <script type="module" src="/src/main.ts"></script>
@@ -21,20 +22,25 @@ export function layout(title, body, section = '') {
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Kalm home">kalm<span class="brand-mark" aria-hidden="true"></span></a>
-    <kalm-site-nav>${mainNavigation(section)}</kalm-site-nav>
-    <kalm-theme-toggle></kalm-theme-toggle>
+    <div class="site-header-inner">
+    <a class="brand" href="/" aria-label="Kalm home">kalm</a>
+    ${section ? `<button class="topic-trigger" type="button" aria-label="Browse ${section} topics" title="Browse ${section} topics" aria-expanded="false" aria-controls="section-navigation">${icon({ docs: 'book-open', examples: 'code-xml', learn: 'route' }[section])}</button>` : ''}
+    <kalm-site-nav><button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation">${icon('menu')}<span>Menu</span></button>${mainNavigation(section)}</kalm-site-nav>
+    <kalm-theme-toggle><button class="theme-trigger" type="button" aria-label="Color theme: system"
+      title="Color theme: system" aria-expanded="false" aria-controls="theme-popover">${icon('monitor')}</button></kalm-theme-toggle>
+    </div>
   </header>
   ${body}
   <footer class="site-footer">
-    <a href="https://github.com/TD99/kalm">Made by TD99</a>
+    <a href="https://github.com/TD99/kalm">TD99/kalm</a>
     <span>${escape(version)}</span>
   </footer>
+  <div class="document-scrollbar" aria-hidden="true"><div class="document-scrollbar-thumb"></div></div>
 </body>
 </html>`;
 }
 export function article(route, body) {
-  return `<main id="main" class="page-layout">
+  return `<main id="main" tabindex="0" class="page-layout">
     <aside class="sidebar">${sidebar(route)}</aside>
     <article class="article${route.section === 'examples' ? ' example-article' : ''}">
       <header class="article-header"><h1>${escape(route.title)}</h1></header>

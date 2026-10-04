@@ -5,11 +5,16 @@
 @import './content.css';
 @import './components.css';
 @import './code.css';
+@import './scrollbar.css';
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 7rem; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 1.05rem/1.75 var(--body);
-  background-image: radial-gradient(var(--grain) .7px, transparent .7px); background-size: 5px 5px; }
+html { scroll-behavior: smooth; scroll-padding-top: 7rem; scrollbar-gutter: stable; }
+html:has(.site-header:focus-within) { scroll-padding-top: 0; }
+html[data-dialog-open] { overflow: hidden; }
+body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh;
+  margin: 0; background: var(--paper); color: var(--ink); font: 1.05rem/1.75 var(--body);
+  background-image: radial-gradient(var(--grain) .7px, transparent .7px); background-size: 5px 5px;
+  user-select: text; }
 a { color: inherit; text-underline-offset: .25em; }
 a:hover { color: var(--accent); }
 button, select { font: inherit; color: inherit; }
@@ -17,16 +22,16 @@ button, select, a, summary { -webkit-tap-highlight-color: transparent; }
 button, summary { cursor: pointer; }
 .icon { display: inline-block; width: 1.125rem; height: 1.125rem; flex-shrink: 0; vertical-align: middle; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+#main:focus { outline: none; }
+#main[data-main-focus]:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+html:not([data-js-enhanced]) #main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 [hidden] { display: none !important; }
 ::selection { background: var(--accent); color: var(--accent-ink); }
 .eyebrow { font: .8rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-.skip-link { position: fixed; top: -5rem; left: 1rem; padding: 1rem; background: var(--surface); z-index: 10; }
+.skip-link { position: fixed; top: -5rem; left: 1rem; padding: .75rem 1rem; border: 1px solid var(--line);
+  border-radius: 7px; background: var(--surface); box-shadow: 0 4px 0 var(--soft); z-index: 100; }
 .skip-link:focus { top: 1rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-@media (prefers-reduced-motion: no-preference) {
-  [data-reveal].visible { animation: enter .45s ease both; }
-  @keyframes enter { from { opacity: .6; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-}
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

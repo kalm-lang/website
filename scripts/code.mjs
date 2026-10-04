@@ -13,6 +13,6 @@ export function code(source, language = 'kalm', label = '') {
   const name = label || ({ kalm: 'Kalm', bash: 'Terminal', text: 'Text', java: 'Java' }[language] ?? language);
   return `<kalm-code-block><div class="code-header">
     <span class="code-caption">${icon(language === 'bash' ? 'terminal' : 'file-code')}<span>${escape(name)}</span></span>
-    ${label ? `<span class="code-language">${escape(language)}</span>` : ''}<span class="code-actions"></span>
+    <span class="code-actions"></span>
     </div>${highlighter.codeToHtml(source.trimEnd(), { lang, themes: { light: 'github-light', dark: 'github-dark' } })}</kalm-code-block>`;
 }

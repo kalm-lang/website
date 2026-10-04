@@ -20,6 +20,8 @@ requires a full JDK 25+ and locally built compiler/runtime/standard-library JARs
 It compiles all example and homepage snippets, exercises each cumulative lesson,
 and checks native tests plus the completed CLI's counts and failure behavior.
 Temporary compilation outputs are removed afterward.
+Set `KALM_TEST_BROWSER_CHANNEL=msedge` to run browser checks with an installed
+Microsoft Edge when bundled Chromium is unavailable.
 
 ## Content
 
@@ -47,13 +49,14 @@ A nullable value can be absent.
 
 `title` and numeric `order` are required. Example `group` values organize the
 sidebar; Docs always uses Handbook and Specifications. Learn lessons also have a
-consecutive `lesson` number. Optional `navSection` indents a Handbook child.
+consecutive `lesson` number. Optional `navSection` groups articles under their Handbook parent.
 The footer version comes from the root Maven project.
 
 Homepage notes also declare an `icon` from the curated Lucide set in
 `shared/icons.mjs` and a `doc` website URL. Icons and code headers render at build
-time; browser controls enhance that HTML. On mobile, native topic disclosures
-keep the article close and leave navigation available without JavaScript.
+time; browser controls enhance that HTML. On mobile, a Topics button in the sticky
+header opens searchable navigation with collapsible subtopics. Native topic
+disclosures leave navigation available without JavaScript.
 
 Use fenced code with its language and optional filename. Ordinary examples have
 one block. For alternatives or Java counterparts, use two or three tabs:
@@ -87,8 +90,13 @@ Raw repository-file browsing and publishing are not part of this website.
 
 `scripts/` separates discovery, rendering, navigation, page layouts, validation,
 and redirects. Generated pages go into ignored `.generated/`; Vite emits `dist/`.
-Styles load directly in each page's head. Lit enhances copying, code tabs, and
-theme selection; the mobile menu preserves its generated navigation links.
+Styles load directly in each page's head. Browser components enhance code copying,
+tabs, and appearance controls; the mobile menu preserves its generated navigation links.
+The custom document scrollbar keeps native document scrolling and is enabled by
+default on desktop layouts. Phone layouts use the native scrollbar and omit its
+appearance setting. The desktop switch saves a device-local preference;
+dialogs and navigation menus retain platform scrollbars.
+Main content receives focus only through an explicit Tab or skip-link action.
 Articles, code, and native disclosure cards remain readable without JavaScript.
 
 Restart `npm run dev` after content changes. Production builds regenerate all

@@ -10,7 +10,7 @@ for (const route of routes) {
   seen.add(route.path);
 }
 export const sectionLinks = [
-  { section: 'docs', path: '/docs/quick-start/', title: 'docs' },
-  { section: 'examples', path: '/examples/', title: 'examples' },
-  { section: 'learn', path: '/learn/', title: 'learn' },
+  { section: 'docs', path: '/docs/quick-start/', title: 'docs', icon: 'book-open' },
+  { section: 'examples', path: '/examples/', title: 'examples', icon: 'code-xml' },
+  { section: 'learn', path: '/learn/', title: 'learn', icon: 'route' },
 ];

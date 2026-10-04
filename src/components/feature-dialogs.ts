@@ -11,6 +11,7 @@ export function enhanceFeatureDialogs() {
     if (trigger && dialog instanceof HTMLDialogElement && typeof dialog.showModal === 'function') {
       event.preventDefault();
       triggers.set(dialog, trigger);
+      document.documentElement.dataset.dialogOpen = '';
       dialog.showModal();
       dialog.querySelector<HTMLElement>('.feature-close')?.focus({ preventScroll: true });
       return;
@@ -23,11 +24,15 @@ export function enhanceFeatureDialogs() {
 
   document.addEventListener('click', event => {
     if (event.target instanceof HTMLDialogElement && event.target.matches('.feature-dialog')) {
-      event.target.close();
+      const bounds = event.target.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) event.target.close();
     }
   });
 
   document.querySelectorAll<HTMLDialogElement>('dialog.feature-dialog').forEach(dialog => {
-    dialog.addEventListener('close', () => triggers.get(dialog)?.focus({ preventScroll: true }));
+    dialog.addEventListener('close', () => {
+      if (!document.querySelector('dialog.feature-dialog[open]')) delete document.documentElement.dataset.dialogOpen;
+      triggers.get(dialog)?.focus({ preventScroll: true });
+    });
   });
 }

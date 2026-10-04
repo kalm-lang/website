@@ -4,7 +4,8 @@ export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.spec.mjs',
   workers: 2,
-  use: { baseURL: 'http://127.0.0.1:4173', browserName: 'chromium', trace: 'retain-on-failure' },
+  use: { baseURL: 'http://127.0.0.1:4173', browserName: 'chromium',
+    channel: process.env.KALM_TEST_BROWSER_CHANNEL, trace: 'retain-on-failure' },
   webServer: {
     command: development ? 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort'
       : 'npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',

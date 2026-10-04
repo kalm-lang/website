@@ -17,9 +17,9 @@ test('phone, tablet, and desktop layouts keep content within the viewport', asyn
       const blocks = await page.locator('kalm-code-block:visible').evaluateAll(elements => elements.map(element => {
         const header = element.querySelector('.code-header').getBoundingClientRect();
         const pre = element.querySelector('pre').getBoundingClientRect();
-        return header.bottom <= pre.top + 1;
+        return { bottom: header.bottom, top: pre.top, valid: header.bottom <= pre.top + 1 };
       }));
-      expect(blocks.every(Boolean), 'code controls must stay above the source').toBe(true);
+      expect(blocks.every(block => block.valid), `code controls at ${path} and ${width}px: ${JSON.stringify(blocks)}`).toBe(true);
     }
   }
 });
@@ -30,13 +30,28 @@ test('mobile topic menus keep the article close and the selected topic reachable
   const navigation = page.getByRole('navigation', { name: 'examples navigation' });
   await expect(navigation).toBeHidden();
   expect(await page.locator('h1').evaluate(element => element.getBoundingClientRect().top)).toBeLessThan(300);
-  await page.locator('.section-menu').click();
+  await page.locator('.topic-trigger').click();
   await expect(navigation).toBeVisible();
-  await expect(navigation.locator('[aria-current="page"]')).toBeInViewport();
+  await expect(navigation.locator('[aria-current="page"]')).toBeVisible();
+  await expect(navigation).toHaveCSS('overflow-y', 'auto');
   await page.setViewportSize({ width: 1440, height: 900 });
   await expect(navigation).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(navigation).toBeHidden();
+  await page.goto('/docs/specifications/1.1/');
+  await page.evaluate(() => window.scrollTo({ top: 2500, behavior: 'instant' }));
+  const scroll = await page.evaluate(() => window.scrollY);
+  await expect(page.locator('.topic-trigger')).toBeInViewport();
+  const topicButton = await page.locator('.topic-trigger').boundingBox();
+  await page.mouse.click(topicButton.x + topicButton.width / 2, topicButton.y + topicButton.height / 2);
+  await expect(page.locator('.sidebar-inner [aria-current="page"]')).toBeInViewport();
+  await expect(page.getByRole('searchbox', { name: 'Find a topic' })).toHaveCount(0);
+  await expect(page.locator('.sidebar-inner a[href="/docs/language/layout/"]')).toBeVisible();
+  await expect(page.locator('.sidebar-inner a[href="/docs/quick-start/"]')).toBeVisible();
+  expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.topic-trigger')).toBeFocused();
+  await expect(page.locator('.sidebar-inner')).toBeHidden();
 });
 
 test('small screens remain usable with enlarged text and touch sized controls', async ({ page }) => {
@@ -47,7 +62,7 @@ test('small screens remain usable with enlarged text and touch sized controls', 
     expect(await fitsViewport(page), `${path} with enlarged text`).toBe(true);
   }
   await page.goto('/');
-  for (const selector of ['.menu-button', '.theme-label select', '.copy-button']) {
+  for (const selector of ['.menu-button', '.theme-trigger', '.copy-button']) {
     const target = page.locator(selector).first();
     await expect(target).toBeVisible();
     expect((await target.boundingBox()).height).toBeGreaterThanOrEqual(44);

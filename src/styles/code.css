@@ -6,16 +6,15 @@ kalm-code-block { display: block; min-width: 0; overflow: hidden; margin: 1.5rem
 .code-caption { display: flex; align-items: center; gap: .5rem; min-width: 0; margin-right: auto; }
 .code-caption > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .code-caption .icon { width: 1rem; height: 1rem; color: var(--accent); }
-.code-language { font-size: .68rem; opacity: .8; }
 .code-actions { display: flex; align-items: center; min-width: 2.75rem; align-self: stretch; }
 .copy-button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
   min-height: 2.75rem; min-width: 2.75rem; padding: 0 .35rem; border: 0;
   background: transparent; color: var(--muted); font: .7rem var(--mono); }
 .copy-button:hover, .copy-button.copied { color: var(--accent); }
+.copy-button:focus-visible { outline-offset: -4px; border-radius: 6px; }
 .copy-button .icon { width: .95rem; height: .95rem; }
 pre { max-width: 100%; margin: 0; padding: 1.25rem; overflow-x: auto;
-  overscroll-behavior-x: contain; font: .82rem/1.8 var(--mono); tab-size: 4;
-  scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  overscroll-behavior-x: contain; font: .82rem/1.8 var(--mono); tab-size: 4; }
 pre code { font: inherit; }
 .shiki { background: transparent !important; }
 html[data-theme='dark'] .shiki, html[data-theme='dark'] .shiki span { color: var(--shiki-dark) !important; }

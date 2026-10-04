@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { routes } from '../scripts/routes.mjs';
 
+async function chooseTheme(page, theme) {
+  await page.locator('.theme-trigger').click();
+  await page.locator(`[data-theme-choice="${theme}"]`).click();
+}
+
 test('every Markdown page loads without runtime errors', async ({ page }) => {
   test.setTimeout(180_000);
   const errors = [];
@@ -35,16 +40,16 @@ test('each section has isolated navigation and correct active state', async ({ p
 test('theme persists across navigation and code copy preserves the source', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/');
-  await page.getByLabel('Color theme').selectOption('dark');
+  await chooseTheme(page, 'dark');
   await page.getByRole('link', { name: 'Start writing' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.getByLabel('Color theme')).toHaveValue('dark');
-  await page.getByLabel('Color theme').selectOption('light');
+  await expect(page.locator('.theme-trigger')).toHaveAttribute('aria-label', 'Color theme: dark');
+  await chooseTheme(page, 'light');
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(243, 232, 213)');
   await page.goto('/');
   await page.getByRole('button', { name: 'Copy code' }).first().click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('pub fun greeting');
-  await page.getByLabel('Color theme').selectOption('system');
+  await chooseTheme(page, 'system');
   await page.emulateMedia({ colorScheme: 'dark' });
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(25, 28, 25)');
 });
