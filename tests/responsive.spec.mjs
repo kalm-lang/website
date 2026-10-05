@@ -46,6 +46,9 @@ test('mobile topic menus keep the article close and the selected topic reachable
   await page.mouse.click(topicButton.x + topicButton.width / 2, topicButton.y + topicButton.height / 2);
   await expect(page.locator('.sidebar-inner [aria-current="page"]')).toBeInViewport();
   await expect(page.getByRole('searchbox', { name: 'Find a topic' })).toHaveCount(0);
+  const languageGuide = page.getByRole('button', { name: 'Language guide subtopics' });
+  await languageGuide.click();
+  await expect(languageGuide).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('.sidebar-inner a[href="/docs/language/layout/"]')).toBeVisible();
   await expect(page.locator('.sidebar-inner a[href="/docs/quick-start/"]')).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
