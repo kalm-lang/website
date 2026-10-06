@@ -2,9 +2,10 @@ name: Kalm website
 
 on:
   push:
-#    branches: ['**']
+    branches: [main]
     tags: ['website-*']
-#  pull_request:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
