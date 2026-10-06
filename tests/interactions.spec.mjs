@@ -134,7 +134,7 @@ test('homepage greeting lets visitors edit the name and animates the matching ou
   const output = page.locator('[data-greeting-output]');
   await expect(name).toHaveCount(1);
   await expect(page.locator('.greeting-edit-hint')).toHaveCount(0);
-  await expect(output).toHaveText(/^Hello, (Mira|Ari|Sam|Lena|Kai|Noah)!$/);
+  await expect(output).toHaveText(/^Hello, (Mira|Ari|Ava|Lena|Leo|Noah)!$/);
 
   await name.fill('Nora');
   await expect(page.locator('[data-greeting-loading]')).toBeVisible();

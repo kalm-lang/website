@@ -1,4 +1,4 @@
-const names = ['Mira', 'Ari', 'Sam', 'Lena', 'Kai', 'Noah'];
+const names = ['Mira', 'Ari', 'Ava', 'Lena', 'Leo', 'Noah'];
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export class GreetingDemo extends HTMLElement {
