@@ -9,7 +9,8 @@ from pathlib import Path, PurePosixPath
 import re
 import sys
 
-MARKER = ".github_deployment_root.txt"
+MARKER = ".github_deployment_root"
+STAGING = PurePosixPath("/.deployment")
 # SemVer 2.0.0: numeric identifiers cannot have leading zeroes, except metadata.
 NUMBER = r"(?:0|[1-9][0-9]*)"
 PRERELEASE = rf"(?:{NUMBER}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
@@ -26,7 +27,7 @@ def validate_tag(tag: str) -> None:
 
 
 def protected(path: PurePosixPath) -> bool:
-    return path.parts[0] == "_imports" or any(
+    return path.parts[0] in ("_imports", STAGING.name) or any(
         part == MARKER or part == ".user.ini"
         or part.startswith(".ht")
         for part in path.parts
@@ -82,18 +83,63 @@ def remote_entries(ftp: FTP, directory: PurePosixPath) -> dict[str, str]:
     return entries
 
 
-def cleanup_plan(ftp: FTP) -> tuple[list[PurePosixPath], list[PurePosixPath], set[PurePosixPath]]:
+def verify_marker(ftp: FTP) -> dict[str, str]:
     root = PurePosixPath("/")
     entries = remote_entries(ftp, root)
     if entries.get(MARKER) != "file":
         raise ValueError(f"FTP root must contain the marker file /{MARKER}; deployment aborted")
-    # Verify it is accessible as a file, without logging its contents.
+    # Verify the marker is readable without logging its contents.
     ftp.retrbinary(f"RETR /{MARKER}", lambda _: None)
+    return entries
+
+
+def tree_deletion_plan(
+    ftp: FTP, directory: PurePosixPath
+) -> tuple[list[PurePosixPath], list[PurePosixPath]]:
+    files, directories = [], []
+
+    def visit(path: PurePosixPath) -> None:
+        for name, kind in sorted(remote_entries(ftp, path).items()):
+            child = path / name
+            if kind == "file":
+                files.append(child)
+            elif kind == "dir":
+                visit(child)
+                directories.append(child)
+            else:
+                raise ValueError(f"Unsupported FTP entry type at {child}: {kind!r}")
+
+    visit(directory)
+    return files, directories
+
+
+def prepare_staging(ftp: FTP, root_entries: dict[str, str]) -> None:
+    """Clear only a previous staging area, then create an empty one."""
+    kind = root_entries.get(STAGING.name)
+    if kind == "file":
+        ftp.delete(str(STAGING))
+    elif kind == "dir":
+        files, directories = tree_deletion_plan(ftp, STAGING)
+        for path in files:
+            ftp.delete(str(path))
+        for path in directories:
+            ftp.rmd(str(path))
+        ftp.rmd(str(STAGING))
+    elif kind is not None:
+        raise ValueError(f"Unsupported FTP entry type at {STAGING}: {kind!r}")
+    ftp.mkd(str(STAGING))
+
+
+def cleanup_plan(ftp: FTP) -> tuple[list[PurePosixPath], list[PurePosixPath], set[PurePosixPath]]:
+    root = PurePosixPath("/")
+    entries = verify_marker(ftp)
     files, directories, retained = [], [], {root}
 
     def visit(directory: PurePosixPath, children: dict[str, str]) -> bool:
         keep = False
         for name, kind in sorted(children.items()):
+            if directory == root and name == STAGING.name:
+                continue
             path = directory / name
             if protected(path.relative_to(root)):
                 keep = True
@@ -109,7 +155,7 @@ def cleanup_plan(ftp: FTP) -> tuple[list[PurePosixPath], list[PurePosixPath], se
                 raise ValueError(f"Unsupported FTP entry type at {path}: {kind!r}")
         return keep
 
-    # Finish every listing before the first delete/upload, so listing errors abort safely.
+    # Inventory the entire live site before deleting any of it.
     visit(root, entries)
     return files, directories, retained
 
@@ -117,24 +163,39 @@ def cleanup_plan(ftp: FTP) -> tuple[list[PurePosixPath], list[PurePosixPath], se
 def deploy(ftp: FTP, source: Path) -> None:
     uploads = local_files(source)
     ftp.cwd("/")
+    # Check the guard before replacing or creating the staging directory.
+    root_entries = verify_marker(ftp)
+    prepare_staging(ftp, root_entries)
+    staging_directories = {STAGING}
+    for local, relative in uploads:
+        destination = STAGING / relative
+        for directory in reversed(destination.parents):
+            if directory not in staging_directories:
+                ftp.mkd(str(directory))
+                staging_directories.add(directory)
+        with local.open("rb") as content:
+            ftp.storbinary(f"STOR {destination}", content)
+    # Inventory and validate the live site only after every staged upload succeeds.
     files, directories, retained = cleanup_plan(ftp)
-    # A retained directory containing config files must not become an uploaded file.
     for _, relative in uploads:
         if PurePosixPath("/") / relative in retained:
             raise ValueError(f"Build file conflicts with a preserved FTP directory: {relative}")
-    print(f"Marker verified; removing {len(files)} files and {len(directories)} directories", flush=True)
+    print(f"Staging complete; removing {len(files)} live files and {len(directories)} directories", flush=True)
     for path in files:
         ftp.delete(str(path))
     for path in directories:
         ftp.rmd(str(path))
-    for local, relative in uploads:
+    for _, relative in uploads:
+        source_path = STAGING / relative
         destination = PurePosixPath("/") / relative
         for directory in reversed(destination.parents):
             if directory not in retained:
                 ftp.mkd(str(directory))
                 retained.add(directory)
-        with local.open("rb") as content:
-            ftp.storbinary(f"STOR {destination}", content)
+        ftp.rename(str(source_path), str(destination))
+    for directory in sorted(staging_directories - {STAGING}, key=lambda path: len(path.parts), reverse=True):
+        ftp.rmd(str(directory))
+    ftp.rmd(str(STAGING))
     print(f"Deployed {len(uploads)} website files to FTP /", flush=True)
 
 

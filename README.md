@@ -39,19 +39,25 @@ FTP uploads cannot overlap or be cancelled by a newer release.
 
 The destination is the FTP account's `/`, using passive FTP. The server must support
 `MLSD` directory listings, including dotfiles. Before any remote deletion or upload,
-the script requires a readable regular file `/.github_deployment_root.txt`, validates
-the build, and inventories the destination. Missing markers, unsupported entry types,
-or failed listings abort before changes. Create the marker on the server yourself;
+the script requires a readable regular file `/.github_deployment_root`, validates
+the build, and inventories the destination. Missing markers or an unreadable marker
+abort before touching the staging directory. Create the marker on the server yourself;
 deployment never creates it.
 
-Deployment removes the previous site and uploads `website/dist/`. It preserves root
-`/_imports/` recursively, the marker, `.ht*` entries (including `.htaccess`,
-`.htpasswd`, `.htgroups`, and their backups), and `.user.ini` at every depth.
-Parent directories containing preserved files
-also remain. These paths are excluded from uploads, so build files cannot overwrite
-them. All other files, including other dotfiles, are eligible for removal.
-Cleanup and upload are sequential; the site can be temporarily incomplete during
-deployment, and a failed transfer requires rerunning the release job.
+After verifying the marker, deployment deletes and recreates `/.deployment`, then
+uploads the complete website there. If a staging transfer fails, the live site stays
+untouched and the partial staging directory is cleared by the next attempt. Once all
+files are staged, deployment inventories the live site, removes its old files, moves
+the staged files into `/`, and removes `/.deployment`. A build entry named
+`.deployment` is excluded from deployment so it cannot overwrite the staging area.
+
+It preserves root `/_imports/` recursively, the marker, `.ht*` entries (including
+`.htaccess`, `.htpasswd`, `.htgroups`, and their backups), and `.user.ini` at every
+depth. Parent directories containing preserved files also remain. These paths are
+excluded from uploads, so build files cannot overwrite them. All other files,
+including other dotfiles, are eligible for removal. Cleanup and promotion are
+sequential, so the site can be briefly incomplete after the new build is staged; an
+error during cleanup or promotion may require rerunning the release job.
 
 Run the deployment safety checks locally from the repository root:
 
