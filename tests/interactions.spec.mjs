@@ -126,3 +126,17 @@ test('page content appears without entrance animation and remains readable with 
   await page.goto('/');
   await expect(page.locator('[data-reveal]')).toHaveCount(0);
 });
+
+test('homepage greeting lets visitors edit the name and animates the matching output', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  const name = page.getByRole('textbox', { name: 'Greeting name' });
+  const output = page.locator('[data-greeting-output]');
+  await expect(name).toHaveCount(1);
+  await expect(output).toHaveText(/^Hello, (Mira|Ari|Sam|Lena|Kai|Noah)!$/);
+
+  await name.fill('Nora');
+  await expect(output).toHaveText('Hello, Nora!', { timeout: 3000 });
+  await page.getByRole('button', { name: 'Copy code' }).first().click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('sayLine(greeting("Nora"))');
+});

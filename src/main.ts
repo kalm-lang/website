@@ -1,6 +1,7 @@
 import './components/theme-toggle';
 import './components/site-nav';
 import './components/code-block';
+import './components/greeting-demo';
 import './components/code-tabs';
 import { enhanceFeatureDialogs } from './components/feature-dialogs';
 import { enhanceSectionNavigation } from './components/section-nav';

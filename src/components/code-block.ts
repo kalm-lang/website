@@ -6,7 +6,7 @@ export class CodeBlock extends HTMLElement {
   private readonly status = document.createElement('span');
   private source = '';
   connectedCallback() {
-    this.source = this.querySelector('code')?.textContent ?? '';
+    this.source = this.readSource();
     this.button.className = 'copy-button';
     this.button.type = 'button';
     this.button.setAttribute('aria-label', 'Copy code');
@@ -22,8 +22,19 @@ export class CodeBlock extends HTMLElement {
     this.button.innerHTML = `${icon(copied ? 'check' : 'copy')}<span>${copied ? 'Copied' : 'Copy'}</span>`;
     this.button.classList.toggle('copied', copied);
   }
+  private readSource() {
+    const code = this.querySelector('code');
+    const editable = code?.querySelector<HTMLInputElement>('[data-greeting-name]');
+    if (!editable) return code?.textContent ?? '';
+    const copy = code!.cloneNode(true) as HTMLElement;
+    const copyInput = copy.querySelector<HTMLInputElement>('[data-greeting-name]');
+    const value = editable.value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+    copyInput?.replaceWith(document.createTextNode(value));
+    return copy.textContent ?? '';
+  }
   private async copy() {
     try {
+      this.source = this.readSource();
       await navigator.clipboard.writeText(this.source);
       this.showCopied(true);
       this.status.textContent = 'Code copied';

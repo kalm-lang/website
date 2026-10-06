@@ -31,6 +31,9 @@ function noteCard(note, index) {
 }
 export function home() {
   const greeting = readDocument(resolve(contentRoot, 'home/greeting.md'));
+  const greetingSource = greeting.content.replace('"Mira"', '"EditableName"');
+  const greetingCode = markdown(greetingSource, greeting.source, 'greeting')
+    .replace('EditableName', '<input class="greeting-name" data-greeting-name value="Mira" maxlength="24" autocomplete="off" spellcheck="false" aria-label="Greeting name">');
   const directory = resolve(contentRoot, 'home/notes');
   const notes = readdirSync(directory).filter(file => file.endsWith('.md'))
     .map(file => readDocument(resolve(directory, file))).sort((a, b) => a.order - b.order);
@@ -45,7 +48,14 @@ export function home() {
         </div>
       </div>
       <div class="hero-sample">
-        ${markdown(greeting.content, greeting.source, 'greeting')}
+        <kalm-greeting-demo>
+          ${greetingCode}
+          <div class="greeting-output" aria-label="Greeting output">
+            <div class="greeting-output-header"><span>Output</span><span class="greeting-edit-hint">Edit name</span></div>
+            <div class="greeting-output-line" aria-hidden="true"><span class="greeting-output-prompt">›</span><span data-greeting-output></span></div>
+            <span class="sr-only" data-greeting-status role="status" aria-live="polite"></span>
+          </div>
+        </kalm-greeting-demo>
       </div>
     </section>
     <section class="notes-section" aria-labelledby="language-notes">
