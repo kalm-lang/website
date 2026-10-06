@@ -252,7 +252,7 @@ class WebsiteDeploymentTest(unittest.TestCase):
         first_live_delete = next(i for i, event in enumerate(events)
                                  if event[0] == "delete" and not event[1].startswith("/.deployment/"))
         first_promotion = next(i for i, event in enumerate(events) if event[0] == "rename")
-        stage_removed = events.index(("rmd", "/.deployment"))
+        stage_removed = max(i for i, event in enumerate(events) if event == ("rmd", "/.deployment"))
         self.assertLess(marker_read, first_stage_delete)
         self.assertLess(first_stage_delete, staging_created)
         self.assertLess(staging_created, last_upload)

@@ -166,7 +166,7 @@ def deploy(ftp: FTP, source: Path) -> None:
     # Check the guard before replacing or creating the staging directory.
     root_entries = verify_marker(ftp)
     prepare_staging(ftp, root_entries)
-    staging_directories = {STAGING}
+    staging_directories = {PurePosixPath("/"), STAGING}
     for local, relative in uploads:
         destination = STAGING / relative
         for directory in reversed(destination.parents):
@@ -193,7 +193,8 @@ def deploy(ftp: FTP, source: Path) -> None:
                 ftp.mkd(str(directory))
                 retained.add(directory)
         ftp.rename(str(source_path), str(destination))
-    for directory in sorted(staging_directories - {STAGING}, key=lambda path: len(path.parts), reverse=True):
+    for directory in sorted(staging_directories - {PurePosixPath("/"), STAGING},
+                            key=lambda path: len(path.parts), reverse=True):
         ftp.rmd(str(directory))
     ftp.rmd(str(STAGING))
     print(f"Deployed {len(uploads)} website files to FTP /", flush=True)
