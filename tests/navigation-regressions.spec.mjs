@@ -53,12 +53,13 @@ test('scrollbar has visible travel and stays inside the visible viewport under z
   await session.detach();
 });
 
-test('main focus is explicit through Tab or the skip link', async ({ page }) => {
+test('main focus is outlined only through Tab or the skip link', async ({ page }) => {
   await page.goto('/docs/quick-start/');
   const main = page.locator('#main');
   await page.evaluate(() => document.getElementById('main').focus());
-  await expect(main).not.toBeFocused();
+  await expect(main).toBeFocused();
   await expect(main).not.toHaveAttribute('data-main-focus', '');
+  await expect(main).toHaveCSS('outline-style', 'none');
   await page.locator('.theme-trigger').focus();
   await page.keyboard.press('Tab');
   await expect(main).toBeFocused();
@@ -69,6 +70,26 @@ test('main focus is explicit through Tab or the skip link', async ({ page }) => 
   await expect(main).toHaveAttribute('data-main-focus', '');
   await page.locator('h1').click();
   await expect(main).not.toHaveAttribute('data-main-focus', '');
+});
+
+test('main text can be selected with the mouse', async ({ page }) => {
+  await page.goto('/docs/quick-start/');
+  const bounds = await page.evaluate(() => {
+    const paragraph = document.querySelector('#main .prose p');
+    const text = paragraph.firstChild;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, Math.min(12, text.textContent.length));
+    return { paragraph: paragraph.getBoundingClientRect().toJSON(), text: range.getBoundingClientRect().toJSON() };
+  });
+  const startX = bounds.text.x + 1;
+  const endX = Math.min(startX + 160, bounds.paragraph.right - 4);
+  const y = bounds.text.y + bounds.text.height / 2;
+  await page.mouse.move(startX, y);
+  await page.mouse.down();
+  await page.mouse.move(endX, y, { steps: 8 });
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString() ?? '')).not.toBe('');
 });
 
 test('mobile home sections have equal space between them', async ({ page }) => {

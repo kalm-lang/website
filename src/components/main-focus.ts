@@ -13,7 +13,6 @@ export function enhanceMainFocus() {
   }, { passive: true });
   main.addEventListener('focus', () => {
     if (tabbing || skipping) main.dataset.mainFocus = '';
-    else main.blur();
   });
   main.addEventListener('blur', () => { delete main.dataset.mainFocus; });
   skip?.addEventListener('click', event => {
