@@ -142,19 +142,26 @@ test('homepage greeting lets visitors edit the name and animates the matching ou
   await expect(output).toHaveText('Hello, Nora!', { timeout: 3000 });
   await page.getByRole('button', { name: 'Copy code' }).first().click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('sayLine(greeting("Nora"))');
+
+  await name.fill('');
+  await expect.poll(() => output.textContent()).toBe('Hello, !');
+  await name.fill('   ');
+  await expect.poll(() => output.textContent()).toBe('Hello,    !');
 });
 
-test('homepage name rotates after five seconds until the field is touched', async ({ page }) => {
+test('homepage name rotates every twenty seconds until the field is touched', async ({ page }) => {
   await page.clock.install();
   await page.goto('/');
   const name = page.getByRole('textbox', { name: 'Greeting name' });
   const initial = await name.inputValue();
 
-  await page.clock.runFor(5200);
+  await page.clock.runFor(18_000);
+  await expect(name).toHaveValue(initial);
+  await page.clock.runFor(2_500);
   const rotated = await name.inputValue();
   expect(rotated).not.toBe(initial);
 
   await name.focus();
-  await page.clock.runFor(6000);
+  await page.clock.runFor(21_000);
   await expect(name).toHaveValue(rotated);
 });

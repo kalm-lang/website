@@ -82,8 +82,7 @@ export class GreetingDemo extends HTMLElement {
   private typeGreeting(generation: number) {
     if (!this.input || !this.output || generation !== this.generation) return;
     if (this.loader) this.loader.hidden = true;
-    const name = this.input.value.trim();
-    const greeting = name ? `Hello, ${name}!` : 'Hello!';
+    const greeting = `Hello, ${this.input.value}!`;
     if (reduceMotion()) {
       this.output.textContent = greeting;
       if (this.status) this.status.textContent = greeting;
@@ -106,7 +105,7 @@ export class GreetingDemo extends HTMLElement {
   private scheduleNameChange() {
     clearTimeout(this.nameTimer);
     if (this.touched || !this.input) return;
-    this.nameTimer = setTimeout(() => this.changeName(), 5000);
+    this.nameTimer = setTimeout(() => this.changeName(), 20_000);
   }
 
   private changeName() {
