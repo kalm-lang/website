@@ -133,10 +133,28 @@ test('homepage greeting lets visitors edit the name and animates the matching ou
   const name = page.getByRole('textbox', { name: 'Greeting name' });
   const output = page.locator('[data-greeting-output]');
   await expect(name).toHaveCount(1);
+  await expect(page.locator('.greeting-edit-hint')).toHaveCount(0);
   await expect(output).toHaveText(/^Hello, (Mira|Ari|Sam|Lena|Kai|Noah)!$/);
 
   await name.fill('Nora');
+  await expect(page.locator('[data-greeting-loading]')).toBeVisible();
+  await expect(output).toBeEmpty();
   await expect(output).toHaveText('Hello, Nora!', { timeout: 3000 });
   await page.getByRole('button', { name: 'Copy code' }).first().click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('sayLine(greeting("Nora"))');
+});
+
+test('homepage name rotates after five seconds until the field is touched', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  const name = page.getByRole('textbox', { name: 'Greeting name' });
+  const initial = await name.inputValue();
+
+  await page.clock.runFor(5200);
+  const rotated = await name.inputValue();
+  expect(rotated).not.toBe(initial);
+
+  await name.focus();
+  await page.clock.runFor(6000);
+  await expect(name).toHaveValue(rotated);
 });

@@ -51,8 +51,8 @@ export function home() {
         <kalm-greeting-demo>
           ${greetingCode}
           <div class="greeting-output" aria-label="Greeting output">
-            <div class="greeting-output-header"><span>Output</span><span class="greeting-edit-hint">Edit name</span></div>
-            <div class="greeting-output-line" aria-hidden="true"><span class="greeting-output-prompt">›</span><span data-greeting-output></span></div>
+            <div class="greeting-output-header"><span>Output</span></div>
+            <div class="greeting-output-line" aria-hidden="true"><span class="greeting-output-prompt">›</span><span class="greeting-loader" data-greeting-loading hidden><i></i><i></i><i></i></span><span data-greeting-output></span></div>
             <span class="sr-only" data-greeting-status role="status" aria-live="polite"></span>
           </div>
         </kalm-greeting-demo>
