@@ -1,0 +1,75 @@
+name: Kalm website
+
+on:
+  push:
+    branches: ['**']
+    tags: ['website-*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate website release tag
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        working-directory: .
+        env:
+          WEBSITE_TAG: ${{ github.ref_name }}
+        run: python3 scripts/deploy_website.py validate-tag "$WEBSITE_TAG"
+      - name: Check deployment safeguards
+        working-directory: .
+        run: python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check
+      - run: npm run test:content
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm test -- --max-failures=1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kalm-website
+          path: website/dist
+          if-no-files-found: error
+
+  deploy:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: website
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: website-prod
+    concurrency:
+      group: website-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: kalm-website
+          path: website/dist
+      - name: Deploy website to FTP root
+        env:
+          DESTINATION_FTP_HOST: ${{ secrets.DESTINATION_FTP_HOST }}
+          DESTINATION_FTP_PASSWORD: ${{ secrets.DESTINATION_FTP_PASSWORD }}
+          DESTINATION_FTP_PORT: ${{ secrets.DESTINATION_FTP_PORT }}
+          DESTINATION_FTP_USER: ${{ secrets.DESTINATION_FTP_USER }}
+        run: python3 scripts/deploy_website.py deploy website/dist

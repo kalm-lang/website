@@ -23,6 +23,42 @@ Temporary compilation outputs are removed afterward.
 Set `KALM_TEST_BROWSER_CHANNEL=msedge` to run browser checks with an installed
 Microsoft Edge when bundled Chromium is unavailable.
 
+## Production deployment
+
+The **Kalm website** workflow builds and tests only `website/` on branch pushes,
+pull requests, and manual runs. Push a `website-<SemVer>` tag (for example,
+`website-1.2.3` or `website-1.2.3-rc.1+build.7`) to deploy that tag's site.
+Malformed `website-*` tags fail before dependency installation. Website tags skip
+the language/distribution workflow. Type, content, build/link, browser, or deployment
+errors stop the release; the fiddle is not built or deployed.
+
+After the build passes, the deployment job uses the `website-prod` GitHub environment
+and its `DESTINATION_FTP_HOST`, `DESTINATION_FTP_PASSWORD`, `DESTINATION_FTP_PORT`,
+and `DESTINATION_FTP_USER` secrets. Deployments share a concurrency group so active
+FTP uploads cannot overlap or be cancelled by a newer release.
+
+The destination is the FTP account's `/`, using passive FTP. The server must support
+`MLSD` directory listings, including dotfiles. Before any remote deletion or upload,
+the script requires a readable regular file `/.github_deployment_root.txt`, validates
+the build, and inventories the destination. Missing markers, unsupported entry types,
+or failed listings abort before changes. Create the marker on the server yourself;
+deployment never creates it.
+
+Deployment removes the previous site and uploads `website/dist/`. It preserves root
+`/_imports/` recursively, the marker, `.ht*` entries (including `.htaccess`,
+`.htpasswd`, `.htgroups`, and their backups), and `.user.ini` at every depth.
+Parent directories containing preserved files
+also remain. These paths are excluded from uploads, so build files cannot overwrite
+them. All other files, including other dotfiles, are eligible for removal.
+Cleanup and upload are sequential; the site can be temporarily incomplete during
+deployment, and a failed transfer requires rerunning the release job.
+
+Run the deployment safety checks locally from the repository root:
+
+```sh
+python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
+```
+
 ## Content
 
 - `content/docs/`: Handbook articles.
