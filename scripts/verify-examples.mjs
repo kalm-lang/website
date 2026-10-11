@@ -4,13 +4,14 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import MarkdownIt from 'markdown-it';
 import { routes } from './routes.mjs';
-import { repository, contentRoot, readDocument } from './content.mjs';
+import { repository, contentRoot, readDocument, contentFiles } from './content.mjs';
 import { tabsPlugin } from './tabs.mjs';
+import { compilerCommand } from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
 const only = process.argv.slice(2);
-const home = ['greeting.md', 'learning.md', ...readdirSync(resolve(contentRoot, 'home/notes')).map(file => `notes/${file}`)]
-  .map(file => readDocument(resolve(contentRoot, 'home', file)))
+const home = ['greeting.md', 'learning.md', ...contentFiles('home/notes').map(file => file.slice('content/home/'.length))]
+  .map(file => readDocument(`${contentRoot}/home/${file}`))
   .map(document => ({ ...document, path: document.source }));
 const examples = [...routes.filter(route => route.section === 'examples' && route.path !== '/examples/'), ...home]
   .filter(route => !only.length || only.includes(route.path));
@@ -35,7 +36,7 @@ try {
         writeFileSync(resolve(language === 'java' ? java : kalm, file), token.content);
       }
       const command = route.verify === 'test' ? 'test' : 'compile';
-      const result = spawnSync(resolve(repository, 'bin/kalm'), [command,
+      const result = spawnSync(compilerCommand.command, [...compilerCommand.args, command,
         '--source-root', kalm, '--java-source-root', java,
         '--generated-sources', resolve(project, 'generated'), '--output', resolve(project, 'classes'),
         '--reports', resolve(project, 'reports'), '--html-reports', resolve(project, 'html')],

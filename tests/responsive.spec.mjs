@@ -39,6 +39,7 @@ test('mobile topic menus keep the article close and the selected topic reachable
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(navigation).toBeHidden();
   await page.goto('/docs/specifications/1.1/');
+  await page.waitForURL('**/docs/specifications/1.1.0/');
   await page.evaluate(() => window.scrollTo({ top: 2500, behavior: 'instant' }));
   const scroll = await page.evaluate(() => window.scrollY);
   await expect(page.locator('.topic-trigger')).toBeInViewport();

@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { routes } from '../scripts/routes.mjs';
 import { validateContent, validateCatalog } from '../scripts/validate-content.mjs';
 import { markdown } from '../scripts/render.mjs';
+import { specificationAliases } from '../scripts/content.mjs';
 
-const sample = content => [{ source: 'website/content/examples/sample.md', path: '/examples/sample/',
+const sample = content => [{ source: 'content/examples/sample.md', path: '/examples/sample/',
   title: 'Sample', section: 'examples', group: 'Basics', content }];
 
 test('all discovered content satisfies publishing constraints', () => {
@@ -12,15 +13,18 @@ test('all discovered content satisfies publishing constraints', () => {
   assert.doesNotThrow(() => validateCatalog(routes));
   assert.throws(() => validateCatalog(routes.filter(route => route.path !== '/examples/fix/')), /coverage differs/);
   assert.equal(routes.filter(route => route.lesson).length, 8);
-  assert.ok(routes.some(route => route.version === '0.1' && route.source.startsWith('specifications/')));
-  assert.ok(routes.some(route => route.version === '1.0'));
-  assert.ok(routes.some(route => route.version === '1.1'));
+  assert.ok(routes.some(route => route.version === '0.1.0' && route.source.startsWith('specification/')));
+  assert.ok(routes.some(route => route.version === '1.0.0'));
+  assert.ok(routes.some(route => route.version === '1.1.0'));
+  assert.ok(routes.some(route => route.path === '/docs/specifications/1.1.0/' && route.status === 'final'));
+  assert.ok(routes.some(route => route.path === '/docs/specifications/1.1.0-draft/' && route.status === 'draft'));
+  assert.ok(specificationAliases.some(([from, to]) => from === '/docs/specifications/1.1/' && to === '/docs/specifications/1.1.0/'));
 });
 
 test('repository links fail instead of exposing raw files', () => {
-  assert.throws(() => markdown('[license](../../../LICENSE)', 'website/content/docs/sample.md'), /No website page/);
+  assert.throws(() => markdown('[license](../../../LICENSE)', 'content/docs/sample.md'), /No website page/);
   assert.throws(() => markdown('[source](/source/LICENSE)', 'sample.md'), /Repository file link/);
-  assert.match(markdown('[guide](values.md)', 'website/content/docs/language/layout.md'), /href="\/docs\/language\/values\/"/);
+  assert.match(markdown('[guide](values.md)', 'content/docs/language/layout.md'), /href="\/docs\/language\/values\/"/);
 });
 
 test('tab groups reject invalid sizes, content, and missing closing markers', () => {

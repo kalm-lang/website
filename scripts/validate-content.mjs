@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import MarkdownIt from 'markdown-it';
-import { contentRoot } from './content.mjs';
+import { catalog } from './content.mjs';
 import { tabsPlugin } from './tabs.mjs';
 
 export function validateContent(routes) {
@@ -30,7 +30,7 @@ export function validateContent(routes) {
 }
 
 export function validateCatalog(routes) {
-  const topics = JSON.parse(readFileSync(resolve(contentRoot, 'examples/topics.json'), 'utf8'));
+  const topics = catalog();
   const published = routes.filter(route => route.section === 'examples' && route.path !== '/examples/')
     .map(route => route.path.split('/').filter(Boolean).at(-1)).sort();
   if (JSON.stringify(topics) !== JSON.stringify(published)) {

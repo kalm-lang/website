@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
+import { assets } from '@kalm-lang/documentation';
 import { resolve } from 'node:path';
 import { createHighlighter } from 'shiki';
 import { repository } from './content.mjs';
 import { icon } from '../shared/icons.mjs';
 
 export const escape = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const grammar = JSON.parse(readFileSync(resolve(repository, 'extensions/vscode-kalm/syntaxes/kalm.tmLanguage.json'), 'utf8'));
+const grammar = assets['assets/kalm.tmLanguage.json'];
 const highlighter = await createHighlighter({ themes: ['github-light', 'github-dark'],
   langs: [{ ...grammar, name: 'kalm' }, 'java', 'bash', 'xml', 'kotlin', 'json'] });
 export function code(source, language = 'kalm', label = '') {

@@ -5,12 +5,12 @@ import { spawnSync } from 'node:child_process';
 import MarkdownIt from 'markdown-it';
 import { routes } from './routes.mjs';
 import { repository } from './content.mjs';
+import { compilerCommand } from './compiler-command.mjs';
 
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-learn-'));
 const main = resolve(root, 'src/main/kalm/stats');
 const tests = resolve(root, 'src/test/kalm/stats');
 const md = new MarkdownIt();
-const launcher = resolve(repository, 'bin/kalm');
 const java = process.env.KALM_JAVA_COMMAND ?? 'java';
 function run(command, args, expectedStatus = 0, expectedText = '') {
   const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 30_000 });
@@ -19,8 +19,7 @@ function run(command, args, expectedStatus = 0, expectedText = '') {
   }
 }
 const classpath = [resolve(root, 'target/classes'),
-  resolve(repository, 'kalm-runtime/target/kalm-runtime-0.1.0-SNAPSHOT.jar'),
-  resolve(repository, 'kalm-stdlib/target/kalm-stdlib-0.1.0-SNAPSHOT.jar')].join(delimiter);
+  resolve(repository, 'build-support/target/lib/*')].join(delimiter);
 const execute = (args, status, text) => run(java, ['-cp', classpath, 'stats.AppKalm', ...args], status, text);
 try {
   mkdirSync(main, { recursive: true });
@@ -34,11 +33,11 @@ try {
       if (!/^[A-Za-z]+\.kalm$/.test(filename ?? '')) throw new Error(`Lesson snippet needs a filename: ${route.path}`);
       writeFileSync(resolve(filename.endsWith('Tests.kalm') ? tests : main, filename), token.content);
     }
-    run(launcher, ['compile']);
+    run(compilerCommand.command, [...compilerCommand.args, 'compile']);
     execute(route.lesson >= 7 || route.lesson === 3 ? ['notes.txt'] : [], 0, outputs[route.lesson - 1]);
     console.log(`Verified lesson ${route.lesson}`);
   }
-  run(launcher, ['test'], 0, '4 passed');
+  run(compilerCommand.command, [...compilerCommand.args, 'test'], 0, '4 passed');
   writeFileSync(resolve(root, 'empty.txt'), '');
   execute(['empty.txt'], 0, '0 lines / 0 words');
   writeFileSync(resolve(root, 'whitespace.txt'), '\n \t\n');
@@ -49,6 +48,6 @@ try {
   execute(['src'], 1, 'Could not read file');
   writeFileSync(resolve(root, 'unreadable.txt'), 'private');
   chmodSync(resolve(root, 'unreadable.txt'), 0);
-  if (process.getuid?.() !== 0) execute(['unreadable.txt'], 1, 'Could not read file');
+  if (process.platform !== 'win32' && process.getuid?.() !== 0) execute(['unreadable.txt'], 1, 'Could not read file');
   console.log('Verified cumulative lessons, native tests, counts, input failures, and usage errors.');
 } finally { rmSync(root, { recursive: true, force: true }); }

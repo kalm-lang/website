@@ -5,7 +5,7 @@ import { escape } from './code.mjs';
 import { mainNavigation, sidebar, lessonNavigation } from './navigation.mjs';
 import { icon } from '../shared/icons.mjs';
 
-const version = readFileSync(resolve(repository, 'pom.xml'), 'utf8').match(/<version>([^<]+)<\/version>/)[1];
+const version = JSON.parse(readFileSync(resolve(repository, 'package.json'), 'utf8')).kalmVersion;
 export function layout(title, body, section = '') {
   return `<!doctype html>
 <html lang="en">
@@ -32,7 +32,7 @@ export function layout(title, body, section = '') {
   </header>
   ${body}
   <footer class="site-footer">
-    <a href="https://github.com/TD99/kalm">TD99/kalm</a>
+    <a href="https://github.com/kalm-lang">kalm-lang</a>
     <span>${escape(version)}</span>
   </footer>
   <div class="document-scrollbar" aria-hidden="true"><div class="document-scrollbar-thumb"></div></div>

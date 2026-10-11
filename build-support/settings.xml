@@ -1,0 +1,14 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+  <servers>
+    <server><id>kalm-packages</id><username>${env.KALM_PACKAGES_USER}</username><password>${env.KALM_PACKAGES_READ_TOKEN}</password></server>
+    <server><id>kalm-publish</id><username>${env.GITHUB_ACTOR}</username><password>${env.GITHUB_TOKEN}</password></server>
+  </servers>
+  <profiles>
+    <profile>
+      <id>kalm-local-registry</id>
+      <activation><property><name>env.KALM_MAVEN_REPOSITORY</name></property></activation>
+      <repositories><repository><id>kalm-packages</id><url>${env.KALM_MAVEN_REPOSITORY}</url></repository></repositories>
+      <pluginRepositories><pluginRepository><id>kalm-packages</id><url>${env.KALM_MAVEN_REPOSITORY}</url></pluginRepository></pluginRepositories>
+    </profile>
+  </profiles>
+</settings>

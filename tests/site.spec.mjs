@@ -62,7 +62,7 @@ test('learning navigation reaches completion and legacy URLs redirect', async ({
   }
   await page.locator('.lesson-navigation a').last().click();
   await expect(page).toHaveURL(/\/learn\/complete\//);
-  for (const [from, to] of [['/tutorial/', '/learn/'], ['/tutorial/06-report/', '/learn/08-tests/'], ['/docs/specification/', '/docs/specifications/1.1/']]) {
+  for (const [from, to] of [['/tutorial/', '/learn/'], ['/tutorial/06-report/', '/learn/08-tests/'], ['/docs/specification/', '/docs/specifications/1.1.0/'], ['/docs/specifications/1.1/', '/docs/specifications/1.1.0/']]) {
     await page.goto(from);
     await expect(page).toHaveURL(new RegExp(`${to}$`));
   }

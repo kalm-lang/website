@@ -6,7 +6,7 @@ Requires Node 22.12 or newer.
 Run in `website/`:
 
 ```sh
-npm ci
+npm install --no-package-lock
 npm run dev
 npm run check
 npm run test:content
@@ -16,7 +16,7 @@ npm run verify:code
 ```
 
 Install Chromium once with `npx playwright install chromium`. `verify:code`
-requires a full JDK 25+ and locally built compiler/runtime/standard-library JARs.
+requires a full JDK 25+ and published compiler/runtime/standard-library JARs, resolved by Maven.
 It compiles all example and homepage snippets, exercises each cumulative lesson,
 and checks native tests plus the completed CLI's counts and failure behavior.
 Temporary compilation outputs are removed afterward.
@@ -25,11 +25,10 @@ Microsoft Edge when bundled Chromium is unavailable.
 
 ## Production deployment
 
-The **Kalm website** workflow builds and tests only `website/` on branch pushes,
+The **Kalm website** workflow builds and tests this repository on branch pushes,
 pull requests, and manual runs. Push a `website-<SemVer>` tag (for example,
 `website-1.2.3` or `website-1.2.3-rc.1+build.7`) to deploy that tag's site.
-Malformed `website-*` tags fail before dependency installation. Website tags skip
-the language/distribution workflow. Type, content, build/link, browser, or deployment
+Malformed `website-*` tags fail before dependency installation. Website tags deploy only after the website gates pass. Type, content, build/link, browser, or deployment
 errors stop the release; the fiddle is not built or deployed.
 
 After the build passes, the deployment job uses the `website-prod` GitHub environment
@@ -67,13 +66,14 @@ python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
 
 ## Content
 
-- `content/docs/`: Handbook articles.
+- `@kalm-lang/documentation`: the canonical handbook, examples, lessons, homepage Markdown, and supporting catalog/grammar.
+- Logical `content/docs/`: Handbook articles.
 - `content/examples/`: short syntax topics; `topics.json` records catalog coverage.
 - `content/learn/`: the ordered text-statistics learning path and completion page.
 - `content/home/`: greeting, learning preview, and expandable language-note snippets.
-- `specifications/Kalm-Language-Specification-v*.md`: canonical specification versions.
+- `@kalm-lang/specification`: canonical final/non-final specification editions.
 
-Pages and navigation are discovered from Markdown. A filename determines its URL;
+Pages and navigation are discovered from the installed package APIs. This repository contains no canonical documentation Markdown. A filename determines its URL;
 `index.md` represents the section root. Front matter uses JSON, a YAML-compatible
 subset, so metadata needs no additional parser dependency:
 
@@ -92,7 +92,7 @@ A nullable value can be absent.
 `title` and numeric `order` are required. Example `group` values organize the
 sidebar; Docs always uses Handbook and Specifications. Learn lessons also have a
 consecutive `lesson` number. Optional `navSection` groups articles under their Handbook parent.
-The footer version comes from the root Maven project.
+The footer version comes from the pinned `kalmVersion` in package.json.
 
 Homepage notes also declare an `icon` from the curated Lucide set in
 `shared/icons.mjs` and a `doc` website URL. Icons and code headers render at build
@@ -141,9 +141,11 @@ dialogs and navigation menus retain platform scrollbars.
 Main content receives focus only through an explicit Tab or skip-link action.
 Articles, code, and native disclosure cards remain readable without JavaScript.
 
-Restart `npm run dev` after content changes. Production builds regenerate all
+Update the pinned documentation package to consume content changes, then restart `npm run dev`. Production builds regenerate all
 pages. To run the navigation first-paint checks against Vite development mode:
 
 ```sh
 KALM_TEST_SERVER=dev npm test -- tests/first-paint.spec.mjs
 ```
+
+Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/blob/main/docs/bootstrap.md) before installing packages. The initial package versions must be published first. For unpublished local changes, use the [optional workspace](https://github.com/kalm-lang/tools/blob/main/docs/workspace.md), which installs tarballs without changing the dependency manifest.

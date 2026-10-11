@@ -14,11 +14,14 @@
     "preview": "vite preview",
     "test": "playwright test",
     "test:content": "node --test --experimental-test-isolation=none tests/content.test.mjs",
-    "verify:code": "node scripts/verify-examples.mjs && node scripts/verify-learn.mjs"
+    "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs"
   },
   "dependencies": {
+    "cross-spawn": "7.0.6",
     "lit": "3.3.3",
-    "lucide": "1.52.0"
+    "lucide": "1.52.0",
+    "@kalm-lang/documentation": "0.1.0",
+    "@kalm-lang/specification": "1.1.0-full"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
@@ -27,5 +30,6 @@
     "shiki": "4.5.0",
     "typescript": "7.0.2",
     "vite": "8.3.2"
-  }
+  },
+  "kalmVersion": "0.1.0-SNAPSHOT"
 }

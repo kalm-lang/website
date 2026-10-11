@@ -15,9 +15,12 @@ jobs:
   website:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      KALM_PACKAGES_USER: ${{ vars.KALM_PACKAGES_USER || github.actor }}
+      KALM_PACKAGES_READ_TOKEN: ${{ secrets.KALM_PACKAGES_READ_TOKEN }}
     defaults:
       run:
-        working-directory: website
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,18 +38,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: website/package-lock.json
-      - run: npm ci --no-audit --no-fund
+      - run: npm install --no-package-lock --no-audit --no-fund
       - run: npm run check
       - run: npm run test:content
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: npm run verify:code
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm test -- --max-failures=1
       - uses: actions/upload-artifact@v4
         with:
           name: kalm-website
-          path: website/dist
+          path: dist
           if-no-files-found: error
 
   deploy:
@@ -66,11 +72,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: kalm-website
-          path: website/dist
+          path: dist
       - name: Deploy website to FTP root
         env:
           DESTINATION_FTP_HOST: ${{ secrets.DESTINATION_FTP_HOST }}
           DESTINATION_FTP_PASSWORD: ${{ secrets.DESTINATION_FTP_PASSWORD }}
           DESTINATION_FTP_PORT: ${{ secrets.DESTINATION_FTP_PORT }}
           DESTINATION_FTP_USER: ${{ secrets.DESTINATION_FTP_USER }}
-        run: python3 scripts/deploy_website.py deploy website/dist
+        run: python3 scripts/deploy_website.py deploy dist

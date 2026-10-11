@@ -1,3 +1,4 @@
+
 **/target/
 **/build/
 **/.gradle/
@@ -37,3 +38,12 @@ website/test-results/
 
 # Locally generated production website delivery bundle
 website/kalm-website-production.zip
+
+/target/
+/build/
+/.generated/
+/playwright-report/
+/test-results/
+/generated/
+/resources/server/
+*.tgz

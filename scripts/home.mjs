@@ -1,6 +1,4 @@
-import { readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { contentRoot, readDocument } from './content.mjs';
+import { contentRoot, readDocument, contentFiles } from './content.mjs';
 import { escape } from './code.mjs';
 import { markdown } from './render.mjs';
 import { icon } from '../shared/icons.mjs';
@@ -30,13 +28,11 @@ function noteCard(note, index) {
   </article>`;
 }
 export function home() {
-  const greeting = readDocument(resolve(contentRoot, 'home/greeting.md'));
+  const greeting = readDocument(`${contentRoot}/home/greeting.md`);
   const greetingSource = greeting.content.replace('"Mira"', '"EditableName"');
   const greetingCode = markdown(greetingSource, greeting.source, 'greeting')
     .replace('EditableName', '<input class="greeting-name" data-greeting-name value="Mira" maxlength="24" autocomplete="off" spellcheck="false" aria-label="Greeting name">');
-  const directory = resolve(contentRoot, 'home/notes');
-  const notes = readdirSync(directory).filter(file => file.endsWith('.md'))
-    .map(file => readDocument(resolve(directory, file))).sort((a, b) => a.order - b.order);
+  const notes = contentFiles('home/notes').map(readDocument).sort((a, b) => a.order - b.order);
   return `<main id="main" tabindex="0" class="home">
     <section class="hero">
       <div>
