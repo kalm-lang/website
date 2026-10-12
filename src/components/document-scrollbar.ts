@@ -1,3 +1,5 @@
+import { gsap } from 'gsap';
+
 // Keep the document as the scroll surface so wheel, touch, anchors, and keyboard
 // navigation stay native. The overlay only replaces the document's gutter.
 export function enhanceDocumentScrollbar() {
@@ -22,6 +24,21 @@ export function enhanceDocumentScrollbar() {
   let trackTop = 0;
   let thumbHeight = 0;
   let scrollTimer: ReturnType<typeof setTimeout>;
+  let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  let sizeTween: gsap.core.Tween | undefined;
+  let targetHeight = -1;
+  let targetWidth = -1;
+  let pointerX = 0, pointerY = 0;
+  let graceBounds: DOMRect | undefined;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const cancelClose = () => { clearTimeout(closeTimer); closeTimer = undefined; delete track.dataset.pendingClose; graceBounds = undefined; };
+  const beginClose = () => {
+    if (closeTimer || dragging || !track.hasAttribute('data-open')) return;
+    graceBounds = track.getBoundingClientRect();
+    track.dataset.pendingClose = '';
+    closeTimer = setTimeout(() => { cancelClose(); delete track.dataset.open; update(); }, 350);
+    update();
+  };
 
   const update = () => {
     frame = 0;
@@ -34,20 +51,35 @@ export function enhanceDocumentScrollbar() {
     const enabled = root.dataset.scrollbarStyle !== 'native' && !unavailable && !root.hasAttribute('data-dialog-open');
     track.hidden = !enabled;
     if (!surface || !enabled) {
+      cancelClose();
+      sizeTween?.kill(); targetHeight = -1; targetWidth = -1;
       endDrag();
       delete track.dataset.open;
       delete track.dataset.visible;
       return;
     }
     const expanded = track.hasAttribute('data-open') || dragging;
-    const trackHeight = Math.min(expanded ? 560 : 160, viewportHeight * (expanded ? .65 : .22));
-    const trackWidth = expanded ? 24 : 18;
-    track.style.height = `${trackHeight}px`;
-    track.style.width = `${trackWidth}px`;
+    const pending = track.hasAttribute('data-pending-close');
+    const factor = pending ? .96 : 1;
+    const trackHeight = Math.min(expanded ? 560 : 160, viewportHeight * (expanded ? .65 : .22)) * factor;
+    const trackWidth = (expanded ? 24 : 18) * factor;
+    if (trackHeight !== targetHeight || trackWidth !== targetWidth) {
+      const immediate = targetHeight < 0 || dragging || reduced.matches || track.hasAttribute('data-resizing');
+      targetHeight = trackHeight; targetWidth = trackWidth;
+      sizeTween?.kill();
+      sizeTween = gsap.to(track, { height: trackHeight, width: trackWidth, borderRadius: expanded ? 12 : 9,
+        duration: immediate ? 0 : pending ? .12 : expanded ? .35 : .28,
+        ease: pending ? 'power2.out' : 'power3.out', overwrite: true, onUpdate: measure });
+    }
     track.style.top = `${(viewport?.offsetTop ?? 0) + viewportHeight / 2}px`;
     // Anchor the right edge so expansion grows inward without shifting the gutter.
     track.style.left = `${(viewport?.offsetLeft ?? 0) + viewportWidth - 8}px`;
     track.style.right = 'auto';
+    measure();
+  };
+  const measure = () => {
+    const surface = document.scrollingElement;
+    if (!surface || track.hidden) return;
     const style = getComputedStyle(track);
     const padding = parseFloat(style.paddingTop);
     const height = Math.max(0, track.clientHeight - padding - parseFloat(style.paddingBottom));
@@ -72,24 +104,28 @@ export function enhanceDocumentScrollbar() {
     delete track.dataset.dragging;
     delete root.dataset.scrollbarDragging;
     if (track.hasPointerCapture(pointerId)) track.releasePointerCapture(pointerId);
+    const bounds = track.getBoundingClientRect();
+    if (pointerX < bounds.left - 12 || pointerX > bounds.right + 12 || pointerY < bounds.top - 12 || pointerY > bounds.bottom + 12) beginClose();
     schedule();
   };
 
-  track.addEventListener('pointerenter', () => { track.dataset.open = ''; update(); });
+  track.addEventListener('pointerenter', event => { pointerX = event.clientX; pointerY = event.clientY; cancelClose(); track.dataset.open = ''; update(); });
   document.addEventListener('pointermove', event => {
+    pointerX = event.clientX; pointerY = event.clientY;
     if (!track.hasAttribute('data-open') || dragging) return;
-    const bounds = track.getBoundingClientRect();
+    const bounds = graceBounds ?? track.getBoundingClientRect();
     const safeSpace = 12;
     const nearTrack = event.clientX >= bounds.left - safeSpace && event.clientX <= bounds.right + safeSpace &&
       event.clientY >= bounds.top - safeSpace && event.clientY <= bounds.bottom + safeSpace;
     if (!nearTrack) {
-      delete track.dataset.open;
-      schedule();
-    }
+      beginClose();
+    } else if (closeTimer) { cancelClose(); update(); }
   }, { passive: true });
   track.addEventListener('pointerdown', event => {
     if (event.button !== 0 || scrollRange <= 8) return;
     event.preventDefault();
+    cancelClose();
+    pointerX = event.clientX; pointerY = event.clientY;
     const bounds = thumb.getBoundingClientRect();
     const grab = event.target === thumb ? Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height)) : .5;
     dragging = true;
@@ -115,6 +151,7 @@ export function enhanceDocumentScrollbar() {
   const viewportChange = () => {
     // Zoom and viewport changes must fit immediately, even during expansion.
     track.dataset.resizing = '';
+    cancelClose(); sizeTween?.kill(); targetHeight = -1; targetWidth = -1;
     endDrag();
     delete track.dataset.open;
     update();
@@ -124,7 +161,8 @@ export function enhanceDocumentScrollbar() {
   window.visualViewport?.addEventListener('resize', viewportChange, { passive: true });
   window.visualViewport?.addEventListener('scroll', schedule, { passive: true });
   phoneLayout.addEventListener('change', schedule);
-  window.addEventListener('kalm-scrollbar-change', () => { endDrag(); schedule(); });
+  window.addEventListener('kalm-scrollbar-change', () => { endDrag(); cancelClose(); schedule(); });
+  reduced.addEventListener('change', viewportChange);
   const resize = new ResizeObserver(schedule);
   resize.observe(root);
   resize.observe(document.body);

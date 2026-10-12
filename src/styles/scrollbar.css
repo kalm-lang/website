@@ -18,8 +18,7 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   opacity: 0; pointer-events: none; transform: translate(-100%, -50%);
   touch-action: none; user-select: none; cursor: grab;
-  transition: height .24s cubic-bezier(.22,.75,.25,1), width .24s cubic-bezier(.22,.75,.25,1),
-    border-radius .24s ease, opacity .14s ease, background .16s ease; }
+  transition: opacity .14s ease, background .16s ease; }
 .document-scrollbar[data-visible] { opacity: .9; pointer-events: auto; }
 .document-scrollbar[data-visible]:hover, .document-scrollbar[data-open],
 .document-scrollbar[data-scrolling], .document-scrollbar[data-dragging] { opacity: 1; }
