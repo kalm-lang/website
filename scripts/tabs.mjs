@@ -1,6 +1,11 @@
 import container from 'markdown-it-container';
 
 // Library-backed containers keep nested groups and fenced content intact.
+export function sourceInfo(info) {
+  const start = info.indexOf('{');
+  const [language, ...label] = (start < 0 ? info : info.slice(0, start)).trim().split(/\s+/);
+  return { language, label: label.join(' '), ...(start < 0 ? {} : JSON.parse(info.slice(start))) };
+}
 export function tabsPlugin(md) {
   for (const name of ['tabs', 'compare', 'dialect']) md.use(container, name);
   md.core.ruler.after('inline', 'source_groups', state => {
@@ -28,8 +33,19 @@ export function tabsPlugin(md) {
         open.meta = name === 'compare' ? (params ? JSON.parse(params) : {}) : {dialect: params};
         if (name === 'tabs' && (children.length < 2 || children.length > 3 || children.some(t => !['fence', 'code_compare'].includes(t.type)))) throw new Error(':::tabs needs two or three fenced code blocks or comparisons');
         if (name === 'compare') {
-          const languages = children.map(t => t.info?.trim().split(/\s+/)[0]);
-          if (children.some(t => t.type !== 'fence') || new Set(languages).size !== languages.length || !languages.includes('kalm') || !languages.includes('java') || languages.some(l => !['kalm','kalms','java'].includes(l)) || (languages.includes('kalms') === Boolean(open.meta.scriptUnavailable))) throw new Error(':::compare needs Kalm, Java, and either Kalm Script or scriptUnavailable');
+          const variants = children.map(t => sourceInfo(t.info ?? ''));
+          const languages = variants.map(v => v.language);
+          open.meta.presentation ??= 'adaptive';
+          open.meta.locks ??= {};
+          if (!['adaptive','showcase'].includes(open.meta.presentation)) throw new Error('Invalid presentation');
+          if (Object.entries(open.meta.locks).some(([key,value]) => !['dialect','style','os','shell'].includes(key) || typeof value !== 'boolean')) throw new Error('Invalid property lock');
+          for (const v of variants) {
+            if ((v.style && !['indentation','braces'].includes(v.style)) || (v.os && !['windows','macos','linux'].includes(v.os)) || (v.shell && !['powershell','cmd','bash','zsh'].includes(v.shell)) || (v.dialect && !['kalm','kalms'].includes(v.dialect))) throw new Error('Invalid source preference');
+          }
+          const keys = variants.map(v => JSON.stringify([v.language,v.style,v.os,v.shell,v.pane]));
+          if (!children.length || children.some(t => t.type !== 'fence') || new Set(keys).size !== keys.length) throw new Error('Duplicate or invalid source variant');
+          const terminal = languages.every(l => ['bash','zsh','powershell','batch','text'].includes(l));
+          if (!terminal && open.meta.presentation !== 'showcase' && (!languages.includes('kalm') || !languages.includes('java') || (languages.includes('kalms') === Boolean(open.meta.scriptUnavailable)))) throw new Error(':::compare needs Kalm, Java, and either Kalm Script or scriptUnavailable');
           if (open.meta.scriptUnavailable && (typeof open.meta.scriptUnavailable !== 'string' || !open.meta.scriptUnavailable.trim())) throw new Error('scriptUnavailable must explain the limitation');
           if (open.meta.primary && !['kalm', 'java'].includes(open.meta.primary)) throw new Error('primary must be kalm or java');
         }
@@ -43,11 +59,11 @@ export function tabsPlugin(md) {
   });
 }
 
-export function fences(tokens, dialect = 'kalm', comparisons = 'primary') {
+export function fences(tokens, dialect = 'kalm', comparisons = 'primary', style = 'indentation') {
   return tokens.flatMap(token => {
     if (token.type === 'fence') return [token];
     if (token.type === 'code_dialect' && token.meta.dialect !== dialect) return [];
-    if (token.type === 'code_compare') return comparisons === 'all' ? token.children : token.children.filter(t => t.info.trim().split(/\s+/)[0] === (comparisons === 'primary' && dialect === 'kalm' ? token.meta.primary ?? dialect : dialect));
-    return token.children && token.type !== 'inline' ? fences(token.children, dialect, comparisons) : [];
+    if (token.type === 'code_compare') return comparisons === 'all' ? token.children : token.children.filter(t => { const v = sourceInfo(t.info); return v.language === (comparisons === 'primary' && dialect === 'kalm' ? token.meta.primary ?? dialect : dialect) && (!v.style || v.style === style || token.meta.locks.style); });
+    return token.children && token.type !== 'inline' ? fences(token.children, dialect, comparisons, style) : [];
   });
 }

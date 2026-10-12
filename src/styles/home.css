@@ -57,7 +57,7 @@
 .feature-trigger, .card-face-summary { display: flex; flex-direction: column; align-items: flex-start; min-height: 12rem; height: 100%;
   padding: 1.4rem; text-decoration: none; }
 .feature-meta { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-.feature-number { font: .75rem/1.5 var(--mono); color: var(--muted); }
+
 .feature-symbol { display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0; width: 2.25rem; height: 2.25rem; background: var(--soft); border-radius: 8px; color: var(--accent); }
 .feature-title { display: block; font: 600 1.05rem/1.5 var(--body); margin: 1rem 0 .5rem; }
@@ -127,3 +127,11 @@
   .start-box { margin-top: 0; }
   .home .section-heading { margin: 0 0 1.25rem; }
 }
+
+kalm-greeting-demo { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+kalm-greeting-demo .greeting-output { margin: 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.reserved-dialects { display: grid; }
+.reserved-dialects > .dialect-content { display: block !important; grid-area: 1 / 1; }
+html[data-dialect=kalm] .reserved-dialects > [data-dialect=kalms], html[data-dialect=kalms] .reserved-dialects > [data-dialect=kalm] { visibility: hidden; }
+
+.greeting-name, [data-greeting-slot] { display: inline-block; height: 1.8em; padding-block: 0; vertical-align: bottom; }

@@ -1,13 +1,17 @@
+import { gsap } from 'gsap';
 import { LitElement, html } from 'lit';
 
 export class CodeTabs extends LitElement {
   static properties = { selected: { state: true } };
   selected = 0;
+  private readonly reset = () => { this.selected = 0; this.show(); };
+  disconnectedCallback() { super.disconnectedCallback(); window.removeEventListener('pageshow', this.reset); }
   private panels: HTMLElement[] = [];
   createRenderRoot() { return this; }
   connectedCallback() {
     this.panels = [...this.querySelectorAll<HTMLElement>(':scope > section')];
     super.connectedCallback();
+    window.addEventListener('pageshow', this.reset);
     this.show();
   }
   private show() { this.panels.forEach((panel, index) => { panel.hidden = index !== this.selected; }); }
@@ -17,9 +21,7 @@ export class CodeTabs extends LitElement {
     this.show();
     const panel = this.panels[index];
     if (changed && panel && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      panel.classList.remove('panel-entering');
-      void panel.offsetWidth;
-      panel.classList.add('panel-entering');
+      gsap.fromTo(panel,{opacity:.2,y:3},{opacity:1,y:0,duration:.22,ease:'power2.out',overwrite:true,clearProps:'opacity,transform'});
     }
     if (focus) void this.updateComplete.then(() => this.querySelectorAll<HTMLButtonElement>(':scope > .source-tab-bar > [role="tab"]')[index]?.focus());
   }

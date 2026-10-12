@@ -14,9 +14,10 @@
     "preview": "vite preview",
     "test": "playwright test",
     "test:content": "node --test --experimental-test-isolation=none tests/content.test.mjs",
-    "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs && node scripts/verify-comparisons.mjs"
+    "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs && node scripts/verify-comparisons.mjs && node scripts/verify-variants.mjs"
   },
   "dependencies": {
+    "@floating-ui/dom": "1.7.4",
     "@kalm-lang/documentation": "0.1.0",
     "@kalm-lang/specification": "1.1.0-full",
     "cross-spawn": "7.0.6",
@@ -28,8 +29,11 @@
   "devDependencies": {
     "@kalm-lang/syntax-highlighting": "1.1.0",
     "@playwright/test": "1.63.0",
+    "@shikijs/langs": "4.5.0",
     "@types/node": "26.6.4",
     "markdown-it": "15.0.2",
+    "prettier": "3.9.10",
+    "prettier-plugin-java": "2.11.0",
     "typescript": "7.0.2",
     "vite": "8.3.2"
   },

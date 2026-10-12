@@ -28,17 +28,14 @@ try {
     const groups = comparisons(tokens);
     const primaryBlocks = new Set(fences(tokens, 'kalm', 'all'));
     for (const [index, group] of groups.entries()) {
+      const block = group.children.find(token => token.info.startsWith('java'));
+      if (!block) continue;
       const project = resolve(root, `${verified++}`);
       mkdirSync(project);
       try {
-        const block = group.children.find(token => token.info.startsWith('java'));
-        let source = block.content;
+        const source = block.content;
         let filename = block.info.split(/\s+/)[1];
         if (!filename?.endsWith('.java')) filename = 'Example.java';
-        if (!/\b(class|record|enum|interface)\s+\w+/.test(source)) {
-          source = `class Example { public static void main(String[] args) { ${source} } }`;
-          filename = 'Example.java';
-        }
         writeFileSync(resolve(project, filename), source);
         // Java interoperability examples intentionally refer to a Kalm facade.
         if (source.includes('GreetingKalm.')) {

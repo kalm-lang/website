@@ -1,3 +1,4 @@
+import { selectSources } from '../shared/source-selection.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { routes } from '../scripts/routes.mjs';
@@ -62,4 +63,16 @@ test('comparisons require real counterparts and render unique accessible panels'
   assert.match(markdown(`:::::tabs\n${group}${group}\n:::::\n`, 'sample.md'), /kalm-code-tabs/);
   assert.throws(() => validateContent(sample('```kalm\nline\n```')), /comparison group/);
   assert.match(markdown('::::dialect kalms\nVisible **script** instructions.\n::::', 'sample.md'), /Visible <strong>script<\/strong>/);
+});
+
+test('source locks operate independently and terminal variants follow resolved environment', () => {
+  const preferences={dialect:'kalms',style:'braces',os:'windows',shell:'cmd'};
+  const sources=[{language:'kalm',style:'indentation'},{language:'kalm',style:'braces'},{language:'kalms',style:'indentation'},{language:'kalms',style:'braces'}];
+  assert.deepEqual(selectSources(sources,{presentation:'showcase',locks:{dialect:true}},preferences),[1,3]);
+  const styles=sources.map(s=>({...s,pane:s.style}));
+  assert.deepEqual(selectSources(styles,{presentation:'showcase',locks:{style:true}},preferences),[2,3]);
+  const shells=[{language:'powershell',os:'windows',shell:'powershell'},{language:'batch',os:'windows',shell:'cmd'},{language:'bash',os:'linux',shell:'bash'}];
+  assert.deepEqual(selectSources(shells,{},preferences),[1]);
+  assert.deepEqual(selectSources(shells,{presentation:'showcase',locks:{os:true,shell:true}},preferences),[0]);
+  assert.throws(()=>markdown(':::compare {"presentation":"showcase","locks":{"style":"true"}}\n'+ '\x60\x60\x60kalm\nfun answer() -> Int = 42\n\x60\x60\x60\n:::', 'sample.md'),/Invalid property lock/);
 });

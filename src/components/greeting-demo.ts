@@ -23,17 +23,20 @@ export class GreetingDemo extends HTMLElement {
   private readonly onFocus = () => this.markTouched();
   private greetingSlot() {
     const dialect = document.documentElement.dataset.dialect === 'kalms' ? 'kalms' : 'kalm';
-    return this.querySelector<HTMLElement>(`[data-language="${dialect}"] [data-greeting-slot]`) ?? this.querySelector<HTMLElement>('[data-greeting-slot]');
+    return this.querySelector<HTMLElement>(`[data-language="${dialect}"][data-visible="true"] [data-greeting-slot]`) ?? this.querySelector<HTMLElement>('[data-greeting-slot]');
   }
   private readonly onDialect = () => {
-    if (this.input?.closest<HTMLElement>('[data-language]')?.dataset.language === document.documentElement.dataset.dialect) return;
+    if (this.input?.closest<HTMLElement>('[data-visible]')?.dataset.visible === 'true') return;
     const slot = this.greetingSlot();
     if (!slot || !this.input) return;
     const placeholder = document.createElement('span');
     placeholder.dataset.greetingSlot = '';
     placeholder.textContent = this.input.value;
+    const focused = document.activeElement === this.input;
+    const start = this.input.selectionStart, end = this.input.selectionEnd;
     this.input.replaceWith(placeholder);
     slot.replaceWith(this.input);
+    if (focused) { this.input.focus({preventScroll:true}); this.input.setSelectionRange(start,end); }
   };
 
   connectedCallback() {
@@ -61,7 +64,7 @@ export class GreetingDemo extends HTMLElement {
     this.resizeInput();
     this.input.addEventListener('input', this.onInput);
     this.input.addEventListener('focus', this.onFocus);
-    window.addEventListener('kalm-dialect-change', this.onDialect);
+    this.addEventListener('kalm-source-change', this.onDialect);
     this.scheduleGreeting(650);
     this.scheduleNameChange();
   }
@@ -69,7 +72,7 @@ export class GreetingDemo extends HTMLElement {
   disconnectedCallback() {
     this.input?.removeEventListener('input', this.onInput);
     this.input?.removeEventListener('focus', this.onFocus);
-    window.removeEventListener('kalm-dialect-change', this.onDialect);
+    this.removeEventListener('kalm-source-change', this.onDialect);
     this.clearTimers();
     this.generation++;
   }

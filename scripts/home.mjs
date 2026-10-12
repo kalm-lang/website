@@ -4,14 +4,14 @@ import { markdown } from './render.mjs';
 import { icon } from '../shared/icons.mjs';
 
 function dialectText(kalm, kalms) {
-  return kalms ? `<span class="dialect-content" data-dialect="kalm">${escape(kalm)}</span><span class="dialect-content" data-dialect="kalms">${escape(kalms)}</span>` : escape(kalm);
+  return kalms ? `<span class="reserved-dialects"><span class="dialect-content" data-dialect="kalm">${escape(kalm)}</span><span class="dialect-content" data-dialect="kalms">${escape(kalms)}</span></span>` : escape(kalm);
 }
 
 function noteCard(note, index) {
   const dialogId = `note-${index}-dialog`;
   return `<article class="feature">
     <a class="feature-trigger" href="${escape(note.doc)}" aria-haspopup="dialog" aria-controls="${dialogId}">
-      <span class="feature-meta"><span class="feature-symbol">${icon(note.icon)}</span><span class="feature-number">${String(index + 1).padStart(2, '0')}</span></span>
+      <span class="feature-meta"><span class="feature-symbol">${icon(note.icon)}</span></span>
       <span class="feature-title">${dialectText(note.title, note.scriptTitle)}</span>
       <span class="feature-description">${dialectText(note.description, note.scriptDescription)}</span>
     </a>
@@ -26,7 +26,7 @@ function noteCard(note, index) {
       <div class="feature-dialog-content">
       <p class="feature-dialog-description">${dialectText(note.description, note.scriptDescription)}</p>
       <div class="prose">${markdown(note.content, note.source, `note-${index}`)}</div>
-      <a class="learn-more" href="${escape(note.doc)}">Read the full guide ${icon('arrow-up-right')}</a>
+      <a class="learn-more" data-home-navigation href="${escape(note.doc)}">Read the full guide ${icon('arrow-up-right')}</a>
       </div>
     </dialog>
   </article>`;
@@ -43,8 +43,8 @@ export function home() {
         <h1>A calmer way<br><em>to write for the JVM.</em></h1>
         <p class="hero-description">Friendly JVM syntax. Full access to Java libraries.</p>
         <div class="actions">
-          <a class="button primary" href="/docs/quick-start/">Start writing ${icon('arrow-up-right')}</a>
-          <a class="button" href="/examples/">Explore examples ${icon('arrow-right')}</a>
+          <a class="button primary" data-home-navigation href="/docs/quick-start/">Start writing ${icon('arrow-up-right')}</a>
+          <a class="button" data-home-navigation href="/examples/">Explore examples ${icon('arrow-right')}</a>
         </div>
       </div>
       <div class="hero-sample">

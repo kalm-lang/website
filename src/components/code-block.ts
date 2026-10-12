@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import { icon } from '../../shared/icons.mjs';
 
 export class CodeBlock extends HTMLElement {
@@ -21,6 +22,9 @@ export class CodeBlock extends HTMLElement {
   private showCopied(copied: boolean) {
     this.button.innerHTML = `${icon(copied ? 'check' : 'copy')}<span>${copied ? 'Copied' : 'Copy'}</span>`;
     this.button.classList.toggle('copied', copied);
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.fromTo(this.button.querySelector('.icon'), {opacity:0,scale:.65,rotation:copied?-20:0}, {opacity:1,scale:1,rotation:0,duration:.22,ease:'back.out(1.5)',overwrite:true});
+    }
   }
   private readSource() {
     const code = this.querySelector('code');
