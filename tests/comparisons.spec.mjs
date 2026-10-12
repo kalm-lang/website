@@ -57,6 +57,13 @@ test('comparison controls fit phones and support keyboard selection', async ({ p
   const right = await group.locator('[data-language="java"]').boundingBox();
   expect(right.y).toBeGreaterThanOrEqual(left.y + left.height);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('[data-dialect-choice="kalms"]').click();
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await expect.poll(async () => {
+    const slider = await page.locator('.dialect-slider').boundingBox();
+    const indicator = await page.locator('.dialect-slider-indicator').boundingBox();
+    return indicator.x >= slider.x && indicator.x + indicator.width <= slider.x + slider.width;
+  }).toBe(true);
 });
 
 test('comparison controls work with blocked storage and static counterparts remain readable', async ({ page, browser }) => {
