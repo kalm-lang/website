@@ -83,11 +83,16 @@ export function enhanceDocumentScrollbar() {
         track.style.borderRadius = Math.min(12, dimensions.width/2)+'px'; measure();
       };
       if (immediate) { dimensions.height = trackHeight; dimensions.width = trackWidth; render(); }
-      else sizeTween = gsap.to(dimensions, {inertia: {
-        height: {velocity:velocityHeight,end:trackHeight},
-        width: {velocity:velocityWidth,end:trackWidth},
-        duration: pending ? .24 : .65,
-      }, ease: 'power3.out', onUpdate:render, onComplete:render});
+      else sizeTween = gsap.to(dimensions, {
+        inertia: {
+          height: { velocity: velocityHeight, end: trackHeight },
+          width: { velocity: velocityWidth, end: trackWidth },
+        },
+        duration: pending ? .2 : .38,
+        ease: 'power2.out',
+        onUpdate: render,
+        onComplete: render,
+      });
     }
     track.style.top = `${(viewport?.offsetTop ?? 0) + viewportHeight / 2}px`;
     // Anchor the right edge so expansion grows inward without shifting the gutter.

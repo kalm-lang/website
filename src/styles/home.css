@@ -17,7 +17,7 @@
 .hero-sample { min-width: 0; position: relative; }
 .hero-sample kalm-greeting-demo { display: block; }
 .hero-sample kalm-code-block { margin: 0; border-radius: 10px 10px 0 0; box-shadow: none; }
-.hero-sample pre { overflow-x: auto; padding-block: .65rem; line-height: 1.5; }
+.hero-sample pre { overflow-x: auto; }
 .greeting-name { width: 5ch; max-width: 24ch; padding: .04em; border: 0; border-radius: 3px;
   outline: 0; background: color-mix(in srgb, var(--accent) 11%, transparent); color: inherit;
   font: inherit; line-height: inherit; text-decoration: underline dotted color-mix(in srgb, var(--accent) 65%, transparent);
@@ -74,11 +74,11 @@
 .card-turn-back { display: flex; flex-direction: column; max-height: inherit; transform: rotateY(180deg); }
 .card-turn-surface { max-height: inherit; }
 .feature-trigger[data-card-open] { visibility: hidden; }
-.feature:has(> .feature-trigger[data-card-open]) { border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line)); background: transparent; }
+.feature:has(> .feature-trigger[data-card-open]) { border: 1px dashed color-mix(in srgb, var(--accent) 42%, var(--line)); background: transparent; }
 .feature-dialog[data-transition] .card-turn-surface { will-change: transform; }
 .feature-dialog[data-transition] .card-turn-back { pointer-events: none; }
 .feature-dialog::backdrop { background: rgb(22 24 21 / var(--backdrop-alpha, .62)); backdrop-filter: blur(var(--backdrop-blur, 4px)); }
-.feature-dialog-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: auto;
+.feature-dialog-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;
   padding: 1.25rem clamp(1rem, 4vw, 2rem) 1.5rem; }
 .feature-dialog-content, .feature-dialog pre { scrollbar-width: none; }
 .feature-dialog-content::-webkit-scrollbar, .feature-dialog pre::-webkit-scrollbar { width: 0; height: 0; }
@@ -93,7 +93,7 @@
 .feature-close:focus-visible { outline-offset: -4px; }
 .feature-dialog-description { color: var(--muted); margin: 0 0 1.25rem; }
 .feature-dialog .prose > kalm-code-block, .feature-dialog .prose > kalm-code-tabs,
-.feature-dialog .prose > kalm-code-compare { margin: 1rem 0 .75rem; }
+.feature-dialog .prose > kalm-code-compare { margin: .75rem 0; }
 .feature-dialog kalm-code-compare kalm-code-block { margin: 0; }
 .learn-more { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px;
   max-width: 100%; font: .8rem/1.6 var(--mono); text-decoration: none; color: var(--accent); }

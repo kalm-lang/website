@@ -7,14 +7,11 @@ html[data-js-enhanced] kalm-code-compare:not([data-home]):has([role='tablist']) 
 .comparison-controls .source-tab-bar { min-width: 0; }
 .comparison-layout { min-height: 44px; margin: .25rem .5rem; padding: .35rem .65rem; font: .72rem/1.5 var(--mono); border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
 .comparison-layout[aria-pressed='true'] { color: var(--accent); background: var(--soft); }
-.comparison-panes { display: grid; grid-template-columns: minmax(0, 1fr); }
+.comparison-panes { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
 .comparison-panes > section { min-width: 0; }
-kalm-code-compare[data-policy*='showcase'] { overflow: visible; border: 0; border-radius: 0; background: transparent; }
-kalm-code-compare[data-policy*='showcase'] .comparison-panes { gap: .75rem; padding: 0; }
-kalm-code-compare[data-policy*='showcase'] .comparison-panes > section { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+kalm-code-compare:not([data-home]) .comparison-panes { padding: .75rem; }
+kalm-code-compare:not([data-home]) .comparison-panes > section { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 kalm-code-compare[data-layout='split']:not([data-stacked='true']) .comparison-panes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-kalm-code-compare[data-layout='split']:not([data-stacked='true']) .comparison-panes > section:nth-child(n+2 of :not([hidden])) { border-left: 1px solid var(--line); }
-kalm-code-compare[data-stacked='true'] .comparison-panes > section:nth-child(n+2 of :not([hidden])) { border-top: 1px solid var(--line); }
 .script-unavailable { display: grid; gap: .25rem; padding: .85rem 1rem; margin: 0; border-top: 1px solid var(--line); border-left: 3px solid var(--accent); color: var(--ink); background: var(--soft); font-size: .85rem; line-height: 1.6; }
 .script-unavailable strong { color: var(--accent); }
 html[data-js-enhanced][data-dialect='kalm'] .dialect-content[data-dialect='kalms'],

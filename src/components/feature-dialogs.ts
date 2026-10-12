@@ -67,7 +67,7 @@ export function enhanceFeatureDialogs() {
         delete dialog.dataset.transition;
         gsap.set(dialog, { clearProps: 'transform,width,height' });
       } });
-      timeline.add(Flip.from(startState, { duration: .55, ease: 'power3.inOut' }), 0)
+      timeline.add(Flip.from(startState, { duration: .55, ease: 'power3.inOut', scale: false }), 0)
         .to(surface, { rotationY: 180, rotationZ: 0, duration: .55, ease: 'power2.inOut' }, 0)
         .to(dialog, { '--backdrop-alpha': .62, '--backdrop-blur': '4px', duration: .55, ease: 'power2.inOut' }, 0)
         .fromTo(surface, { boxShadow: '0 2px 6px rgb(0 0 0 / 4%)' }, { boxShadow: '0 5px 12px rgb(0 0 0 / 7%)', duration: .28, repeat: 1, yoyo: true }, 0);
