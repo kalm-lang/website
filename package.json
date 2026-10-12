@@ -29,7 +29,7 @@
     "markdown-it": "15.0.2",
     "typescript": "7.0.2",
     "vite": "8.3.2",
-    "@kalm-lang/syntax-highlighting": "0.1.0"
+    "@kalm-lang/syntax-highlighting": "1.1.0"
   },
   "kalmVersion": "0.1.0-SNAPSHOT"
 }
