@@ -14,7 +14,7 @@ export function layout(title, body, section = '') {
   <title>${title === 'Kalm' ? 'Kalm' : `${escape(title)} · Kalm`}</title>
   <meta name="description" content="Write Kalm. Explore small syntax examples, read the handbook, or follow a guided learning path.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <script>document.documentElement.dataset.jsEnhanced='';try{const t=localStorage.getItem('kalm-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;document.documentElement.dataset.scrollbarStyle=localStorage.getItem('kalm-scrollbar')==='native'?'native':'custom'}catch{}</script>
+  <script>document.documentElement.dataset.jsEnhanced='';document.documentElement.dataset.dialect='kalm';try{document.documentElement.dataset.dialect=localStorage.getItem('kalm-dialect')==='kalms'?'kalms':'kalm';const t=localStorage.getItem('kalm-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;document.documentElement.dataset.scrollbarStyle=localStorage.getItem('kalm-scrollbar')==='native'?'native':'custom'}catch{}</script>
   <style>:root{background:#f3e8d5;color:#30271f;color-scheme:light}:root[data-theme=dark]{background:#191c19;color:#ece5d7;color-scheme:dark}@media(prefers-color-scheme:dark){:root:not([data-theme=light]):not([data-theme=dark]){background:#191c19;color:#ece5d7;color-scheme:dark}}</style>
   <link rel="stylesheet" href="/src/styles/global.css">
   <script type="module" src="/src/main.ts"></script>
@@ -24,6 +24,7 @@ export function layout(title, body, section = '') {
   <header class="site-header">
     <div class="site-header-inner">
     <a class="brand" href="/" aria-label="Kalm home">kalm</a>
+    <kalm-dialect-toggle><div class="dialect-slider" role="group" aria-label="Kalm dialect"><span class="dialect-slider-indicator" aria-hidden="true"></span><button type="button" data-dialect-choice="kalm" aria-pressed="true">Kalm</button><button type="button" data-dialect-choice="kalms" aria-pressed="false">Kalm Script</button></div></kalm-dialect-toggle>
     ${section ? `<button class="topic-trigger" type="button" aria-label="Browse ${section} topics" title="Browse ${section} topics" aria-expanded="false" aria-controls="section-navigation">${icon({ docs: 'book-open', examples: 'code-xml', learn: 'route' }[section])}</button>` : ''}
     <kalm-site-nav><button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation">${icon('menu')}<span>Menu</span></button>${mainNavigation(section)}</kalm-site-nav>
     <kalm-theme-toggle><button class="theme-trigger" type="button" aria-label="Color theme: system"

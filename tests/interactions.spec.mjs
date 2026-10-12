@@ -90,12 +90,12 @@ test('mobile navigation and code tabs work with the keyboard', async ({ page }) 
   await page.keyboard.press('Escape');
   await expect(page.locator('#site-navigation')).toBeHidden();
   await page.goto('/examples/layout/');
-  const tabs = page.getByRole('tab');
+  const tabs = page.locator('kalm-code-tabs > .source-tab-bar > [role="tab"]');
   await expect(tabs).toHaveCount(2);
   await tabs.first().focus();
   await page.keyboard.press('ArrowRight');
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toHaveCount(1);
+  await expect(page.locator('kalm-code-tabs > section:visible')).toHaveCount(1);
   await page.keyboard.press('Home');
   await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
   await expect(tabs.first()).toBeFocused();
@@ -110,8 +110,8 @@ test('static content and disclosures work without JavaScript', async ({ browser 
   await page.locator('.feature-trigger').first().click();
   await expect(page).toHaveURL(/\/docs\/language\/layout\//);
   await page.goto('http://127.0.0.1:4173/examples/java-to-kalm/');
-  await expect(page.locator('kalm-code-tabs pre')).toHaveCount(2);
-  await expect(page.locator('kalm-code-tabs pre').nth(1)).toBeVisible();
+  await expect(page.locator('kalm-code-tabs > section')).toHaveCount(2);
+  await expect(page.locator('kalm-code-tabs > section').nth(1)).toBeVisible();
   await context.close();
 });
 

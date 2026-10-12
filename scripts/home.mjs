@@ -3,24 +3,28 @@ import { escape } from './code.mjs';
 import { markdown } from './render.mjs';
 import { icon } from '../shared/icons.mjs';
 
+function dialectText(kalm, kalms) {
+  return kalms ? `<span class="dialect-content" data-dialect="kalm">${escape(kalm)}</span><span class="dialect-content" data-dialect="kalms">${escape(kalms)}</span>` : escape(kalm);
+}
+
 function noteCard(note, index) {
   const dialogId = `note-${index}-dialog`;
   return `<article class="feature">
     <a class="feature-trigger" href="${escape(note.doc)}" aria-haspopup="dialog" aria-controls="${dialogId}">
       <span class="feature-meta"><span class="feature-symbol">${icon(note.icon)}</span><span class="feature-number">${String(index + 1).padStart(2, '0')}</span></span>
-      <span class="feature-title">${escape(note.title)}</span>
-      <span class="feature-description">${escape(note.description)}</span>
+      <span class="feature-title">${dialectText(note.title, note.scriptTitle)}</span>
+      <span class="feature-description">${dialectText(note.description, note.scriptDescription)}</span>
     </a>
     <dialog class="feature-dialog" id="${dialogId}" aria-labelledby="${dialogId}-title">
       <div class="feature-dialog-header">
         <div class="feature-dialog-heading">
           <span class="feature-symbol">${icon(note.icon)}</span>
-          <span class="feature-dialog-title" id="${dialogId}-title">${escape(note.title)}</span>
+          <span class="feature-dialog-title" id="${dialogId}-title">${dialectText(note.title, note.scriptTitle)}</span>
         </div>
         <button class="feature-close" type="button" aria-label="Close ${escape(note.title)} example">${icon('x')}</button>
       </div>
       <div class="feature-dialog-content">
-      <p class="feature-dialog-description">${escape(note.description)}</p>
+      <p class="feature-dialog-description">${dialectText(note.description, note.scriptDescription)}</p>
       <div class="prose">${markdown(note.content, note.source, `note-${index}`)}</div>
       <a class="learn-more" href="${escape(note.doc)}">Read the full guide ${icon('arrow-up-right')}</a>
       </div>
@@ -29,9 +33,9 @@ function noteCard(note, index) {
 }
 export function home() {
   const greeting = readDocument(`${contentRoot}/home/greeting.md`);
-  const greetingSource = greeting.content.replace('"Mira"', '"EditableName"');
+  const greetingSource = greeting.content.replaceAll('"Mira"', '"EditableName"');
   const greetingCode = markdown(greetingSource, greeting.source, 'greeting')
-    .replace('EditableName', '<input class="greeting-name" data-greeting-name value="Mira" maxlength="24" autocomplete="off" spellcheck="false" aria-label="Greeting name">');
+    .replaceAll('EditableName', '<span data-greeting-slot>Mira</span>');
   const notes = contentFiles('home/notes').map(readDocument).sort((a, b) => a.order - b.order);
   return `<main id="main" tabindex="0" class="home">
     <section class="hero">
@@ -61,7 +65,7 @@ export function home() {
     <section class="start-box" aria-labelledby="learn-kalm">
       <div class="section-heading"><h2 id="learn-kalm">Learn Kalm</h2></div>
       <div class="start-content">
-        <p>Start with a word counter. Add file input, handle errors, and finish with tests. Eight small steps, one useful program.</p>
+        <p>${dialectText('Start with a word counter. Add file input, handle errors, and finish with tests. Eight small steps, one useful program.', 'Start with a word counter in a single script. Add file input and handle errors, then explore project mode for reusable APIs and native tests.')}</p>
         <a class="button" href="/learn/">Follow the learning path ${icon('arrow-right')}</a>
       </div>
     </section>

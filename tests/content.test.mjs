@@ -48,3 +48,18 @@ test('heading anchors stay unique and authored HTML remains escaped', () => {
   assert.match(html, /id="values-1"/);
   assert.doesNotMatch(html, /<script>/);
 });
+
+test('comparisons require real counterparts and render unique accessible panels', () => {
+  const group = '::::compare\n```kalm App.kalm\npub fun main() -> Unit: sayLine("Hello")\n```\n```kalms App.kalms\nsayLine("Hello")\n```\n```java App.java\nclass App {}\n```\n::::\n';
+  const html = markdown(group.repeat(2), 'content/examples/sample.md');
+  assert.match(html, /kalm-code-compare/);
+  assert.match(html, /article-compare-0-java/);
+  assert.match(html, /article-compare-1-java/);
+  assert.throws(() => markdown(group.replace(/```java[\s\S]*?```\n/, ''), 'sample.md'), /needs Kalm, Java/);
+  assert.throws(() => markdown(group.replace(/```kalms[\s\S]*?```\n/, ''), 'sample.md'), /scriptUnavailable/);
+  assert.match(markdown(group, 'content/home/sample.md'), /data-home/);
+  assert.doesNotMatch(markdown(group, 'content/home/sample.md'), /data-language="java"/);
+  assert.match(markdown(`:::::tabs\n${group}${group}\n:::::\n`, 'sample.md'), /kalm-code-tabs/);
+  assert.throws(() => validateContent(sample('```kalm\nline\n```')), /comparison group/);
+  assert.match(markdown('::::dialect kalms\nVisible **script** instructions.\n::::', 'sample.md'), /Visible <strong>script<\/strong>/);
+});

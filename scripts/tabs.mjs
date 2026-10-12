@@ -1,20 +1,53 @@
-// A tab group contains two or three fenced blocks; fence labels become tab names.
+import container from 'markdown-it-container';
+
+// Library-backed containers keep nested groups and fenced content intact.
 export function tabsPlugin(md) {
-  md.block.ruler.before('fence', 'code_tabs', (state, start, end, silent) => {
-    const line = state.src.slice(state.bMarks[start] + state.tShift[start], state.eMarks[start]);
-    if (line.trim() !== ':::tabs') return false;
-    if (silent) return true;
-    let close = start + 1;
-    while (close < end && state.src.slice(state.bMarks[close], state.eMarks[close]).trim() !== ':::') close++;
-    if (close === end) throw new Error('Unclosed :::tabs group');
-    const body = state.src.slice(state.bMarks[start + 1], state.bMarks[close]);
-    const children = md.parse(body, state.env);
-    if (children.length < 2 || children.length > 3 || children.some(token => token.type !== 'fence')) {
-      throw new Error(':::tabs needs two or three fenced code blocks');
+  for (const name of ['tabs', 'compare', 'dialect']) md.use(container, name);
+  md.core.ruler.after('inline', 'source_groups', state => {
+    const lines = state.src.split('\n');
+    function collect(tokens) {
+      const result = [];
+      for (let i = 0; i < tokens.length; i++) {
+        const open = tokens[i];
+        const match = /^container_(tabs|compare|dialect)_open$/.exec(open.type);
+        if (!match) { result.push(open); continue; }
+        const name = match[1];
+        let depth = 1, end = i + 1;
+        for (; end < tokens.length; end++) {
+          if (tokens[end].type === open.type) depth++;
+          if (tokens[end].type === 'container_' + name + '_close') depth--;
+          if (!depth) break;
+        }
+        const closing = (lines[open.map[1]] ?? '').trim();
+        if (end === tokens.length || !/^:+$/.test(closing) || closing.length < open.markup.length) throw new Error('Unclosed :::' + name + ' group');
+        const children = collect(tokens.slice(i + 1, end));
+        open.type = {tabs: 'code_tabs', compare: 'code_compare', dialect: 'code_dialect'}[name];
+        open.nesting = 0;
+        open.children = children;
+        const params = open.info.trim().slice(name.length).trim();
+        open.meta = name === 'compare' ? (params ? JSON.parse(params) : {}) : {dialect: params};
+        if (name === 'tabs' && (children.length < 2 || children.length > 3 || children.some(t => !['fence', 'code_compare'].includes(t.type)))) throw new Error(':::tabs needs two or three fenced code blocks or comparisons');
+        if (name === 'compare') {
+          const languages = children.map(t => t.info?.trim().split(/\s+/)[0]);
+          if (children.some(t => t.type !== 'fence') || new Set(languages).size !== languages.length || !languages.includes('kalm') || !languages.includes('java') || languages.some(l => !['kalm','kalms','java'].includes(l)) || (languages.includes('kalms') === Boolean(open.meta.scriptUnavailable))) throw new Error(':::compare needs Kalm, Java, and either Kalm Script or scriptUnavailable');
+          if (open.meta.scriptUnavailable && (typeof open.meta.scriptUnavailable !== 'string' || !open.meta.scriptUnavailable.trim())) throw new Error('scriptUnavailable must explain the limitation');
+          if (open.meta.primary && !['kalm', 'java'].includes(open.meta.primary)) throw new Error('primary must be kalm or java');
+        }
+        if (name === 'dialect' && !['kalm','kalms'].includes(params)) throw new Error(':::dialect needs kalm or kalms');
+        result.push(open);
+        i = end;
+      }
+      return result;
     }
-    const token = state.push('code_tabs', '', 0);
-    token.children = children;
-    state.line = close + 1;
-    return true;
+    state.tokens = collect(state.tokens);
+  });
+}
+
+export function fences(tokens, dialect = 'kalm', comparisons = 'primary') {
+  return tokens.flatMap(token => {
+    if (token.type === 'fence') return [token];
+    if (token.type === 'code_dialect' && token.meta.dialect !== dialect) return [];
+    if (token.type === 'code_compare') return comparisons === 'all' ? token.children : token.children.filter(t => t.info.trim().split(/\s+/)[0] === (comparisons === 'primary' && dialect === 'kalm' ? token.meta.primary ?? dialect : dialect));
+    return token.children && token.type !== 'inline' ? fences(token.children, dialect, comparisons) : [];
   });
 }

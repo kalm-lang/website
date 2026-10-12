@@ -21,7 +21,7 @@ export class CodeTabs extends LitElement {
       void panel.offsetWidth;
       panel.classList.add('panel-entering');
     }
-    if (focus) void this.updateComplete.then(() => this.querySelectorAll<HTMLButtonElement>('[role="tab"]')[index]?.focus());
+    if (focus) void this.updateComplete.then(() => this.querySelectorAll<HTMLButtonElement>(':scope > .source-tab-bar > [role="tab"]')[index]?.focus());
   }
   private key(event: KeyboardEvent, index: number) {
     const count = this.panels.length;

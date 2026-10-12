@@ -1,5 +1,31 @@
 kalm-code-block { display: block; min-width: 0; overflow: hidden; margin: 1.5rem 0;
   border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+kalm-code-compare { display: block; min-width: 0; margin: 1.5rem 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+kalm-code-compare kalm-code-block { margin: 0; border: 0; border-radius: 0; }
+.comparison-controls { display: none; align-items: center; flex-wrap: wrap; justify-content: space-between; background: var(--surface); }
+html[data-js-enhanced] kalm-code-compare:not([data-home]) > .comparison-controls { display: flex; }
+.comparison-controls .source-tab-bar { min-width: 0; }
+.comparison-layout { min-height: 44px; margin: .25rem .5rem; padding: .35rem .65rem; font: .72rem/1.5 var(--mono); border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+.comparison-layout[aria-pressed='true'] { color: var(--accent); background: var(--soft); }
+.comparison-panes { display: grid; grid-template-columns: minmax(0, 1fr); }
+.comparison-panes > section { min-width: 0; }
+html[data-js-enhanced] kalm-code-compare:not([data-layout]) .comparison-panes > :not([data-language='kalm']) { display: none; }
+html[data-js-enhanced][data-dialect='kalms'] kalm-code-compare:not([data-layout]):has([data-language='kalms']) [data-language='kalm'] { display: none; }
+html[data-js-enhanced][data-dialect='kalms'] kalm-code-compare:not([data-layout]) [data-language='kalms'] { display: block; }
+kalm-code-compare[data-layout='split'] .comparison-panes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+kalm-code-compare[data-layout='split'] [data-language='java'] { border-left: 1px solid var(--line); }
+.script-unavailable { padding: .75rem 1rem; margin: 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+html[data-js-enhanced][data-dialect='kalm'] .dialect-content[data-dialect='kalms'],
+html[data-js-enhanced][data-dialect='kalms'] .dialect-content[data-dialect='kalm'],
+html:not([data-js-enhanced]) .dialect-content[data-dialect='kalms'] { display: none; }
+html[data-js-enhanced] kalm-code-compare[data-home] [data-language='kalms'],
+html[data-js-enhanced][data-dialect='kalms'] kalm-code-compare[data-home]:has([data-language='kalms']) [data-language='kalm'] { display: none; }
+html[data-js-enhanced][data-dialect='kalms'] kalm-code-compare[data-home] [data-language='kalms'] { display: block; }
+html:not([data-js-enhanced]) kalm-code-compare[data-home] [data-language='kalms'] { display: none; }
+@media (max-width: 700px) {
+  kalm-code-compare[data-layout='split'] .comparison-panes { grid-template-columns: minmax(0, 1fr); }
+  kalm-code-compare[data-layout='split'] [data-language='java'] { border-left: 0; border-top: 1px solid var(--line); }
+}
 .code-header { display: flex; align-items: center; gap: .75rem; min-height: 2.75rem;
   padding: 0 .85rem; border-bottom: 1px solid var(--line); background: var(--soft);
   color: var(--muted); font: .72rem/1.5 var(--mono); }

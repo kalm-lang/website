@@ -18,12 +18,26 @@ export function markdown(source, sourcePath, namespace = 'article') {
   md.renderer.rules.code_tabs = (tokens, i) => {
     const id = `${namespace}-tabs-${group++}`;
     return `<kalm-code-tabs>${tokens[i].children.map((token, index) => {
-      const [language, ...label] = token.info.trim().split(/\s+/);
+      const primary = token.type === 'code_compare' ? token.children[0] : token;
+      const [language, ...label] = primary.info.trim().split(/\s+/);
       const caption = label.join(' ');
       const filename = /\.[a-z0-9]+$/i.test(caption) ? caption : '';
-      return `<section id="${id}-${index}" data-label="${escape(caption || language)}">${code(token.content, language, filename)}</section>`;
+      const body = token.type === 'code_compare' ? md.renderer.render([token], md.options, {}) : code(token.content, language, filename);
+      return `<section id="${id}-${index}" data-label="${escape(caption || language)}">${body}</section>`;
     }).join('')}</kalm-code-tabs>`;
   };
+  md.renderer.rules.code_compare = (tokens, i) => {
+    const token = tokens[i];
+    const id = `${namespace}-compare-${group++}`;
+    const home = sourcePath.startsWith('content/home/');
+    const explanation = token.meta.scriptUnavailable ?? '';
+    return `<kalm-code-compare id="${id}"${home ? ' data-home' : ''} data-script-unavailable="${escape(explanation)}">
+      <div class="comparison-controls"></div><div class="comparison-panes">${token.children.filter(t => !home || !t.info.startsWith('java')).map(t => {
+        const [language, ...label] = t.info.trim().split(/\s+/);
+        return `<section id="${id}-${language}" data-language="${language}" aria-label="${language === 'kalms' ? 'Kalm Script' : language === 'java' ? 'Java' : 'Kalm'}">${code(t.content, language, label.join(' '))}</section>`;
+      }).join('')}</div>${explanation ? `<p class="script-unavailable" hidden>${escape(explanation)} The Kalm project example is shown.</p>` : ''}</kalm-code-compare>`;
+  };
+  md.renderer.rules.code_dialect = (tokens, i) => `<div class="dialect-content" data-dialect="${tokens[i].meta.dialect}">${md.renderer.render(tokens[i].children, md.options, {})}</div>`;
   md.renderer.rules.heading_open = (tokens, i) => {
     const base = tokens[i + 1].content.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'section';
     const count = slugs.get(base) ?? 0;

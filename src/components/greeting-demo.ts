@@ -21,9 +21,36 @@ export class GreetingDemo extends HTMLElement {
   };
 
   private readonly onFocus = () => this.markTouched();
+  private greetingSlot() {
+    const dialect = document.documentElement.dataset.dialect === 'kalms' ? 'kalms' : 'kalm';
+    return this.querySelector<HTMLElement>(`[data-language="${dialect}"] [data-greeting-slot]`) ?? this.querySelector<HTMLElement>('[data-greeting-slot]');
+  }
+  private readonly onDialect = () => {
+    if (this.input?.closest<HTMLElement>('[data-language]')?.dataset.language === document.documentElement.dataset.dialect) return;
+    const slot = this.greetingSlot();
+    if (!slot || !this.input) return;
+    const placeholder = document.createElement('span');
+    placeholder.dataset.greetingSlot = '';
+    placeholder.textContent = this.input.value;
+    this.input.replaceWith(placeholder);
+    slot.replaceWith(this.input);
+  };
 
   connectedCallback() {
     this.input = this.querySelector<HTMLInputElement>('[data-greeting-name]') ?? undefined;
+    if (!this.input) {
+      const slot = this.greetingSlot();
+      if (slot) {
+        this.input = document.createElement('input');
+        this.input.className = 'greeting-name';
+        this.input.dataset.greetingName = '';
+        this.input.maxLength = 24;
+        this.input.autocomplete = 'off';
+        this.input.spellcheck = false;
+        this.input.setAttribute('aria-label', 'Greeting name');
+        slot.replaceWith(this.input);
+      }
+    }
     this.output = this.querySelector<HTMLElement>('[data-greeting-output]') ?? undefined;
     this.loader = this.querySelector<HTMLElement>('[data-greeting-loading]') ?? undefined;
     this.status = this.querySelector<HTMLElement>('[data-greeting-status]') ?? undefined;
@@ -34,6 +61,7 @@ export class GreetingDemo extends HTMLElement {
     this.resizeInput();
     this.input.addEventListener('input', this.onInput);
     this.input.addEventListener('focus', this.onFocus);
+    window.addEventListener('kalm-dialect-change', this.onDialect);
     this.scheduleGreeting(650);
     this.scheduleNameChange();
   }
@@ -41,6 +69,7 @@ export class GreetingDemo extends HTMLElement {
   disconnectedCallback() {
     this.input?.removeEventListener('input', this.onInput);
     this.input?.removeEventListener('focus', this.onFocus);
+    window.removeEventListener('kalm-dialect-change', this.onDialect);
     this.clearTimers();
     this.generation++;
   }
