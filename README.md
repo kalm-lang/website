@@ -25,8 +25,7 @@ Microsoft Edge when bundled Chromium is unavailable.
 
 ## Production deployment
 
-The **Kalm website** workflow builds and tests this repository on branch pushes,
-pull requests, and manual runs. Push a `website-<SemVer>` tag (for example,
+The **Kalm website** workflow runs FTP safeguard checks on branch pushes and pull requests. Full site gates run on manual dispatch or deployment tags. Push a `website-<SemVer>` tag (for example,
 `website-1.2.3` or `website-1.2.3-rc.1+build.7`) to deploy that tag's site.
 Malformed `website-*` tags fail before dependency installation. Website tags deploy only after the website gates pass. Type, content, build/link, browser, or deployment
 errors stop the release; the fiddle is not built or deployed.
@@ -149,3 +148,5 @@ KALM_TEST_SERVER=dev npm test -- tests/first-paint.spec.mjs
 ```
 
 Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/blob/main/docs/bootstrap.md) before installing packages. The initial package versions must be published first. For unpublished local changes, use the [optional workspace](https://github.com/kalm-lang/tools/blob/main/docs/workspace.md), which installs tarballs without changing the dependency manifest.
+
+Code rendering uses `@kalm-lang/syntax-highlighting@0.1.0`, independently of documentation assets. Configure `KALM_PACKAGES_READ_TOKEN` to read this package and the documentation/specification packages. The optional tools workspace installs local tarballs before registry bootstrap. The new shared API also works in browsers for future fiddle development; this extraction adds no fiddle UI.
