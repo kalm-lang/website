@@ -29,7 +29,9 @@ export function markdown(source, sourcePath, namespace = 'article') {
   md.renderer.rules.code_compare = (tokens, i) => {
     const token = tokens[i];
     const id = `${namespace}-compare-${group++}`;
-    const home = sourcePath.startsWith('content/home/');
+    // Only the editable hero greeting reserves every variant to keep the output
+    // stationary. Dialog examples on the homepage use their normal tab panels.
+    const home = sourcePath === 'content/home/greeting.md';
     const explanation = (token.meta.scriptUnavailable ?? '').trim();
     const policy = escape(JSON.stringify(token.meta));
     const seen = new Set();

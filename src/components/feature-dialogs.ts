@@ -55,6 +55,7 @@ export function enhanceFeatureDialogs() {
       dialog.querySelector<HTMLElement>('.feature-close')?.focus({ preventScroll: true });
       if (reduced.matches) { gsap.set(surface, { rotationY: 180 }); return; }
       dialog.dataset.transition = 'opening';
+      gsap.set(dialog, { '--backdrop-alpha': 0, '--backdrop-blur': '0px' });
       // Flip owns the outer layout transform; the inner surface owns the turn.
       const layoutState = Flip.getState(dialog);
       const target = Flip.fit(dialog, trigger, { getVars: true })!;
@@ -68,7 +69,8 @@ export function enhanceFeatureDialogs() {
       } });
       timeline.add(Flip.from(startState, { duration: .55, ease: 'power3.inOut' }), 0)
         .to(surface, { rotationY: 180, rotationZ: 0, duration: .55, ease: 'power2.inOut' }, 0)
-        .fromTo(surface, { boxShadow: '0 3px 9px rgb(0 0 0 / 7%)' }, { boxShadow: '0 8px 20px rgb(0 0 0 / 10%)', duration: .28, repeat: 1, yoyo: true }, 0);
+        .to(dialog, { '--backdrop-alpha': .62, '--backdrop-blur': '4px', duration: .55, ease: 'power2.inOut' }, 0)
+        .fromTo(surface, { boxShadow: '0 2px 6px rgb(0 0 0 / 4%)' }, { boxShadow: '0 5px 12px rgb(0 0 0 / 7%)', duration: .28, repeat: 1, yoyo: true }, 0);
     };
     trigger.addEventListener('click', open);
     dialog.querySelector('.feature-close')?.addEventListener('click', close);
@@ -83,7 +85,7 @@ export function enhanceFeatureDialogs() {
       closing = false;
       delete dialog.dataset.transition;
       delete trigger.dataset.cardOpen;
-      gsap.set([dialog, surface], { clearProps: 'transform,width,height,boxShadow' });
+      gsap.set([dialog, surface], { clearProps: 'transform,width,height,boxShadow,--backdrop-alpha,--backdrop-blur' });
       if (!document.querySelector('dialog.feature-dialog[open]')) delete root.dataset.dialogOpen;
       trigger.focus({ preventScroll: true });
     });

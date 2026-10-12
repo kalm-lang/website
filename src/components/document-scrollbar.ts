@@ -84,10 +84,10 @@ export function enhanceDocumentScrollbar() {
       };
       if (immediate) { dimensions.height = trackHeight; dimensions.width = trackWidth; render(); }
       else sizeTween = gsap.to(dimensions, {inertia: {
-        height: {velocity:velocityHeight,end:trackHeight,min:Math.min(trackHeight,dimensions.height)-8,max:Math.min(viewportHeight-24,Math.max(trackHeight,dimensions.height)+12)},
-        width: {velocity:velocityWidth,end:trackWidth,min:16,max:26},
-        duration: pending ? .2 : .42,
-      }, onUpdate:render});
+        height: {velocity:velocityHeight,end:trackHeight},
+        width: {velocity:velocityWidth,end:trackWidth},
+        duration: pending ? .24 : .65,
+      }, ease: 'power3.out', onUpdate:render, onComplete:render});
     }
     track.style.top = `${(viewport?.offsetTop ?? 0) + viewportHeight / 2}px`;
     // Anchor the right edge so expansion grows inward without shifting the gutter.
@@ -123,7 +123,7 @@ export function enhanceDocumentScrollbar() {
     delete root.dataset.scrollbarDragging;
     if (track.hasPointerCapture(pointerId)) track.releasePointerCapture(pointerId);
     const bounds = track.getBoundingClientRect();
-    if (outsideWindow || pointerX >= bounds.right - 1) collapse();
+    if (outsideWindow) collapse();
     else if (pointerX < bounds.left - 12 || pointerX > bounds.right + 12 || pointerY < bounds.top - 12 || pointerY > bounds.bottom + 12) beginClose();
     schedule();
   };
@@ -133,7 +133,6 @@ export function enhanceDocumentScrollbar() {
     pointerX = event.clientX; pointerY = event.clientY;
     if (!track.hasAttribute('data-open') || dragging) return;
     const bounds = graceBounds ?? track.getBoundingClientRect();
-    if (event.clientX >= bounds.right - 1) { collapse(); return; }
     const safeSpace = 12;
     const nearTrack = event.clientX >= bounds.left - safeSpace && event.clientX <= bounds.right + safeSpace &&
       event.clientY >= bounds.top - safeSpace && event.clientY <= bounds.bottom + safeSpace;

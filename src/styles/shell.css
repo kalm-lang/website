@@ -18,21 +18,34 @@ kalm-theme-toggle { position: relative; display: block; flex: 0 0 44px; width: 4
   .site-header-inner { min-height: 4.5rem; gap: .5rem; flex-wrap: wrap; }
   .brand { margin-right: auto; }
   kalm-dialect-toggle { order: 0; }
-  .preference-summary, .preferences-trigger .icon-chevron-down { display: none; }
   kalm-site-nav { order: 3; margin-left: 0; }
   kalm-theme-toggle { order: 1; }
   .site-footer { margin-top: 3rem; padding-inline: 1rem; font-size: .72rem; }
 }
 
-.preferences-trigger { display: flex; align-items: center; gap: .5rem; min-height: 44px; padding: .5rem .65rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font: .75rem/1.5 var(--mono); }
-.preferences-trigger .icon { width: 1.05rem; height: 1.05rem; }
-.preferences-trigger[aria-expanded=true] { color: var(--accent); background: var(--soft); }
-.preferences-popover { position: fixed; inset: auto; margin: 0; width: min(21rem, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; border: 1px solid var(--line); border-radius: 12px; padding: 1rem; color: var(--ink); background: var(--surface); box-shadow: 0 8px 24px var(--shadow); }
-.preferences-popover h2 { font: 600 .95rem/1.5 var(--sans); margin: 0 0 .75rem; }
-.preferences-popover label { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-block: .5rem; font-size: .85rem; }
-.preferences-popover select { min-width: 10rem; min-height: 40px; border: 1px solid var(--line); border-radius: 6px; padding: .4rem; background: var(--paper); color: var(--ink); font: inherit; }
-.preferences-popover p { color: var(--muted); font-size: .75rem; margin: .75rem 0; }
-.preferences-popover details { border-top: 1px solid var(--line); padding-top: .75rem; }
-.preferences-popover summary { cursor: pointer; font-size: .85rem; min-height: 32px; }
-
-@media (max-width: 480px) { .preferences-popover label { display: grid; grid-template-columns: minmax(0, 1fr); justify-content: stretch; gap: .3rem; } .preferences-popover select { width: 100%; min-width: 0; } }
+.preferences-trigger { flex: 0 0 44px; width: 44px; }
+.preferences-popover { box-sizing: border-box; position: fixed; inset: auto; margin: 0; width: min(20rem, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: .75rem; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--surface); box-shadow: 0 12px 30px var(--shadow); opacity: 0; transform: translateY(-.35rem) scale(.99); transform-origin: top right; visibility: hidden; pointer-events: none; transition: opacity .16s ease, transform .19s cubic-bezier(.22,.75,.25,1), display .19s allow-discrete, overlay .19s allow-discrete, visibility 0s linear .19s; }
+.preferences-popover:popover-open { display: grid; gap: .55rem; visibility: visible; }
+.preferences-popover:popover-open:not([data-positioned]) { visibility: hidden; }
+.preferences-popover.open { opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto; transition-delay: 0s; }
+@starting-style { .preferences-popover:popover-open { opacity: 0; transform: translateY(-.35rem) scale(.99); } }
+.preferences-popover h2 { margin: 0 0 .1rem; font: 600 .9rem/1.5 var(--sans); }
+.preference-setting { min-width: 0; margin: 0; padding: 0; border: 0; }
+.preference-setting legend { margin-bottom: .35rem; color: var(--muted); font: .72rem/1.5 var(--mono); }
+.preference-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem; padding: .2rem; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.preference-options button { min-width: 0; min-height: 38px; padding: .4rem .5rem; border: 0; border-radius: 6px; color: var(--muted); background: transparent; font: .76rem/1.35 var(--mono); cursor: pointer; transition: color .15s, background-color .15s, box-shadow .15s; }
+.preference-options button:hover { color: var(--ink); background: var(--soft); }
+.preference-options button[aria-pressed='true'] { color: var(--accent); background: var(--soft); box-shadow: inset 0 0 0 1px var(--line); }
+.preference-options button:focus-visible, .preference-environment select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.preference-environment { border-top: 1px solid var(--line); padding-top: .35rem; }
+.preference-environment summary { display: flex; align-items: center; justify-content: space-between; min-height: 36px; color: var(--ink); font: .76rem/1.5 var(--mono); cursor: pointer; list-style: none; }
+.preference-environment summary::-webkit-details-marker { display: none; }
+.preference-environment summary .icon { width: .9rem; height: .9rem; color: var(--muted); transition: transform .2s cubic-bezier(.22,.75,.25,1); }
+.preference-environment[open] summary .icon { transform: rotate(180deg); }
+.environment-fields { display: grid; gap: .45rem; padding-top: .35rem; }
+.environment-fields label { display: flex; align-items: center; justify-content: space-between; gap: .75rem; color: var(--muted); font: .72rem/1.5 var(--mono); }
+.environment-fields select { min-width: 8.5rem; min-height: 38px; padding: .4rem .6rem; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: var(--paper); font: .75rem/1.4 var(--mono); }
+html[data-theme='dark'] .environment-fields select { color-scheme: dark; }
+html[data-theme='light'] .environment-fields select { color-scheme: light; }
+@media (prefers-color-scheme: dark) { html:not([data-theme='light']):not([data-theme='dark']) .environment-fields select { color-scheme: dark; } }
+@media (prefers-reduced-motion: reduce) { .preferences-popover, .preference-options button, .preference-environment summary .icon { transition-duration: .01ms; } }
