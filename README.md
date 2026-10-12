@@ -150,3 +150,43 @@ KALM_TEST_SERVER=dev npm test -- tests/first-paint.spec.mjs
 Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/blob/main/docs/bootstrap.md) before installing packages. The initial package versions must be published first. For unpublished local changes, use the [optional workspace](https://github.com/kalm-lang/tools/blob/main/docs/workspace.md), which installs tarballs without changing the dependency manifest.
 
 Code rendering uses `@kalm-lang/syntax-highlighting@0.1.0`, independently of documentation assets. Configure `KALM_PACKAGES_READ_TOKEN` to read this package and the documentation/specification packages. The optional tools workspace installs local tarballs before registry bootstrap. The new shared API also works in browsers for future fiddle development; this extraction adds no fiddle UI.
+
+## Language comparisons
+
+The navbar remembers Kalm or Kalm Script on this device. Outside the homepage,
+programming snippets offer local language tabs and a side-by-side switch (stacked
+on phones). The homepage only switches dialect; it has no Java comparison controls.
+Script lessons use one self-contained file and the existing shell CLI.
+
+Author comparison groups with four-colon containers:
+
+~~~~markdown
+::::compare
+```kalm App.kalm
+pub fun main() -> Unit:
+    sayLine("Hello")
+```
+```kalms App.kalms
+sayLine("Hello")
+```
+```java App.java
+public class App {
+    public static void main(String[] args) { System.out.println("Hello"); }
+}
+```
+::::
+~~~~
+
+When script mode cannot express the example, omit its fence and use
+`::::compare {"scriptUnavailable":"Explain the project-only requirement."}`.
+Existing Java interop source sets declare `"primary":"java"` on their Java caller
+comparison so verification preserves joint compilation. Nest comparisons inside
+five-colon `tabs` containers. Use six-colon `dialect kalm` and `dialect kalms`
+containers for mode-specific prose and commands. Longer delimiters belong outside
+shorter delimiters. Containers are parsed with markdown-it-container.
+
+Animation uses pinned GSAP and Flip; the document scroll surface remains native.
+Reduced motion bypasses animation and retains the scrollbar closing grace period.
+Code verification compiles Java counterparts, runs JUnit Jupiter examples, executes
+script variants, and validates both cumulative Java and Kalm lessons. Set
+`KALM_JAVA_COMMAND` and `KALM_JAVAC_COMMAND` to the JDK 25+ executables when needed.

@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "test": "playwright test",
     "test:content": "node --test --experimental-test-isolation=none tests/content.test.mjs",
-    "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs"
+    "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs && node scripts/verify-comparisons.mjs"
   },
   "dependencies": {
     "@kalm-lang/documentation": "0.1.0",

@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import MarkdownIt from 'markdown-it';
 import { routes } from './routes.mjs';
 import { repository, contentRoot, readDocument, contentFiles } from './content.mjs';
-import { tabsPlugin } from './tabs.mjs';
+import { tabsPlugin, fences } from './tabs.mjs';
 import { compilerCommand } from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
@@ -20,7 +20,7 @@ let compiled = 0;
 const failures = [];
 try {
   for (const [index, route] of examples.entries()) {
-    const tokens = md.parse(route.content, {}).flatMap(token => token.children ?? [token]).filter(token => token.type === 'fence');
+    const tokens = fences(md.parse(route.content, {}));
     const codeTokens = tokens.filter(token => /^(kalm|java)(?:\s|$)/.test(token.info));
     if (!codeTokens.length) continue;
     const groups = route.verify === 'alternatives' ? codeTokens.map(token => [token]) : [codeTokens];

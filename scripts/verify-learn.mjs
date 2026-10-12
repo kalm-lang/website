@@ -6,11 +6,12 @@ import MarkdownIt from 'markdown-it';
 import { routes } from './routes.mjs';
 import { repository } from './content.mjs';
 import { compilerCommand } from './compiler-command.mjs';
+import { tabsPlugin, fences } from './tabs.mjs';
 
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-learn-'));
 const main = resolve(root, 'src/main/kalm/stats');
 const tests = resolve(root, 'src/test/kalm/stats');
-const md = new MarkdownIt();
+const md = new MarkdownIt().use(tabsPlugin);
 const java = process.env.KALM_JAVA_COMMAND ?? 'java';
 function run(command, args, expectedStatus = 0, expectedText = '') {
   const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 30_000 });
@@ -27,7 +28,7 @@ try {
   writeFileSync(resolve(root, 'notes.txt'), 'a quiet\nmorning\n');
   const outputs = ['Text stats', '3 words: a quiet morning', 'Will read notes.txt', '3 words', '3 words', '2 lines / 3 words', '2 lines / 3 words', '2 lines / 3 words'];
   for (const route of routes.filter(route => route.lesson)) {
-    for (const token of md.parse(route.content, {}).filter(token => token.type === 'fence')) {
+    for (const token of fences(md.parse(route.content, {}))) {
       const [language, filename] = token.info.split(/\s+/);
       if (language !== 'kalm') continue;
       if (!/^[A-Za-z]+\.kalm$/.test(filename ?? '')) throw new Error(`Lesson snippet needs a filename: ${route.path}`);
@@ -36,6 +37,16 @@ try {
     run(compilerCommand.command, [...compilerCommand.args, 'compile']);
     execute(route.lesson >= 7 || route.lesson === 3 ? ['notes.txt'] : [], 0, outputs[route.lesson - 1]);
     console.log(`Verified lesson ${route.lesson}`);
+    if (route.lesson < 8) {
+      const script = fences(md.parse(route.content, {}), 'kalms').find(token => token.info.startsWith('kalms '));
+      if (!script) throw new Error(`Missing self-contained script lesson: ${route.path}`);
+      writeFileSync(resolve(root, 'App.kalms'), script.content);
+      run(compilerCommand.command, [...compilerCommand.args, 'shell', '-f', resolve(root, 'App.kalms')], 0, outputs[route.lesson - 1]);
+      if (route.lesson === 7) {
+        writeFileSync(resolve(root, 'App.kalms'), script.content.replace('arrayOf("notes.txt")', 'arrayOf("missing.txt")'));
+        run(compilerCommand.command, [...compilerCommand.args, 'shell', '-f', resolve(root, 'App.kalms')], 1, 'Could not read file');
+      }
+    }
   }
   run(compilerCommand.command, [...compilerCommand.args, 'test'], 0, '4 passed');
   writeFileSync(resolve(root, 'empty.txt'), '');
