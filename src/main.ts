@@ -1,3 +1,4 @@
+import { enhanceHomeNavigation } from './components/home-navigation';
 import './components/theme-toggle';
 import './components/site-nav';
 import './components/code-block';
@@ -14,5 +15,6 @@ enhanceFeatureDialogs();
 enhanceSectionNavigation();
 enhanceDocumentScrollbar();
 enhanceMainFocus();
+enhanceHomeNavigation();
 
 // Content remains ordinary HTML; browser code only adds focused interactions.

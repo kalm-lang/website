@@ -68,7 +68,7 @@ export function enhanceFeatureDialogs() {
       } });
       timeline.add(Flip.from(startState, { duration: .55, ease: 'power3.inOut' }), 0)
         .to(surface, { rotationY: 180, rotationZ: 0, duration: .55, ease: 'power2.inOut' }, 0)
-        .fromTo(surface, { boxShadow: '0 4px 12px rgb(0 0 0 / 12%)' }, { boxShadow: '0 24px 60px rgb(0 0 0 / 22%)', duration: .28, repeat: 1, yoyo: true }, 0);
+        .fromTo(surface, { boxShadow: '0 3px 9px rgb(0 0 0 / 7%)' }, { boxShadow: '0 8px 20px rgb(0 0 0 / 10%)', duration: .28, repeat: 1, yoyo: true }, 0);
     };
     trigger.addEventListener('click', open);
     dialog.querySelector('.feature-close')?.addEventListener('click', close);

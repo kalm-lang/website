@@ -1,4 +1,6 @@
 import { gsap } from 'gsap';
+import { InertiaPlugin } from 'gsap/InertiaPlugin';
+gsap.registerPlugin(InertiaPlugin);
 
 // Keep the document as the scroll surface so wheel, touch, anchors, and keyboard
 // navigation stay native. The overlay only replaces the document's gutter.
@@ -28,10 +30,17 @@ export function enhanceDocumentScrollbar() {
   let sizeTween: gsap.core.Tween | undefined;
   let targetHeight = -1;
   let targetWidth = -1;
+  const dimensions = {height:160,width:18};
+  const velocity = InertiaPlugin.track(dimensions, 'height,width')[0];
+  let outsideWindow = false;
   let pointerX = 0, pointerY = 0;
   let graceBounds: DOMRect | undefined;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const cancelClose = () => { clearTimeout(closeTimer); closeTimer = undefined; delete track.dataset.pendingClose; graceBounds = undefined; };
+  const collapse = () => {
+    if (dragging) return;
+    cancelClose(); delete track.dataset.open; update();
+  };
   const beginClose = () => {
     if (closeTimer || dragging || !track.hasAttribute('data-open')) return;
     graceBounds = track.getBoundingClientRect();
@@ -66,10 +75,19 @@ export function enhanceDocumentScrollbar() {
     if (trackHeight !== targetHeight || trackWidth !== targetWidth) {
       const immediate = targetHeight < 0 || dragging || reduced.matches || track.hasAttribute('data-resizing');
       targetHeight = trackHeight; targetWidth = trackWidth;
+      const velocityHeight = velocity.get('height');
+      const velocityWidth = velocity.get('width');
       sizeTween?.kill();
-      sizeTween = gsap.to(track, { height: trackHeight, width: trackWidth, borderRadius: expanded ? 12 : 9,
-        duration: immediate ? 0 : pending ? .12 : expanded ? .35 : .28,
-        ease: pending ? 'power2.out' : 'power3.out', overwrite: true, onUpdate: measure });
+      const render = () => {
+        track.style.height = dimensions.height+'px'; track.style.width = dimensions.width+'px';
+        track.style.borderRadius = Math.min(12, dimensions.width/2)+'px'; measure();
+      };
+      if (immediate) { dimensions.height = trackHeight; dimensions.width = trackWidth; render(); }
+      else sizeTween = gsap.to(dimensions, {inertia: {
+        height: {velocity:velocityHeight,end:trackHeight,min:Math.min(trackHeight,dimensions.height)-8,max:Math.min(viewportHeight-24,Math.max(trackHeight,dimensions.height)+12)},
+        width: {velocity:velocityWidth,end:trackWidth,min:16,max:26},
+        duration: pending ? .2 : .42,
+      }, onUpdate:render});
     }
     track.style.top = `${(viewport?.offsetTop ?? 0) + viewportHeight / 2}px`;
     // Anchor the right edge so expansion grows inward without shifting the gutter.
@@ -105,15 +123,17 @@ export function enhanceDocumentScrollbar() {
     delete root.dataset.scrollbarDragging;
     if (track.hasPointerCapture(pointerId)) track.releasePointerCapture(pointerId);
     const bounds = track.getBoundingClientRect();
-    if (pointerX < bounds.left - 12 || pointerX > bounds.right + 12 || pointerY < bounds.top - 12 || pointerY > bounds.bottom + 12) beginClose();
+    if (outsideWindow || pointerX >= bounds.right - 1) collapse();
+    else if (pointerX < bounds.left - 12 || pointerX > bounds.right + 12 || pointerY < bounds.top - 12 || pointerY > bounds.bottom + 12) beginClose();
     schedule();
   };
 
-  track.addEventListener('pointerenter', event => { pointerX = event.clientX; pointerY = event.clientY; cancelClose(); track.dataset.open = ''; update(); });
+  track.addEventListener('pointerenter', event => { outsideWindow = false; pointerX = event.clientX; pointerY = event.clientY; cancelClose(); track.dataset.open = ''; update(); });
   document.addEventListener('pointermove', event => {
     pointerX = event.clientX; pointerY = event.clientY;
     if (!track.hasAttribute('data-open') || dragging) return;
     const bounds = graceBounds ?? track.getBoundingClientRect();
+    if (event.clientX >= bounds.right - 1) { collapse(); return; }
     const safeSpace = 12;
     const nearTrack = event.clientX >= bounds.left - safeSpace && event.clientX <= bounds.right + safeSpace &&
       event.clientY >= bounds.top - safeSpace && event.clientY <= bounds.bottom + safeSpace;
@@ -121,6 +141,8 @@ export function enhanceDocumentScrollbar() {
       beginClose();
     } else if (closeTimer) { cancelClose(); update(); }
   }, { passive: true });
+  document.addEventListener('pointerleave', event => { if (!event.relatedTarget) { outsideWindow = true; collapse(); } });
+  window.addEventListener('blur', () => { outsideWindow = true; collapse(); });
   track.addEventListener('pointerdown', event => {
     if (event.button !== 0 || scrollRange <= 8) return;
     event.preventDefault();

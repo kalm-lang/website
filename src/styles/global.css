@@ -43,3 +43,13 @@ html:not([data-js-enhanced]) #main:focus-visible { outline: 2px solid var(--acce
   th, td { padding: .55rem; }
   .prose :not(pre) > code { overflow-wrap: anywhere; }
 }
+
+@view-transition { navigation: auto; }
+:root { view-transition-name: none; }
+#main { view-transition-name: page-content; }
+.site-header { view-transition-name: site-header; }
+::view-transition-old(site-header), ::view-transition-new(site-header) { animation: none; }
+::view-transition-old(page-content) { animation: page-out .16s ease-in both; }
+::view-transition-new(page-content) { animation: page-in .22s ease-out both; }
+@keyframes page-out { to { opacity: 0; transform: translateY(-5px); } }
+@keyframes page-in { from { opacity: 0; transform: translateY(5px); } }

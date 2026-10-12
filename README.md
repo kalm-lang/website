@@ -96,25 +96,12 @@ The footer version comes from the pinned `kalmVersion` in package.json.
 Homepage notes also declare an `icon` from the curated Lucide set in
 `shared/icons.mjs` and a `doc` website URL. Icons and code headers render at build
 time; browser controls enhance that HTML. On mobile, a Topics button in the sticky
-header opens searchable navigation with collapsible subtopics. Native topic
+header opens navigation with collapsible subtopics. Native topic
 disclosures leave navigation available without JavaScript.
 
-Use fenced code with its language and optional filename. Ordinary examples have
-one block. For alternatives or Java counterparts, use two or three tabs:
-
-````markdown
-:::tabs
-```kalm Indentation
-pub fun hello() -> Unit:
-    sayLine("Hello")
-```
-```kalm Braces
-pub fun hello() -> Unit {
-    sayLine("Hello");
-}
-```
-:::
-````
+Use fenced code with its language and optional filename. Programming examples use
+comparison groups described below. File tabs hold cooperating files; syntax and
+language demonstrations use fixed, labeled showcase panes.
 
 Example verification treats tabs as one source set by default. Set
 `"verify": "alternatives"` for independently compiled variants, or
@@ -151,42 +138,67 @@ Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/bl
 
 Code rendering uses `@kalm-lang/syntax-highlighting@0.1.0`, independently of documentation assets. Configure `KALM_PACKAGES_READ_TOKEN` to read this package and the documentation/specification packages. The optional tools workspace installs local tarballs before registry bootstrap. The new shared API also works in browsers for future fiddle development; this extraction adds no fiddle UI.
 
-## Language comparisons
+## Code preferences and authored variants
 
-The navbar remembers Kalm or Kalm Script on this device. Outside the homepage,
-programming snippets offer local language tabs and a side-by-side switch (stacked
-on phones). The homepage only switches dialect; it has no Java comparison controls.
-Script lessons use one self-contained file and the existing shell CLI.
+The navbar's native Code preferences popover uses Floating UI positioning. The
+versioned local record `kalm-code-preferences` stores dialect, block style, OS,
+and shell; the head bootstrap migrates the former dialect record before paint.
+Java choices, file tabs, and comparison layout reset on navigation and pageshow.
+The greeting reserves every variant's height and shares its frame with output.
 
-Author comparison groups with four-colon containers:
+Author variants inside `compare` containers. Fence metadata follows the filename:
 
 ~~~~markdown
-::::compare
-```kalm App.kalm
+::::compare {"presentation":"adaptive"}
+```kalm App.kalm {"style":"indentation"}
 pub fun main() -> Unit:
     sayLine("Hello")
 ```
-```kalms App.kalms
+```kalm App.kalm {"style":"braces"}
+pub fun main() -> Unit {
+    sayLine("Hello")
+}
+```
+```kalms App.kalms {"style":"indentation"}
+sayLine("Hello")
+```
+```kalms App.kalms {"style":"braces"}
 sayLine("Hello")
 ```
 ```java App.java
-public class App {
-    public static void main(String[] args) { System.out.println("Hello"); }
+void main() {
+    System.out.println("Hello");
 }
 ```
 ::::
 ~~~~
 
-When script mode cannot express the example, omit its fence and use
-`::::compare {"scriptUnavailable":"Explain the project-only requirement."}`.
-Existing Java interop source sets declare `"primary":"java"` on their Java caller
-comparison so verification preserves joint compilation. Nest comparisons inside
-five-colon `tabs` containers. Use six-colon `dialect kalm` and `dialect kalms`
-containers for mode-specific prose and commands. Longer delimiters belong outside
-shorter delimiters. Containers are parsed with markdown-it-container.
+Use `presentation: "showcase"` with independent boolean `locks` for dialect,
+style, OS, and shell. A fence's `pane` labels its fixed pane. A style showcase
+locks style and authors each dialect in each pane; a dialect showcase locks
+dialect and authors each style in each pane. Interop showcases retain their
+cooperating Kalm and Java files. They have no language controls.
 
-Animation uses pinned GSAP and Flip; the document scroll surface remains native.
-Reduced motion bypasses animation and retains the scrollbar closing grace period.
-Code verification compiles Java counterparts, runs JUnit Jupiter examples, executes
-script variants, and validates both cumulative Java and Kalm lessons. Set
-`KALM_JAVA_COMMAND` and `KALM_JAVAC_COMMAND` to the JDK 25+ executables when needed.
+Terminal variants declare `os` and `shell`; Bash/zsh, PowerShell, and Batch
+have their own highlighted source. Use `dialect kalm` / `dialect kalms`
+containers for instructions. Nest longer container delimiters outside shorter
+ones. Historical specification excerpts keep their authored presentation.
+
+Omit unavailable scripts and supply a specific `scriptUnavailable` reason.
+The callout is displayed only when that Kalm fallback is actually visible.
+Source variants are authored Markdown, never rewritten by browser regexes.
+Use the existing Kalm formatter and Prettier's Java plugin, with four spaces and
+multiline bodies. Standalone Java 25 programs use compact main methods; packaged
+sources, reusable APIs, and class demonstrations retain explicit classes.
+
+GSAP/Flip animates card turns and code changes; InertiaPlugin preserves velocity
+through interrupted scrollbar changes. Reduced motion preserves the 350 ms
+closing grace period while bypassing movement. Homepage content links use native
+cross-document View Transitions with a GSAP fallback. Sidebar scroll positions
+are stored per section and mobile/desktop surface in session storage.
+
+Code checks compile the displayed sources directly, including both Kalm styles,
+Java compact programs, cooperating source sets, native tests, script variants,
+and cumulative lessons. Set `KALM_JAVA_COMMAND` and `KALM_JAVAC_COMMAND` to
+JDK 25+ executables when needed. Local unpublished documentation is consumed via
+its tarball without changing the pinned package version.

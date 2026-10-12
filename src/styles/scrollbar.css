@@ -45,3 +45,10 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
   html:not([data-scrollbar-style='native']):not([data-scrollbar-unavailable])::-webkit-scrollbar { width: auto; height: auto; }
   .document-scrollbar { display: none !important; }
 }
+
+/* Applied synchronously by the card trigger before its first animation frame. */
+html[data-dialog-open] { scrollbar-width: none !important; }
+html[data-dialog-open]::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+html[data-dialog-open] .document-scrollbar { display: none !important; }
+dialog[data-transition], dialog[data-transition] pre, dialog[data-transition] .feature-dialog-content { scrollbar-width: none !important; }
+dialog[data-transition]::-webkit-scrollbar, dialog[data-transition] ::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
