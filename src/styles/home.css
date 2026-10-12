@@ -54,7 +54,7 @@
 .feature { min-width: 0; overflow: hidden; overflow-wrap: anywhere; border: 1px solid var(--line);
   border-radius: 10px; background: var(--surface); transition: border-color .2s; }
 .feature:hover { border-color: var(--accent); }
-.feature-trigger { display: flex; flex-direction: column; align-items: flex-start; min-height: 12rem; height: 100%;
+.feature-trigger, .card-face-summary { display: flex; flex-direction: column; align-items: flex-start; min-height: 12rem; height: 100%;
   padding: 1.4rem; text-decoration: none; }
 .feature-meta { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .feature-number { font: .75rem/1.5 var(--mono); color: var(--muted); }
@@ -65,7 +65,18 @@
 .feature-dialog { width: min(46rem, calc(100vw - 2rem)); max-width: none; max-height: min(88dvh, 54rem);
   margin: auto; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px;
   color: var(--ink); background: var(--surface); }
-.feature-dialog[open] { display: flex; flex-direction: column; }
+.feature-dialog[open] { display: flex; flex-direction: column; overflow: visible; perspective: 1400px; }
+.feature-dialog[data-card-enhanced] { border: 0; background: transparent; }
+.card-turn-surface { display: grid; min-height: 0; transform-style: preserve-3d; border-radius: inherit; }
+.card-turn-front, .card-turn-back { grid-area: 1 / 1; min-width: 0; min-height: 0; backface-visibility: hidden; border: 1px solid var(--line); border-radius: inherit; background: var(--surface); overflow: hidden; }
+.card-turn-front { display: flex; align-items: center; }
+.card-turn-front > .card-face-summary { width: 100%; }
+.card-turn-back { display: flex; flex-direction: column; max-height: inherit; transform: rotateY(180deg); }
+.card-turn-surface { max-height: inherit; }
+.feature-trigger[data-card-open] { visibility: hidden; }
+.feature:has(> .feature-trigger[data-card-open]) { border-color: transparent; background: transparent; }
+.feature-dialog[data-transition] .card-turn-surface { will-change: transform; }
+.feature-dialog[data-transition] .card-turn-back { pointer-events: none; }
 .feature-dialog::backdrop { background: rgb(22 24 21 / 62%); backdrop-filter: blur(4px); }
 .feature-dialog-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;
   padding: 1.25rem clamp(1rem, 4vw, 2rem) 1.5rem; }
@@ -80,8 +91,6 @@
 .feature-close:focus-visible { outline-offset: -4px; }
 .feature-dialog-description { color: var(--muted); margin: 0 0 1.25rem; }
 .feature-dialog kalm-code-block, .feature-dialog kalm-code-tabs { margin: 1rem 0 .75rem; }
-.feature-dialog[open] { animation: dialog-enter .12s ease both; }
-@keyframes dialog-enter { from { opacity: 0; } to { opacity: 1; } }
 .learn-more { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px;
   max-width: 100%; font: .8rem/1.6 var(--mono); text-decoration: none; color: var(--accent); }
 .start-box { margin-top: 0; }
