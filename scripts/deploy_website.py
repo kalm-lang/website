@@ -13,17 +13,13 @@ MARKER = ".github_deployment_root"
 STAGING = PurePosixPath("/.deployment")
 # SemVer 2.0.0: numeric identifiers cannot have leading zeroes, except metadata.
 NUMBER = r"(?:0|[1-9][0-9]*)"
-PRERELEASE = rf"(?:{NUMBER}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
-TAG = re.compile(
-    rf"v{NUMBER}\.{NUMBER}\.{NUMBER}"
-    rf"(?:-{PRERELEASE}(?:\.{PRERELEASE})*)?"
-    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
-)
+STATUS = r"(?:-[a-z][a-z0-9-]*)?"
+TAG = re.compile(rf"v{NUMBER}\.{NUMBER}\.{NUMBER}{STATUS}")
 
 
 def validate_tag(tag: str) -> None:
     if not TAG.fullmatch(tag):
-        raise ValueError("Expected a v<SemVer> tag, for example v1.2.3")
+        raise ValueError("Expected a vX.Y.Z tag with an optional -status suffix, for example v1.2.3-rc-1")
 
 
 def protected(path: PurePosixPath) -> bool:

@@ -25,9 +25,7 @@ Microsoft Edge when bundled Chromium is unavailable.
 
 ## Production deployment
 
-The **Website checks** workflow runs the full site gates on branch pushes and pull requests, and can also be started manually. The **Release website** workflow runs the same gates for version tags before deploying. Push a `v<SemVer>` tag (for example,
-`v1.2.3` or `v1.2.3-rc.1+build.7`) to deploy that tag's site.
-Malformed version tags fail before dependency installation. Type, content, build/link, browser, or deployment errors stop the release; the fiddle is not built or deployed.
+The **Website checks** workflow runs the full site gates on branch pushes and pull requests, and can also be started manually. The **Release website** workflow runs the same gates for `vX.Y.Z[-status]` tags and for manual releases with `version` and `status` inputs. An empty manual version uses the numeric part of `kalmVersion` in `package.json`; `final` releases omit the status suffix. The release build sets the footer version to the selected release version, deploys it, creates the tag for manual releases, and creates a GitHub Release without assets. Type, content, build/link, browser, or deployment errors stop the release; the fiddle is not built or deployed.
 
 After the build passes, the deployment job uses the `prod` GitHub environment
 and its `DESTINATION_FTP_HOST`, `DESTINATION_FTP_PASSWORD`, `DESTINATION_FTP_PORT`,

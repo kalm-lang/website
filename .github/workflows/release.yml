@@ -2,34 +2,106 @@ name: Release website
 
 on:
   push:
-    tags: ['v*.*.*']
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional X.Y.Z version; empty uses kalmVersion from package.json
+        required: false
+        type: string
+      status:
+        description: Release status
+        required: false
+        type: string
+        default: final
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: website-release
+  cancel-in-progress: false
 
 jobs:
   website:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.release_version }}
+      prerelease: ${{ steps.release.outputs.prerelease }}
     env:
       KALM_PACKAGES_USER: ${{ vars.KALM_PACKAGES_USER || github.actor }}
       KALM_PACKAGES_READ_TOKEN: ${{ secrets.KALM_PACKAGES_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate website release tag
-        env:
-          WEBSITE_TAG: ${{ github.ref_name }}
-        run: python3 scripts/deploy_website.py validate-tag "$WEBSITE_TAG"
-      - name: Check deployment safeguards
-        run: python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Resolve and validate release version
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_STATUS: ${{ inputs.status }}
+          WEBSITE_TAG: ${{ github.ref_name }}
+        run: node scripts/resolve-release-version.mjs >> "$GITHUB_OUTPUT"
+      - name: Require package-read credentials
+        shell: bash
+        run: |
+          if [[ -z "$KALM_PACKAGES_READ_TOKEN" ]]; then
+            echo '::error::Set KALM_PACKAGES_READ_TOKEN before releasing the website.'
+            exit 1
+          fi
+      - name: Reject an existing release or conflicting tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          if release_output=$(gh release view "$RELEASE_TAG" 2>&1); then
+            echo "A GitHub release already exists for $RELEASE_TAG" >&2
+            exit 1
+          else
+            release_status=$?
+            if [[ "$release_output" != *"HTTP 404"* && "$release_output" != *"release not found"* ]]; then
+              printf '%s\n' "$release_output" >&2
+              echo "Could not verify whether GitHub release $RELEASE_TAG exists" >&2
+              exit "$release_status"
+            fi
+          fi
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            if tag_output=$(git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" 2>&1); then
+              tag_sha="${tag_output%%$'\t'*}"
+              if [[ "$tag_sha" != "$GITHUB_SHA" ]]; then
+                echo "Tag $RELEASE_TAG already exists at a different commit" >&2
+                exit 1
+              fi
+            else
+              tag_status=$?
+              if [[ "$tag_status" -ne 2 ]]; then
+                printf '%s\n' "$tag_output" >&2
+                echo "Could not verify whether tag $RELEASE_TAG exists" >&2
+                exit "$tag_status"
+              fi
+            fi
+          fi
+      - name: Check deployment safeguards
+        run: python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
       - name: Install website dependencies
         run: npm install --no-package-lock --no-audit --no-fund --fetch-retries=0
+      - name: Set website version
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
+        run: npm pkg set "kalmVersion=$RELEASE_VERSION"
       - run: npm run check
       - run: npm run test:content
       - uses: actions/setup-java@v4
@@ -70,3 +142,40 @@ jobs:
           DESTINATION_FTP_PORT: ${{ secrets.DESTINATION_FTP_PORT }}
           DESTINATION_FTP_USER: ${{ secrets.DESTINATION_FTP_USER }}
         run: python3 scripts/deploy_website.py deploy dist
+      - name: Create tag for a manually started release
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          RELEASE_TAG: ${{ needs.website.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if tag_output=$(git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" 2>&1); then
+            tag_sha="${tag_output%%$'\t'*}"
+            if [[ "$tag_sha" != "$GITHUB_SHA" ]]; then
+              echo "Tag $RELEASE_TAG already exists at a different commit" >&2
+              exit 1
+            fi
+          else
+            tag_status=$?
+            if [[ "$tag_status" -ne 2 ]]; then
+              printf '%s\n' "$tag_output" >&2
+              echo "Could not verify whether tag $RELEASE_TAG exists" >&2
+              exit "$tag_status"
+            fi
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag "$RELEASE_TAG" "$GITHUB_SHA"
+            git push origin "$RELEASE_TAG"
+          fi
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.website.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.website.outputs.version }}
+          PRERELEASE: ${{ needs.website.outputs.prerelease }}
+        shell: bash
+        run: |
+          flags=(); [[ "$PRERELEASE" != true ]] || flags+=(--prerelease)
+          gh release create "$RELEASE_TAG" --verify-tag "${flags[@]}" \
+            --title "Kalm website $RELEASE_VERSION" \
+            --notes "Deploys the Kalm website for $RELEASE_VERSION."
