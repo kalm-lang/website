@@ -20,7 +20,8 @@ html[data-js-enhanced][data-dialect='kalm'] .dialect-content[data-dialect='kalms
 html[data-js-enhanced][data-dialect='kalms'] .dialect-content[data-dialect='kalm'],
 html:not([data-js-enhanced]) .dialect-content[data-dialect='kalms'] { display: none; }
 /* The greeting uses only the selected source's natural height. */
-kalm-greeting-demo > kalm-code-compare { margin: 0; border: 0; border-radius: 0; }
+kalm-greeting-demo > kalm-code-compare,
+kalm-greeting-demo > kalm-code-block { margin: 0; border: 0; border-radius: 0; }
 .code-header { display: flex; align-items: center; gap: .75rem; min-height: 2.75rem;
   padding: 0 .85rem; border-bottom: 1px solid var(--line); background: var(--soft);
   color: var(--muted); font: .72rem/1.5 var(--mono); }

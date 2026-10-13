@@ -1,6 +1,11 @@
-import { documents, assets } from '@kalm-lang/documentation';
-import { versions, drafts } from '@kalm-lang/specification';
-import { resolve } from 'node:path';
+import * as documentation from '@kalm-lang/documentation';
+import * as specification from '@kalm-lang/specification';
+import {resolve} from 'node:path';
+import {contentCapabilities} from './capabilities.mjs';
+
+const { documents, assets = {} } = documentation;
+const { versions = {}, drafts = {} } = specification;
+export const capabilities = contentCapabilities(documents);
 
 // Logical package paths are stable across installations and support authored relative links.
 export const repository = resolve(import.meta.dirname, '..');

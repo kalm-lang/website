@@ -136,7 +136,21 @@ KALM_TEST_SERVER=dev npm test -- tests/first-paint.spec.mjs
 
 Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/blob/main/docs/bootstrap.md) before installing packages. The initial package versions must be published first. For unpublished local changes, use the [optional workspace](https://github.com/kalm-lang/tools/blob/main/docs/workspace.md), which installs tarballs without changing the dependency manifest.
 
-Code rendering uses `@kalm-lang/syntax-highlighting@0.1.0`, independently of documentation assets. Configure `KALM_PACKAGES_READ_TOKEN` to read this package and the documentation/specification packages. The optional tools workspace installs local tarballs before registry bootstrap. The new shared API also works in browsers for future fiddle development; this extraction adds no fiddle UI.
+Code rendering uses `@kalm-lang/syntax-highlighting`, independently of documentation assets. Configure `KALM_PACKAGES_READ_TOKEN` to read this package and the documentation/specification packages. The optional tools workspace installs local tarballs before registry bootstrap. The shared API also works in browsers for future fiddle development.
+
+Older `@kalm-lang/*` releases are supported through their core package APIs
+(`documents`, specification `versions`, and `createKalmHighlighter`). Package
+versions can differ. Optional documentation assets and specification drafts may
+be absent. Plain fences and file tabs remain valid; comparison groups may omit
+Java or Kalm Script. Java/Kalm tabs and side-by-side comparison appear only when
+the group supplies both languages. Code preferences hide unavailable script,
+block-style, and environment choices based on the installed content. Saved
+preferences fall back to supported choices without losing the stored selection.
+Unsupported highlighting languages render as escaped plain text.
+
+`npm run test:content` includes isolated build and link checks for legacy package
+APIs and content without the newer optional variants. New package APIs or content
+formats should extend these compatibility fixtures when necessary.
 
 ## Code preferences and authored variants
 

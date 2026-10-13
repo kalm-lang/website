@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
+import {readDocument} from '../scripts/content.mjs';
 
 test('appearance popover preserves the header and page position and saves scrollbar preferences', async ({ page }) => {
   const errors = [];
@@ -89,13 +90,15 @@ test('mobile navigation and code tabs work with the keyboard', async ({ page }) 
   await expect(page.locator('#site-navigation')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('#site-navigation')).toBeHidden();
-  await page.goto('/examples/fix/');
-  const tabs = page.locator('kalm-code-compare [role="tab"]');
+  const comparisons = readDocument('content/examples/fix.md').content.includes('compare');
+  await page.goto(comparisons ? '/examples/fix/' : '/examples/java-to-kalm/');
+  const frame = page.locator(comparisons ? 'kalm-code-compare' : 'kalm-code-tabs');
+  const tabs = frame.locator('[role="tab"]');
   await expect(tabs).toHaveCount(2);
   await tabs.first().focus();
   await page.keyboard.press('ArrowRight');
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await expect(page.locator('.comparison-panes > section:visible')).toHaveCount(1);
+  await expect(frame.locator('section:visible')).toHaveCount(1);
   await page.keyboard.press('Home');
   await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
   await expect(tabs.first()).toBeFocused();
@@ -110,8 +113,13 @@ test('static content and disclosures work without JavaScript', async ({ browser 
   await page.locator('.feature-trigger').first().click();
   await expect(page).toHaveURL(/\/docs\/language\/layout\//);
   await page.goto(new URL('/examples/java-to-kalm/', test.info().project.use.baseURL).href);
-  await expect(page.locator('.comparison-panes [data-language="java"]')).toBeVisible();
-  await expect(page.locator('.comparison-panes [data-language="kalm"]').first()).toBeVisible();
+  if (await page.locator('kalm-code-compare').count()) {
+    await expect(page.locator('.comparison-panes [data-language="java"]')).toBeVisible();
+    await expect(page.locator('.comparison-panes [data-language="kalm"]').first()).toBeVisible();
+  } else {
+    await expect(page.locator('.prose kalm-code-block')).toHaveCount(2);
+    for (const block of await page.locator('.prose kalm-code-block').all()) await expect(block).toBeVisible();
+  }
   await expect(page.getByRole('tab', {name:'Java',exact:true})).toHaveCount(0);
   await context.close();
 });

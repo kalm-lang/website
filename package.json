@@ -13,12 +13,12 @@
     "build": "node scripts/generate.mjs && vite build && node scripts/check-links.mjs",
     "preview": "vite preview",
     "test": "playwright test",
-    "test:content": "node --test --experimental-test-isolation=none tests/content.test.mjs",
+    "test:content": "node --test --experimental-test-isolation=none tests/*.test.mjs",
     "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs && node scripts/verify-comparisons.mjs && node scripts/verify-variants.mjs"
   },
   "dependencies": {
     "@floating-ui/dom": "1.7.4",
-    "@kalm-lang/documentation": "0.1.0",
+    "@kalm-lang/documentation": "1.1.0",
     "@kalm-lang/specification": "1.1.0-full",
     "cross-spawn": "7.0.6",
     "gsap": "3.13.0",

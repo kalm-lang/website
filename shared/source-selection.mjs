@@ -4,7 +4,7 @@ export function selectSources(panels, policy, preferences, java = false, split =
   const showcase = policy.presentation === 'showcase';
   const available = panels.some((p) => p.language === preferences.dialect)
     ? preferences.dialect
-    : 'kalm';
+    : panels.some((p) => p.language === 'kalm') ? 'kalm' : panels[0]?.language;
   const terminal = panels.every((p) => !['kalm', 'kalms', 'java'].includes(p.language));
   const groups = new Map();
   panels.forEach((panel, index) => {

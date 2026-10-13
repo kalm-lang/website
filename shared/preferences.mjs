@@ -1,6 +1,7 @@
 // Shared by the synchronous head bootstrap and the preference menu.
 export function applyPreferences(record) {
   const root = document.documentElement;
+  const capabilities = JSON.parse(root.dataset.codeCapabilities || '{}');
   let saved = record;
   if (!saved) {
     try {
@@ -30,8 +31,9 @@ export function applyPreferences(record) {
       ? { windows: 'powershell', macos: 'zsh', linux: 'bash' }[os]
       : preferences.shell;
   root.dataset.codePreferences = JSON.stringify(preferences);
-  root.dataset.dialect = preferences.dialect;
-  root.dataset.codeStyle = preferences.style;
+  // Keep saved choices for newer bundles while applying only supported features.
+  root.dataset.dialect = capabilities.dialect === false ? 'kalm' : preferences.dialect;
+  root.dataset.codeStyle = capabilities.style === false ? 'indentation' : preferences.style;
   root.dataset.codeOs = os;
   root.dataset.codeShell = shell;
   try {

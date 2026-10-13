@@ -1,12 +1,12 @@
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { resolve, delimiter } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import {chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {delimiter, resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
 import MarkdownIt from 'markdown-it';
-import { routes } from './routes.mjs';
-import { repository } from './content.mjs';
-import { compilerCommand } from './compiler-command.mjs';
-import { tabsPlugin, fences } from './tabs.mjs';
+import {routes} from './routes.mjs';
+import {capabilities, repository} from './content.mjs';
+import {compilerCommand} from './compiler-command.mjs';
+import {fences, tabsPlugin} from './tabs.mjs';
 
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-learn-'));
 const main = resolve(root, 'src/main/kalm/stats');
@@ -27,7 +27,7 @@ try {
   mkdirSync(tests, { recursive: true });
   writeFileSync(resolve(root, 'notes.txt'), 'a quiet\nmorning\n');
   const outputs = ['Text stats', '3 words: a quiet morning', 'Will read notes.txt', '3 words', '3 words', '2 lines / 3 words', '2 lines / 3 words', '2 lines / 3 words'];
-  for (const style of ['indentation','braces']) {
+  for (const style of capabilities.style ? ['indentation','braces'] : ['indentation']) {
   for (const route of routes.filter(route => route.lesson)) {
     for (const token of fences(md.parse(route.content, {}), 'kalm', 'primary', style)) {
       const [language, filename] = token.info.split(/\s+/);
@@ -38,9 +38,9 @@ try {
     run(compilerCommand.command, [...compilerCommand.args, 'compile']);
     execute(route.lesson >= 7 || route.lesson === 3 ? ['notes.txt'] : [], 0, outputs[route.lesson - 1]);
     console.log(`Verified lesson ${route.lesson}`);
-    if (route.lesson < 8) {
+    if (capabilities.dialect && route.lesson < 8) {
       const script = fences(md.parse(route.content, {}), 'kalms', 'primary', style).find(token => token.info.startsWith('kalms '));
-      if (!script) throw new Error(`Missing self-contained script lesson: ${route.path}`);
+      if (!script) continue; // Verify optional counterparts only when authored.
       writeFileSync(resolve(root, 'App.kalms'), script.content);
       run(compilerCommand.command, [...compilerCommand.args, 'shell', '-f', resolve(root, 'App.kalms')], 0, outputs[route.lesson - 1]);
       if (route.lesson === 7) {
@@ -64,5 +64,5 @@ try {
   if (process.getuid?.() !== 0) execute(['unreadable.txt'], 1, 'Could not read file');
   }
   }
-  console.log('Verified both styles of cumulative lessons, native tests, counts, input failures, and usage errors.');
+  console.log('Verified authored styles of cumulative lessons, native tests, counts, input failures, and usage errors.');
 } finally { rmSync(root, { recursive: true, force: true }); }

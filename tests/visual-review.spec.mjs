@@ -1,8 +1,10 @@
-import {test,expect} from '@playwright/test';
+import {expect, test} from '@playwright/test';
 import {mkdirSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {capabilities} from '../scripts/content.mjs';
 
 test('review light and dark frames at phone, tablet, desktop and enlarged text',async({page})=>{
+  test.skip(!Object.values(capabilities).every(Boolean), 'Installed documentation omits the reviewed code preferences and comparisons.');
   test.setTimeout(120000);
   const root=resolve('build/review');mkdirSync(root,{recursive:true});
   for(const theme of ['light','dark']) for(const [name,width] of [['phone',390],['tablet',768],['desktop',1600]]) {

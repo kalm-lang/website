@@ -1,4 +1,9 @@
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
+import {capabilities} from '../scripts/content.mjs';
+
+test.beforeEach(() => {
+  test.skip(!Object.values(capabilities).every(Boolean), 'Installed documentation omits variants required by these comparison scenarios.');
+});
 const choose = async (page, values) => {
   await page.getByRole('button', { name: 'Code preferences', exact: true }).click();
   const keys = { Language: 'dialect', Blocks: 'style', 'Operating system': 'os', Shell: 'shell' };

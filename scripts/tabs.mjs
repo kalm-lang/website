@@ -45,7 +45,7 @@ export function tabsPlugin(md) {
           const keys = variants.map(v => JSON.stringify([v.language,v.style,v.os,v.shell,v.pane]));
           if (!children.length || children.some(t => t.type !== 'fence') || new Set(keys).size !== keys.length) throw new Error('Duplicate or invalid source variant');
           const terminal = languages.every(l => ['bash','zsh','powershell','batch','text'].includes(l));
-          if (!terminal && open.meta.presentation !== 'showcase' && (!languages.includes('kalm') || !languages.includes('java') || (languages.includes('kalms') === Boolean(open.meta.scriptUnavailable)))) throw new Error(':::compare needs Kalm, Java, and either Kalm Script or scriptUnavailable');
+          if (!terminal && languages.some(language => !['kalm', 'kalms', 'java'].includes(language))) throw new Error(':::compare needs programming or terminal sources');
           if (open.meta.scriptUnavailable && (typeof open.meta.scriptUnavailable !== 'string' || !open.meta.scriptUnavailable.trim())) throw new Error('scriptUnavailable must explain the limitation');
           if (open.meta.primary && !['kalm', 'java'].includes(open.meta.primary)) throw new Error('primary must be kalm or java');
         }

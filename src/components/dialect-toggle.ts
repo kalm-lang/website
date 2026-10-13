@@ -1,7 +1,7 @@
-import { gsap } from 'gsap';
-import { HeaderPopover } from './header-popover';
-import { applyPreferences } from '../../shared/preferences.mjs';
-import { icon } from '../../shared/icons.mjs';
+import {gsap} from 'gsap';
+import {HeaderPopover} from './header-popover';
+import {applyPreferences} from '../../shared/preferences.mjs';
+import {icon} from '../../shared/icons.mjs';
 
 export type Dialect = 'kalm' | 'kalms';
 export const dialect = (): Dialect => document.documentElement.dataset.dialect === 'kalms' ? 'kalms' : 'kalm';
@@ -58,6 +58,11 @@ class CodePreferences extends HTMLElement {
   };
 
   connectedCallback() {
+    const capabilities = JSON.parse(document.documentElement.dataset.codeCapabilities || '{}');
+    if (Object.values(capabilities).every(value => value === false) && Object.keys(capabilities).length) {
+      this.hidden = true;
+      return;
+    }
     this.innerHTML =
       '<button class="theme-trigger preferences-trigger" type="button" aria-controls="code-preferences" aria-label="Code preferences" title="Code preferences" aria-expanded="false">' + icon('sliders-horizontal') + '</button>' +
       '<div id="code-preferences" class="theme-popover preferences-popover" popover="manual" aria-label="Code preferences">' +
@@ -67,6 +72,11 @@ class CodePreferences extends HTMLElement {
       '<details class="preference-environment"><summary class="theme-option">Environment' + icon('chevron-down') + '</summary><div class="environment-fields">' +
       choices('os', 'Operating system', [['auto', 'Automatic'], ['windows', 'Windows'], ['macos', 'macOS'], ['linux', 'Linux']]) +
       '<div class="shell-preferences"></div></div></details></div>';
+    for (const setting of ['dialect', 'style', 'environment']) {
+      if (capabilities[setting] === false) {
+        this.querySelector<HTMLElement>(setting === 'environment' ? '.preference-environment' : `[data-setting="${setting}"]`)!.hidden = true;
+      }
+    }
     this.menu = new HeaderPopover(this, this.querySelector<HTMLButtonElement>('.preferences-trigger')!, this.querySelector<HTMLElement>('.preferences-popover')!, 'start');
     this.addEventListener('click', this.choose);
     const environment = this.querySelector<HTMLDetailsElement>('.preference-environment')!;

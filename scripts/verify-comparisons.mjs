@@ -1,12 +1,12 @@
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { resolve, delimiter } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {delimiter, resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
 import MarkdownIt from 'markdown-it';
-import { routes } from './routes.mjs';
-import { readDocument, contentFiles, repository } from './content.mjs';
-import { tabsPlugin, fences } from './tabs.mjs';
-import { compilerCommand } from './compiler-command.mjs';
+import {routes} from './routes.mjs';
+import {contentFiles, readDocument, repository} from './content.mjs';
+import {fences, tabsPlugin} from './tabs.mjs';
+import {compilerCommand} from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
 const home = contentFiles('home').filter(file => file.endsWith('.md')).map(readDocument);
@@ -67,7 +67,9 @@ try {
   writeFileSync(resolve(project, 'notes.txt'), 'a quiet\nmorning\n');
   const outputs = ['Text stats', '3 words: a quiet morning', 'Will read notes.txt', '3 words', '3 words', '2 lines / 3 words', '2 lines / 3 words', '2 lines / 3 words'];
   for (const route of routes.filter(route => route.lesson)) {
-    for (const token of fences(md.parse(route.content, {}), 'kalm', 'all').filter(t => t.info.startsWith('java'))) {
+    const blocks = fences(md.parse(route.content, {}), 'kalm', 'all').filter(t => t.info.startsWith('java'));
+    if (!blocks.length) continue;
+    for (const token of blocks) {
       writeFileSync(resolve(project, token.info.split(/\s+/)[1]), token.content);
     }
     const sources = (await import('node:fs')).readdirSync(project).filter(f => f.endsWith('.java')).map(f => resolve(project, f));
@@ -75,7 +77,8 @@ try {
     const output = run(java, ['-cp', resolve(project, 'classes'), 'stats.App', ...(route.lesson === 3 || route.lesson >= 7 ? ['notes.txt'] : [])], project);
     if (!output.includes(outputs[route.lesson - 1])) throw new Error(`Java lesson ${route.lesson} produced ${JSON.stringify(output)}`);
   }
-  run(java, ['-cp', [resolve(project, 'classes'), libraries].join(delimiter), 'org.junit.platform.console.ConsoleLauncher', 'execute', '--scan-classpath', '--disable-banner', '--fail-if-no-tests'], project);
+  if (routes.some(route => route.lesson === 8 && fences(md.parse(route.content, {}), 'kalm', 'all').some(t => t.info.startsWith('java'))))
+    run(java, ['-cp', [resolve(project, 'classes'), libraries].join(delimiter), 'org.junit.platform.console.ConsoleLauncher', 'execute', '--scan-classpath', '--disable-banner', '--fail-if-no-tests'], project);
 } finally { rmSync(root, { recursive: true, force: true }); }
 if (failures.length) throw new Error(failures.join('\n'));
 console.log(`Verified ${verified} comparisons, script counterparts, and cumulative Java lessons.`);

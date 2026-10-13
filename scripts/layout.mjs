@@ -1,17 +1,17 @@
-import { installHomeNavigation } from '../shared/home-navigation.mjs';
-import { restoreSidebar } from '../shared/sidebar.mjs';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { repository } from './content.mjs';
-import { escape } from './code.mjs';
-import { mainNavigation, sidebar, lessonNavigation } from './navigation.mjs';
-import { icon } from '../shared/icons.mjs';
-import { applyPreferences } from '../shared/preferences.mjs';
+import {installHomeNavigation} from '../shared/home-navigation.mjs';
+import {restoreSidebar} from '../shared/sidebar.mjs';
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {capabilities, repository} from './content.mjs';
+import {escape} from './code.mjs';
+import {lessonNavigation, mainNavigation, sidebar} from './navigation.mjs';
+import {icon} from '../shared/icons.mjs';
+import {applyPreferences} from '../shared/preferences.mjs';
 
 const version = JSON.parse(readFileSync(resolve(repository, 'package.json'), 'utf8')).kalmVersion;
 export function layout(title, body, section = '') {
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-code-capabilities="${escape(JSON.stringify(capabilities))}">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title === 'Kalm' ? 'Kalm' : `${escape(title)} · Kalm`}</title>

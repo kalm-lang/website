@@ -1,7 +1,7 @@
-import { selectSources } from '../../shared/source-selection.mjs';
-import { gsap } from 'gsap';
-import { dialect, codeStyle } from './dialect-toggle';
-import { icon } from '../../shared/icons.mjs';
+import {selectSources} from '../../shared/source-selection.mjs';
+import {gsap} from 'gsap';
+import {codeStyle, dialect} from './dialect-toggle';
+import {icon} from '../../shared/icons.mjs';
 
 type Policy = {
   presentation?: 'adaptive' | 'showcase';
@@ -81,7 +81,8 @@ class CodeCompare extends HTMLElement {
           (p) =>
             p.dataset.language === dialect() &&
             (!p.dataset.style || p.dataset.style === codeStyle()),
-        ) || this.panels.find((p) => p.dataset.language === 'kalm');
+        ) || this.panels.find((p) => p.dataset.language === 'kalm') ||
+        this.panels.find((p) => p.dataset.language === 'kalms');
       this.querySelectorAll<HTMLButtonElement>('[data-comparison-language]').forEach((button) => {
         const java = button.dataset.comparisonLanguage === 'java';
         button.textContent = java
@@ -156,7 +157,8 @@ class CodeCompare extends HTMLElement {
     if (
       !this.hasAttribute('data-home') &&
       this.policy.presentation !== 'showcase' &&
-      this.panels.some((p) => p.dataset.language === 'java')
+      this.panels.some((p) => p.dataset.language === 'java') &&
+      this.panels.some((p) => ['kalm', 'kalms'].includes(p.dataset.language || ''))
     ) {
       this.querySelector('.comparison-controls')!.innerHTML =
         '<div class="source-tab-bar" role="tablist" aria-label="Compare languages"><button type="button" role="tab" id="' +

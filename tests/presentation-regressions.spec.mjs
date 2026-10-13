@@ -1,9 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
+import {expect, test} from '@playwright/test';
+import {mkdirSync} from 'node:fs';
+import {capabilities} from '../scripts/content.mjs';
 
 const settled = async (page) => expect.poll(() => page.locator('dialog[open]').evaluateAll(elements => elements.every(e => !e.hasAttribute('data-transition')))).toBe(true);
 
 test('both settings menus share appearance, toggle behavior and viewport-safe mobile layout', async ({ page }) => {
+  test.skip(!capabilities.environment, 'Installed documentation has no environment preferences.');
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/');
@@ -103,8 +105,10 @@ test('modal comparisons keep the dialog width, separate panes and stack on phone
   await page.locator('.feature-trigger').nth(1).click();
   await settled(page);
   const dialog = page.locator('dialog[open]'), group = dialog.locator('kalm-code-compare');
+  test.skip(!await group.count(), 'Installed homepage note has no language comparisons.');
   const before = await dialog.boundingBox();
   await group.getByRole('button', { name: 'Compare side by side' }).click();
+  await expect(group).toHaveAttribute('data-layout', 'split');
   await expect(group).toHaveAttribute('data-stacked', 'false');
   await expect.poll(() => group.locator('.comparison-panes').evaluate(e => e.style.height)).toBe('');
   expect((await dialog.boundingBox()).width).toBeCloseTo(before.width);

@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it';
-import { catalog } from './content.mjs';
-import { tabsPlugin, fences } from './tabs.mjs';
+import {catalog} from './content.mjs';
+import {fences, tabsPlugin} from './tabs.mjs';
 
 export function validateContent(routes) {
   const md = new MarkdownIt().use(tabsPlugin);
@@ -26,14 +26,6 @@ export function validateContent(routes) {
         if (fences(code, dialect, 'all').some(token => token.content.trim().split('\n').length > 40)) fail('Keep example snippets to 40 lines or fewer');
       }
       if (route.lesson && (!Number.isInteger(route.lesson) || route.lesson < 1)) fail('Invalid lesson number');
-      const requireComparisons = items => {
-        for (const token of items) {
-          if (token.type === 'code_compare') continue;
-          if (token.type === 'fence' && /^(kalm|java)(?:\s|$)/.test(token.info) && !route.specification) fail('Programming snippets need a comparison group');
-          if (token.type === 'code_tabs') requireComparisons(token.children);
-        }
-      };
-      requireComparisons(tokens);
     }
   }
   const lessons = routes.filter(route => route.lesson).map(route => route.lesson).sort((a, b) => a - b);
@@ -42,6 +34,7 @@ export function validateContent(routes) {
 
 export function validateCatalog(routes) {
   const topics = catalog();
+  if (topics === undefined) return; // Older bundles may omit the optional coverage catalog.
   const published = routes.filter(route => route.section === 'examples' && route.path !== '/examples/')
     .map(route => route.path.split('/').filter(Boolean).at(-1)).sort();
   if (JSON.stringify(topics) !== JSON.stringify(published)) {

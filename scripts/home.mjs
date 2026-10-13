@@ -1,10 +1,10 @@
-import { contentRoot, readDocument, contentFiles } from './content.mjs';
-import { escape } from './code.mjs';
-import { markdown } from './render.mjs';
-import { icon } from '../shared/icons.mjs';
+import {capabilities, contentFiles, contentRoot, readDocument} from './content.mjs';
+import {escape} from './code.mjs';
+import {markdown} from './render.mjs';
+import {icon} from '../shared/icons.mjs';
 
 function dialectText(kalm, kalms) {
-  return kalms ? `<span class="reserved-dialects"><span class="dialect-content" data-dialect="kalm">${escape(kalm)}</span><span class="dialect-content" data-dialect="kalms">${escape(kalms)}</span></span>` : escape(kalm);
+  return kalms && capabilities.dialect ? `<span class="reserved-dialects"><span class="dialect-content" data-dialect="kalm">${escape(kalm)}</span><span class="dialect-content" data-dialect="kalms">${escape(kalms)}</span></span>` : escape(kalm);
 }
 
 function noteCard(note, index) {
