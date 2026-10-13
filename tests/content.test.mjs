@@ -58,8 +58,8 @@ test('comparisons require real counterparts and render unique accessible panels'
   assert.match(html, /article-compare-1-java/);
   assert.throws(() => markdown(group.replace(/```java[\s\S]*?```\n/, ''), 'sample.md'), /needs Kalm, Java/);
   assert.throws(() => markdown(group.replace(/```kalms[\s\S]*?```\n/, ''), 'sample.md'), /scriptUnavailable/);
-  assert.match(markdown(group, 'content/home/sample.md'), /data-home/);
-  assert.doesNotMatch(markdown(group, 'content/home/sample.md'), /data-language="java"/);
+  assert.match(markdown(group, 'content/home/greeting.md'), /data-home/);
+  assert.doesNotMatch(markdown(group, 'content/home/greeting.md'), /data-language="java"/);
   assert.match(markdown(`:::::tabs\n${group}${group}\n:::::\n`, 'sample.md'), /kalm-code-tabs/);
   assert.throws(() => validateContent(sample('```kalm\nline\n```')), /comparison group/);
   assert.match(markdown('::::dialect kalms\nVisible **script** instructions.\n::::', 'sample.md'), /Visible <strong>script<\/strong>/);

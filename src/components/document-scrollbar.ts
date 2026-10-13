@@ -87,9 +87,8 @@ export function enhanceDocumentScrollbar() {
         inertia: {
           height: { velocity: velocityHeight, end: trackHeight },
           width: { velocity: velocityWidth, end: trackWidth },
+          duration: pending ? .14 : expanded ? .22 : .26,
         },
-        duration: pending ? .2 : .38,
-        ease: 'power2.out',
         onUpdate: render,
         onComplete: render,
       });

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { routes } from '../scripts/routes.mjs';
 
 async function chooseTheme(page, theme) {
-  await page.locator('.theme-trigger').click();
+  await page.locator('kalm-theme-toggle .theme-trigger').click();
   await page.locator(`[data-theme-choice="${theme}"]`).click();
 }
 
@@ -43,7 +43,7 @@ test('theme persists across navigation and code copy preserves the source', asyn
   await chooseTheme(page, 'dark');
   await page.getByRole('link', { name: 'Start writing' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('.theme-trigger')).toHaveAttribute('aria-label', 'Color theme: dark');
+  await expect(page.locator('kalm-theme-toggle .theme-trigger')).toHaveAttribute('aria-label', 'Color theme: dark');
   await chooseTheme(page, 'light');
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(243, 232, 213)');
   await page.goto('/');

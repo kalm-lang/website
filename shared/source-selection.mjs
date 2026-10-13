@@ -51,9 +51,10 @@ export function initializeSources(id, policy) {
     },
   );
   panels.forEach((panel, index) => {
+    panel.hidden = !selected.includes(index);
     if (frame.hasAttribute('data-home')) {
       panel.dataset.visible = String(selected.includes(index));
       panel.inert = !selected.includes(index);
-    } else panel.hidden = !selected.includes(index);
+    }
   });
 }

@@ -10,21 +10,21 @@ test('appearance popover preserves the header and page position and saves scroll
     await page.evaluate(() => window.scrollTo({ top: 300, behavior: 'instant' }));
     const before = await page.locator('.site-header-inner').boundingBox();
     const scroll = await page.evaluate(() => window.scrollY);
-    const button = await page.locator('.theme-trigger').boundingBox();
+    const button = await page.locator('kalm-theme-toggle .theme-trigger').boundingBox();
     // Locator.click scrolls sticky targets into their original document position.
     // A pointer click exercises the browser interaction without that extra step.
     await page.mouse.click(button.x + button.width / 2, button.y + button.height / 2);
-    await expect(page.locator('.theme-popover')).toBeVisible();
+    await expect(page.locator('kalm-theme-toggle .theme-popover')).toBeVisible();
     expect(await page.locator('.site-header-inner').boundingBox()).toEqual(before);
     expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const choice = await page.getByRole('button', { name: 'Dark', exact: true }).boundingBox();
     await page.mouse.click(choice.x + choice.width / 2, choice.y + choice.height / 2);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(page.locator('.theme-popover')).toHaveCount(0);
+    await expect(page.locator('kalm-theme-toggle .theme-popover')).toBeHidden();
     expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
   }
-  await page.locator('.theme-trigger').click();
+  await page.locator('kalm-theme-toggle .theme-trigger').click();
   const toggle = page.getByRole('switch', { name: 'Custom scrollbar' });
   await expect(toggle).toBeChecked();
   await toggle.click();
@@ -32,11 +32,11 @@ test('appearance popover preserves the header and page position and saves scroll
   await expect(page.locator('.document-scrollbar')).toBeHidden();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-scrollbar-style', 'native');
-  await page.locator('.theme-trigger').click();
+  await page.locator('kalm-theme-toggle .theme-trigger').click();
   await page.getByRole('switch', { name: 'Custom scrollbar' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-scrollbar-style', 'custom');
   await page.keyboard.press('Escape');
-  await expect(page.locator('.theme-trigger')).toBeFocused();
+  await expect(page.locator('kalm-theme-toggle .theme-trigger')).toBeFocused();
   expect(errors).toEqual([]);
 });
 
@@ -105,11 +105,11 @@ test('mobile navigation and code tabs work with the keyboard', async ({ page }) 
 test('static content and disclosures work without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
-  await page.goto('http://127.0.0.1:4173/');
+  await page.goto(new URL('/', test.info().project.use.baseURL).href);
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
   await page.locator('.feature-trigger').first().click();
   await expect(page).toHaveURL(/\/docs\/language\/layout\//);
-  await page.goto('http://127.0.0.1:4173/examples/java-to-kalm/');
+  await page.goto(new URL('/examples/java-to-kalm/', test.info().project.use.baseURL).href);
   await expect(page.locator('.comparison-panes [data-language="java"]')).toBeVisible();
   await expect(page.locator('.comparison-panes [data-language="kalm"]').first()).toBeVisible();
   await expect(page.getByRole('tab', {name:'Java',exact:true})).toHaveCount(0);

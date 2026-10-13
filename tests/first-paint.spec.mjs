@@ -16,7 +16,7 @@ for (const theme of ['light', 'dark']) {
         await page.goto(path, { waitUntil: 'commit' });
         await expect(page.locator('h1')).toBeVisible();
         await expect(page.locator('.site-header-inner')).toHaveCSS('display', 'flex');
-        await expect(page.locator('.theme-trigger')).toBeVisible();
+        await expect(page.locator('kalm-theme-toggle .theme-trigger')).toBeVisible();
         await expect(page.locator('body')).toHaveCSS('background-color', theme === 'dark' ? 'rgb(25, 28, 25)' : 'rgb(243, 232, 213)');
         expect(await page.evaluate(() => Boolean(document.querySelector('link[rel="stylesheet"]')?.sheet))).toBe(true);
         expect(await page.evaluate(() => customElements.get('kalm-code-block'))).toBeUndefined();
@@ -25,7 +25,7 @@ for (const theme of ['light', 'dark']) {
         await page.waitForLoadState('load');
         await page.unroute('**/*', handler);
       }
-      await expect(page.locator('.theme-trigger')).toHaveAttribute('aria-label', `Color theme: ${theme}`);
+      await expect(page.locator('kalm-theme-toggle .theme-trigger')).toHaveAttribute('aria-label', `Color theme: ${theme}`);
     }
   });
 }

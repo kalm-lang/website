@@ -37,13 +37,13 @@ test('reduced motion settles immediately while keeping the close grace period', 
   await expect(track).toHaveAttribute('data-open', '');
 });
 
-test('right edge, window exit and blur bypass the closing grace period',async({page})=>{
+test('the right edge keeps its safe space while window exit and blur collapse the scrollbar',async({page})=>{
   await page.goto('/docs/specifications/1.1.0/');
   const track=page.locator('.document-scrollbar');
   await track.hover();await expect(track).toHaveAttribute('data-open','');
   let bounds=await track.boundingBox();
   await page.mouse.move(bounds.x+bounds.width-.5,bounds.y+bounds.height/2);
-  await expect(track).not.toHaveAttribute('data-open');await expect(track).not.toHaveAttribute('data-pending-close');
+  await expect(track).toHaveAttribute('data-open','');await expect(track).not.toHaveAttribute('data-pending-close');
   await track.hover();await page.evaluate(()=>document.dispatchEvent(new PointerEvent('pointerleave',{relatedTarget:null})));
   await expect(track).not.toHaveAttribute('data-open');
   await track.hover();await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
@@ -54,9 +54,9 @@ test('scrollbar suppression is present in the card trigger frame',async({page})=
   await page.goto('/');
   const result=await page.locator('.feature-trigger').first().evaluate(element=>{
     element.click();
-    return {root:document.documentElement.hasAttribute('data-dialog-open'),track:getComputedStyle(document.querySelector('.document-scrollbar')).display,document:getComputedStyle(document.documentElement).scrollbarWidth,gutters:[...document.querySelectorAll('dialog[open] pre')].map(e=>getComputedStyle(e).scrollbarWidth)};
+    return {root:document.documentElement.hasAttribute('data-dialog-open'),track:getComputedStyle(document.querySelector('.document-scrollbar')).display,document:getComputedStyle(document.documentElement).scrollbarWidth,gutters:[...document.querySelectorAll('dialog[open] pre')].map(e=>getComputedStyle(e).scrollbarColor)};
   });
   expect(result).toMatchObject({root:true,track:'none',document:'none'});
-  expect(result.gutters.every(value=>value==='none')).toBe(true);
+  expect(result.gutters.every(value=>value==='rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)')).toBe(true);
   await page.keyboard.press('Escape');
 });

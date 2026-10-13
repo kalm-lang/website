@@ -10,7 +10,7 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 7rem; scrollbar-gutter: stable; }
 html:has(.site-header:focus-within) { scroll-padding-top: 0; }
-html[data-dialog-open] { overflow: hidden; }
+html[data-dialog-open] { overflow: hidden; padding-right: var(--dialog-scrollbar-gap, 0px); }
 body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh;
   margin: 0; background: var(--paper); color: var(--ink); font: 1.05rem/1.75 var(--body);
   background-image: radial-gradient(var(--grain) .7px, transparent .7px); background-size: 5px 5px;

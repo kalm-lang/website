@@ -77,6 +77,6 @@ test('only eligible homepage content links request navigation motion', async ({ 
   );
   await page.locator('[data-home-navigation]').first().click();
   expect(await page.evaluate(() => window.motionRequests)).toEqual([
-    'http://127.0.0.1:4173/docs/quick-start/',
+    new URL('/docs/quick-start/', test.info().project.use.baseURL).href,
   ]);
 });

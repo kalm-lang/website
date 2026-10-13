@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
 const choose = async (page, values) => {
   await page.getByRole('button', { name: 'Code preferences', exact: true }).click();
+  const keys = { Language: 'dialect', Blocks: 'style', 'Operating system': 'os', Shell: 'shell' };
   for (const [name, value] of Object.entries(values)) {
-    if (['Operating system', 'Shell'].includes(name))
-      await page
-        .locator('.preferences-popover details')
-        .evaluate((element) => (element.open = true));
-    await page.getByRole('combobox', { name, exact: true }).selectOption(value);
+    if (['Operating system', 'Shell'].includes(name) && !await page.locator('.preferences-popover details').evaluate(e => e.open))
+      await page.locator('.preferences-popover summary').click();
+    await page.locator(`.preferences-popover [data-preference="${keys[name]}"][data-value="${value}"]`).click();
   }
   await page.getByRole('button', { name: 'Code preferences', exact: true }).click();
 };
@@ -47,31 +46,29 @@ test('preferences persist while Java and comparison state stay local and copying
   ).toMatchObject({ version: 1, dialect: 'kalms', style: 'braces', spaces: 4 });
 });
 
-test('greeting frame touches output and retains its name and layout across every preference combination', async ({
+test('greeting frame touches output and retains its name at the selected source natural height', async ({
   page,
 }) => {
   await page.goto('/');
   const input = page.getByRole('textbox', { name: 'Greeting name' });
   await input.fill('Nora');
   await expect(page.locator('[data-greeting-output]')).toHaveText('Hello, Nora!');
-  const positions = () =>
-    page
-      .locator('.greeting-output,.feature-grid,.start-box')
-      .evaluateAll((elements) => elements.map((e) => e.getBoundingClientRect().top));
-  const before = await positions();
   for (const Language of ['kalms', 'kalm'])
     for (const Blocks of ['braces', 'indentation']) {
       await choose(page, { Language, Blocks });
       await expect(input).toHaveValue('Nora');
       await expect(input).toBeVisible();
-      await expect.poll(positions).toEqual(before);
+      await expect.poll(() => page.locator('kalm-greeting-demo .comparison-panes').evaluate(e => getComputedStyle(e).height === 'auto' || !e.style.height)).toBe(true);
       const edges = await page
         .locator('kalm-greeting-demo')
         .evaluate((e) => ({
           code: e.querySelector('kalm-code-compare').getBoundingClientRect().bottom,
           output: e.querySelector('.greeting-output').getBoundingClientRect().top,
+          pane: e.querySelector('.comparison-panes > section:not([hidden])').getBoundingClientRect().height,
+          frame: e.querySelector('.comparison-panes').getBoundingClientRect().height,
         }));
       expect(Math.abs(edges.code - edges.output)).toBeLessThan(1);
+      expect(Math.abs(edges.pane - edges.frame)).toBeLessThan(1);
     }
   await expect(page.locator('.feature-number')).toHaveCount(0);
   await expect(page.locator('kalm-greeting-demo [data-language="java"]')).toHaveCount(0);

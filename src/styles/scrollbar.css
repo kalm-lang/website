@@ -50,5 +50,6 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
 html[data-dialog-open] { scrollbar-width: none !important; }
 html[data-dialog-open]::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
 html[data-dialog-open] .document-scrollbar { display: none !important; }
-dialog[data-transition], dialog[data-transition] pre, dialog[data-transition] .feature-dialog-content { scrollbar-width: none !important; }
-dialog[data-transition]::-webkit-scrollbar, dialog[data-transition] ::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+/* Keep the gutter's geometry throughout the turn, hiding only its paint. */
+dialog[data-transition] pre, dialog[data-transition] .feature-dialog-content { scrollbar-color: transparent transparent !important; }
+dialog[data-transition] ::-webkit-scrollbar-thumb { background: transparent !important; }

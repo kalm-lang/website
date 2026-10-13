@@ -46,6 +46,7 @@ class CodeCompare extends HTMLElement {
     const beforeWidth = this.getBoundingClientRect().width;
     this.timeline?.kill();
     const home = this.hasAttribute('data-home');
+    const modal = !!this.closest('dialog');
     const showcase = this.policy.presentation === 'showcase';
     const next = this.desiredPanels();
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -53,21 +54,23 @@ class CodeCompare extends HTMLElement {
       const focused = document.activeElement;
       this.panels.forEach((panel) => {
         const visible = next.includes(panel);
+        panel.hidden = !visible;
         if (home) {
-          panel.hidden = false;
           panel.dataset.visible = String(visible);
           panel.inert = !visible;
           panel.setAttribute('aria-hidden', String(!visible));
-        } else panel.hidden = !visible;
+        }
         panel.setAttribute('role', this.sideBySide || home || showcase ? 'region' : 'tabpanel');
       });
       this.dataset.layout = this.sideBySide || (showcase && next.length > 1) ? 'split' : 'inline';
       const availableWidth = Math.min(1312, innerWidth - this.getBoundingClientRect().left - 40);
       const normalWidth = this.parentElement!.getBoundingClientRect().width;
-      const width = this.sideBySide && !home ? Math.max(normalWidth, availableWidth) : normalWidth;
-      this.style.width = this.sideBySide && !home ? width + 'px' : '';
+      // A dialog owns its width. Page comparisons may extend beyond the prose column.
+      const expand = this.sideBySide && !home && !modal;
+      const width = expand ? Math.max(normalWidth, availableWidth) : normalWidth;
+      this.style.width = expand ? width + 'px' : '';
       this.dataset.stacked = String(
-        width < 56 * parseFloat(getComputedStyle(document.documentElement).fontSize),
+        width < (modal ? 37 : 57) * parseFloat(getComputedStyle(document.documentElement).fontSize),
       );
       const explanation = this.querySelector<HTMLElement>('.script-unavailable');
       if (explanation)
@@ -113,38 +116,37 @@ class CodeCompare extends HTMLElement {
     if (!animate || reduced) {
       gsap.set(stage, { clearProps: 'opacity,transform,height,overflow' });
       apply();
-      gsap.set(this, { clearProps: this.sideBySide ? '' : 'width' });
+      if (!this.sideBySide || modal) this.style.width = '';
       return;
     }
     this.timeline = gsap.timeline();
-    this.timeline.to(stage, { opacity: 0.15, y: -3, duration: 0.09, ease: 'power1.in' }).add(() => {
+    this.timeline.to(stage, { opacity: 0.2, y: -2, duration: 0.055, ease: 'power1.in' }).add(() => {
       gsap.set(stage, { clearProps: 'height,overflow' });
       apply();
       const height = stage.getBoundingClientRect().height;
       const width = this.getBoundingClientRect().width;
-      gsap.set(stage, { height: beforeHeight, overflow: 'hidden', y: 3 });
-      gsap.set(this, { width: beforeWidth });
-      this.timeline!.to(this, {
-        width,
-        duration: 0.28,
-        ease: 'power3.out',
-        onComplete: () => {
-          if (!this.sideBySide) this.style.width = '';
-        },
-      });
+      gsap.set(stage, { height: beforeHeight, overflow: 'hidden', y: 2 });
+      const start = this.timeline!.duration();
+      if (!modal && Math.abs(width - beforeWidth) > 1) {
+        gsap.set(this, { width: beforeWidth });
+        this.timeline!.to(this, {
+          width, duration: 0.16, ease: 'power2.out',
+          onComplete: () => { if (!this.sideBySide) this.style.width = ''; },
+        }, start);
+      }
       this.timeline!.to(
         stage,
         {
           height,
           opacity: 1,
           y: 0,
-          duration: 0.23,
+          duration: 0.14,
           ease: 'power2.out',
           onComplete: () => {
             gsap.set(stage, { clearProps: 'opacity,transform,height,overflow' });
           },
         },
-        '<',
+        start,
       );
     });
   }

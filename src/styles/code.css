@@ -7,21 +7,20 @@ html[data-js-enhanced] kalm-code-compare:not([data-home]):has([role='tablist']) 
 .comparison-controls .source-tab-bar { min-width: 0; }
 .comparison-layout { min-height: 44px; margin: .25rem .5rem; padding: .35rem .65rem; font: .72rem/1.5 var(--mono); border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
 .comparison-layout[aria-pressed='true'] { color: var(--accent); background: var(--soft); }
-.comparison-panes { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+.comparison-panes { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 0; }
 .comparison-panes > section { min-width: 0; }
-kalm-code-compare:not([data-home]) .comparison-panes { padding: .75rem; }
-kalm-code-compare:not([data-home]) .comparison-panes > section { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+kalm-code-compare[data-layout='split'] .comparison-panes { gap: .75rem; }
 kalm-code-compare[data-layout='split']:not([data-stacked='true']) .comparison-panes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+kalm-code-compare[data-policy*='showcase'], .feature-dialog kalm-code-compare[data-layout='split'] { border: 0; border-radius: 0; background: transparent; }
+kalm-code-compare[data-policy*='showcase'] .comparison-panes > section > kalm-code-block,
+.feature-dialog kalm-code-compare[data-layout='split'] .comparison-panes > section > kalm-code-block { border: 1px solid var(--line); border-radius: 8px; }
 .script-unavailable { display: grid; gap: .25rem; padding: .85rem 1rem; margin: 0; border-top: 1px solid var(--line); border-left: 3px solid var(--accent); color: var(--ink); background: var(--soft); font-size: .85rem; line-height: 1.6; }
 .script-unavailable strong { color: var(--accent); }
 html[data-js-enhanced][data-dialect='kalm'] .dialect-content[data-dialect='kalms'],
 html[data-js-enhanced][data-dialect='kalms'] .dialect-content[data-dialect='kalm'],
 html:not([data-js-enhanced]) .dialect-content[data-dialect='kalms'] { display: none; }
-/* Reserve every greeting variant before modules load, so output never moves. */
+/* The greeting uses only the selected source's natural height. */
 kalm-greeting-demo > kalm-code-compare { margin: 0; border: 0; border-radius: 0; }
-kalm-code-compare[data-home] .comparison-panes { display: grid; }
-kalm-code-compare[data-home] .comparison-panes > section { grid-area: 1 / 1; visibility: hidden; pointer-events: none; }
-kalm-code-compare[data-home] .comparison-panes > section[data-visible='true'] { visibility: visible; pointer-events: auto; }
 .code-header { display: flex; align-items: center; gap: .75rem; min-height: 2.75rem;
   padding: 0 .85rem; border-bottom: 1px solid var(--line); background: var(--soft);
   color: var(--muted); font: .72rem/1.5 var(--mono); }
@@ -50,7 +49,7 @@ html[data-theme='dark'] .shiki, html[data-theme='dark'] .shiki span { color: var
   .copy-button span { display: none; }
 }
 
-.comparison-controls { padding: .25rem .4rem; border-bottom: 1px solid var(--line); gap: .5rem; min-height: 52px; }
+.comparison-controls { padding: .25rem .4rem; border: 0; gap: .5rem; min-height: 48px; }
 .comparison-controls .source-tab-bar { padding: 0; }
 .comparison-layout { display: grid; place-items: center; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; background: transparent; }
 .comparison-layout .icon { width: 1.1rem; height: 1.1rem; }

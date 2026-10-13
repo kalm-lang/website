@@ -21,7 +21,7 @@ export class CodeTabs extends LitElement {
     this.show();
     const panel = this.panels[index];
     if (changed && panel && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      gsap.fromTo(panel,{opacity:.2,y:3},{opacity:1,y:0,duration:.22,ease:'power2.out',overwrite:true,clearProps:'opacity,transform'});
+      gsap.fromTo(panel,{opacity:.2,y:2},{opacity:1,y:0,duration:.14,ease:'power2.out',overwrite:true,clearProps:'opacity,transform'});
     }
     if (focus) void this.updateComplete.then(() => this.querySelectorAll<HTMLButtonElement>(':scope > .source-tab-bar > [role="tab"]')[index]?.focus());
   }

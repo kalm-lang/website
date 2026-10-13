@@ -66,7 +66,7 @@ test('small screens remain usable with enlarged text and touch sized controls', 
     expect(await fitsViewport(page), `${path} with enlarged text`).toBe(true);
   }
   await page.goto('/');
-  for (const selector of ['.menu-button', '.theme-trigger', '.copy-button']) {
+  for (const selector of ['.menu-button', 'kalm-theme-toggle .theme-trigger', '.copy-button']) {
     const target = page.locator(selector).first();
     await expect(target).toBeVisible();
     expect((await target.boundingBox()).height).toBeGreaterThanOrEqual(44);

@@ -7,11 +7,12 @@ test('review light and dark frames at phone, tablet, desktop and enlarged text',
   const root=resolve('build/review');mkdirSync(root,{recursive:true});
   for(const theme of ['light','dark']) for(const [name,width] of [['phone',390],['tablet',768],['desktop',1600]]) {
     await page.setViewportSize({width,height:900});await page.goto('/');
-    await page.locator('.theme-trigger').click();await page.locator('[data-theme-choice="'+theme+'"]').click();
+    await page.locator('kalm-theme-toggle .theme-trigger').click();await page.locator('[data-theme-choice="'+theme+'"]').click();
     await expect(page.locator('[data-greeting-output]')).toHaveText(/^Hello, .+!$/);
     await page.screenshot({path:resolve(root,name+'-'+theme+'-home.png')});
     await page.getByRole('button',{name:'Code preferences',exact:true}).click();
     await expect(page.locator('.preferences-popover')).toBeInViewport();
+    await expect.poll(()=>page.locator('.preferences-popover').evaluate(e=>getComputedStyle(e).opacity)).toBe('1');
     await page.screenshot({path:resolve(root,name+'-'+theme+'-preferences.png')});
     await page.getByRole('button',{name:'Code preferences',exact:true}).click();
     await page.goto('/examples/fix/');await page.getByRole('button',{name:'Compare side by side'}).click();
@@ -21,6 +22,7 @@ test('review light and dark frames at phone, tablet, desktop and enlarged text',
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await page.evaluate(()=>document.documentElement.style.fontSize='200%');
     await page.getByRole('button',{name:'Code preferences',exact:true}).click();
+    await expect.poll(()=>page.locator('.preferences-popover').evaluate(e=>getComputedStyle(e).opacity)).toBe('1');
     await page.screenshot({path:resolve(root,name+'-'+theme+'-large-text.png')});
     expect(await page.locator('.preferences-popover').evaluate(e=>e.scrollWidth<=e.clientWidth)).toBe(true);
   }
