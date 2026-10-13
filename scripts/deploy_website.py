@@ -15,7 +15,7 @@ STAGING = PurePosixPath("/.deployment")
 NUMBER = r"(?:0|[1-9][0-9]*)"
 PRERELEASE = rf"(?:{NUMBER}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
 TAG = re.compile(
-    rf"website-{NUMBER}\.{NUMBER}\.{NUMBER}"
+    rf"v{NUMBER}\.{NUMBER}\.{NUMBER}"
     rf"(?:-{PRERELEASE}(?:\.{PRERELEASE})*)?"
     r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
 )
@@ -23,7 +23,7 @@ TAG = re.compile(
 
 def validate_tag(tag: str) -> None:
     if not TAG.fullmatch(tag):
-        raise ValueError("Expected a website-<SemVer> tag, for example website-1.2.3")
+        raise ValueError("Expected a v<SemVer> tag, for example v1.2.3")
 
 
 def protected(path: PurePosixPath) -> bool:

@@ -25,12 +25,11 @@ Microsoft Edge when bundled Chromium is unavailable.
 
 ## Production deployment
 
-The **Kalm website** workflow runs FTP safeguard checks on branch pushes and pull requests. Full site gates run on manual dispatch or deployment tags. Push a `website-<SemVer>` tag (for example,
-`website-1.2.3` or `website-1.2.3-rc.1+build.7`) to deploy that tag's site.
-Malformed `website-*` tags fail before dependency installation. Website tags deploy only after the website gates pass. Type, content, build/link, browser, or deployment
-errors stop the release; the fiddle is not built or deployed.
+The **Website checks** workflow runs the full site gates on branch pushes and pull requests, and can also be started manually. The **Release website** workflow runs the same gates for version tags before deploying. Push a `v<SemVer>` tag (for example,
+`v1.2.3` or `v1.2.3-rc.1+build.7`) to deploy that tag's site.
+Malformed version tags fail before dependency installation. Type, content, build/link, browser, or deployment errors stop the release; the fiddle is not built or deployed.
 
-After the build passes, the deployment job uses the `website-prod` GitHub environment
+After the build passes, the deployment job uses the `prod` GitHub environment
 and its `DESTINATION_FTP_HOST`, `DESTINATION_FTP_PASSWORD`, `DESTINATION_FTP_PORT`,
 and `DESTINATION_FTP_USER` secrets. Deployments share a concurrency group so active
 FTP uploads cannot overlap or be cancelled by a newer release.

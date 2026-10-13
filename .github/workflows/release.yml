@@ -1,56 +1,35 @@
-name: Kalm website
+name: Release website
 
 on:
   push:
-    branches: [main]
-    tags: ['website-*']
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+    tags: ['v*.*.*']
 
 permissions:
   contents: read
 
 jobs:
-  safeguards:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    concurrency:
-      group: website-safeguards-${{ github.ref }}
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
-
   website:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_type == 'tag')
-    needs: safeguards
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       KALM_PACKAGES_USER: ${{ vars.KALM_PACKAGES_USER || github.actor }}
       KALM_PACKAGES_READ_TOKEN: ${{ secrets.KALM_PACKAGES_READ_TOKEN }}
-    defaults:
-      run:
-        working-directory: .
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Validate website release tag
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        working-directory: .
         env:
           WEBSITE_TAG: ${{ github.ref_name }}
         run: python3 scripts/deploy_website.py validate-tag "$WEBSITE_TAG"
+      - name: Check deployment safeguards
+        run: python3 -m unittest discover -s scripts -p 'test_deploy_website.py'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-package-lock --no-audit --no-fund --fetch-retries=0
+      - name: Install website dependencies
+        run: npm install --no-package-lock --no-audit --no-fund --fetch-retries=0
       - run: npm run check
       - run: npm run test:content
       - uses: actions/setup-java@v4
@@ -68,13 +47,12 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    if: github.event_name == 'push' && github.ref_type == 'tag'
     needs: website
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: website-prod
+    environment: prod
     concurrency:
-      group: website-prod
+      group: prod
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4

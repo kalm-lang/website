@@ -104,15 +104,15 @@ class WebsiteDeploymentTest(unittest.TestCase):
                              for command, path in self.ftp.events))
 
     def test_semver_release_tags(self) -> None:
-        for tag in ("website-0.0.0", "website-1.2.3", "website-10.20.30-rc.1",
-                    "website-1.2.3-0", "website-1.2.3-01a", "website-1.2.3+build.001",
-                    "website-1.2.3-beta.1+sha.abc"):
+        for tag in ("v0.0.0", "v1.2.3", "v10.20.30-rc.1",
+                    "v1.2.3-0", "v1.2.3-01a", "v1.2.3+build.001",
+                    "v1.2.3-beta.1+sha.abc"):
             with self.subTest(tag=tag):
                 validate_tag(tag)
-        for tag in ("v1.2.3", "website-v1.2.3", "website-1.2", "website-01.2.3",
-                    "website-1.02.3", "website-1.2.03", "website-1.2.3-01",
-                    "website-1.2.3-rc.01", "website-1.2.3-", "website-1.2.3+",
-                    "website-1.2.3-a..b", "website-1.2.3\n", "website-1.2.3/other"):
+        for tag in ("1.2.3", "website-v1.2.3", "v1.2", "v01.2.3",
+                    "v1.02.3", "v1.2.03", "v1.2.3-01",
+                    "v1.2.3-rc.01", "v1.2.3-", "v1.2.3+",
+                    "v1.2.3-a..b", "v1.2.3\n", "v1.2.3/other"):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 validate_tag(tag)
 
