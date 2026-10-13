@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { routes } from '../scripts/routes.mjs';
+import {expect, test} from '@playwright/test';
+import {routes} from '../scripts/routes.mjs';
 
 async function chooseTheme(page, theme) {
-  await page.locator('kalm-theme-toggle .theme-trigger').click();
+  await page.locator('kalm-settings-menu .settings-trigger').click();
   await page.locator(`[data-theme-choice="${theme}"]`).click();
 }
 
@@ -13,7 +13,7 @@ test('every Markdown page loads without runtime errors', async ({ page }) => {
   for (const route of [{ path: '/' }, ...routes]) {
     await page.goto(route.path);
     await expect(page.locator('h1')).toBeVisible();
-    await expect(page.getByLabel('Color theme')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
   }
   expect(errors).toEqual([]);
 });
@@ -43,7 +43,7 @@ test('theme persists across navigation and code copy preserves the source', asyn
   await chooseTheme(page, 'dark');
   await page.getByRole('link', { name: 'Start writing' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('kalm-theme-toggle .theme-trigger')).toHaveAttribute('aria-label', 'Color theme: dark');
+  await expect(page.locator('kalm-settings-menu .settings-trigger')).toHaveAttribute('aria-label', 'Settings');
   await chooseTheme(page, 'light');
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(243, 232, 213)');
   await page.goto('/');

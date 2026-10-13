@@ -6,12 +6,8 @@
 body > main { flex: 1 0 auto; width: 100%; }
 .brand { display: inline-flex; align-items: center;
   font: 800 clamp(1.4rem, 5vw, 1.8rem) var(--mono); letter-spacing: -.09em; text-decoration: none; }
-/* Keep the preference control visually attached to the wordmark on every width. */
-kalm-dialect-toggle { margin-left: -.9rem; }
 kalm-site-nav { margin-left: auto; }
-kalm-dialect-toggle { display: none; flex: 0 0 auto; }
-html[data-js-enhanced] kalm-dialect-toggle { display: block; }
-kalm-theme-toggle { position: relative; display: block; flex: 0 0 44px; width: 44px; height: 44px; }
+kalm-settings-menu { position: relative; display: block; flex: 0 0 44px; width: 44px; height: 44px; }
 .site-footer { width: 100%; max-width: 88rem; margin: 5rem auto 0; padding: 1.5rem 4vw 2rem;
   border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between;
   gap: 2.5rem; color: var(--muted); font: .8rem/1.6 var(--mono); }
@@ -19,13 +15,19 @@ kalm-theme-toggle { position: relative; display: block; flex: 0 0 44px; width: 4
 @media (max-width: 700px) {
   .site-header-inner { min-height: 4.5rem; gap: .5rem; flex-wrap: wrap; }
   .brand { margin-right: 0; }
-  kalm-dialect-toggle { order: 0; margin-left: 0; }
   kalm-site-nav { order: 3; margin-left: 0; }
-  kalm-theme-toggle { order: 1; margin-left: auto; }
+  kalm-settings-menu { order: 1; margin-left: auto; }
   .site-footer { margin-top: 3rem; padding-inline: 1rem; font-size: .72rem; }
 }
 
-.theme-popover.preferences-popover { width: min(20rem, calc(100vw - 24px)); gap: .45rem; }
+.settings-popover { width: min(20rem, calc(100vw - 24px)); gap: .45rem; }
+.settings-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: .2rem; padding: .1rem; }
+.settings-tab { min-height: 38px; border: 0; border-radius: 6px; color: var(--muted); background: transparent;
+  font: .75rem/1.5 var(--mono); cursor: pointer; }
+.settings-tab:hover, .settings-tab[aria-selected='true'] { color: var(--accent); background: var(--soft); }
+.settings-tab:focus-visible { outline-offset: -2px; }
+.theme-settings-content, .code-settings-content { display: grid; gap: .2rem; }
+.code-settings-content { gap: .45rem; }
 .popover-heading { margin: 0; padding: .4rem .6rem .1rem; font: 600 .8rem/1.5 var(--mono); }
 .preference-setting { min-width: 0; margin: 0; padding: 0; border: 0; }
 .preference-setting legend { padding: .2rem .6rem; color: var(--muted); font: .7rem/1.5 var(--mono); }

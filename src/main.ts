@@ -1,15 +1,14 @@
-import { enhanceHomeNavigation } from './components/home-navigation';
-import './components/theme-toggle';
+import {enhanceHomeNavigation} from './components/home-navigation';
+import './components/settings-menu';
 import './components/site-nav';
 import './components/code-block';
 import './components/greeting-demo';
 import './components/code-tabs';
 import './components/code-compare';
-import './components/dialect-toggle';
-import { enhanceFeatureDialogs } from './components/feature-dialogs';
-import { enhanceSectionNavigation } from './components/section-nav';
-import { enhanceDocumentScrollbar } from './components/document-scrollbar';
-import { enhanceMainFocus } from './components/main-focus';
+import {enhanceFeatureDialogs} from './components/feature-dialogs';
+import {enhanceSectionNavigation} from './components/section-nav';
+import {enhanceDocumentScrollbar} from './components/document-scrollbar';
+import {enhanceMainFocus} from './components/main-focus';
 
 enhanceFeatureDialogs();
 enhanceSectionNavigation();

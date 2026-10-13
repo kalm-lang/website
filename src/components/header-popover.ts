@@ -1,7 +1,7 @@
-import { autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
-import { gsap } from 'gsap';
+import {autoUpdate, computePosition, flip, offset, shift, size} from '@floating-ui/dom';
+import {gsap} from 'gsap';
 
-/** Both header settings menus use the same positioning, focus, and motion. */
+/** Positions the header settings menu and manages its focus and motion. */
 export class HeaderPopover {
   private open = false;
   private cleanup?: () => void;

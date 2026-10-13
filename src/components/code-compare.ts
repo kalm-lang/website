@@ -70,7 +70,7 @@ class CodeCompare extends HTMLElement {
       const width = expand ? Math.max(normalWidth, availableWidth) : normalWidth;
       this.style.width = expand ? width + 'px' : '';
       this.dataset.stacked = String(
-        width < (modal ? 37 : 57) * parseFloat(getComputedStyle(document.documentElement).fontSize),
+        modal || width < 57 * parseFloat(getComputedStyle(document.documentElement).fontSize),
       );
       const explanation = this.querySelector<HTMLElement>('.script-unavailable');
       if (explanation)

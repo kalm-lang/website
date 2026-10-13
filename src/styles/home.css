@@ -11,9 +11,11 @@
 .button { max-width: 100%; min-height: 48px; border: 1px solid var(--line); border-radius: 7px;
   padding: .75rem 1rem; text-decoration: none; display: inline-flex; align-items: center;
   justify-content: space-between; gap: .75rem; background: var(--surface);
-  font: .8rem/1.6 var(--mono); transition: background-color .15s, border-color .15s; }
+  font: .8rem/1.6 var(--mono); transition: background-color .15s, border-color .15s, transform .15s cubic-bezier(.22,.75,.25,1); }
 .button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .button:hover { border-color: var(--accent); }
+.button .icon { transition: transform .15s cubic-bezier(.22,.75,.25,1); }
+.button:hover .icon { transform: translateX(3px); }
 .hero-sample { min-width: 0; position: relative; }
 .hero-sample kalm-greeting-demo { display: block; }
 .hero-sample kalm-code-block { margin: 0; border-radius: 10px 10px 0 0; box-shadow: none; }

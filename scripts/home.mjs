@@ -35,7 +35,7 @@ export function home() {
   const greeting = readDocument(`${contentRoot}/home/greeting.md`);
   const greetingSource = greeting.content.replaceAll('"Mira"', '"EditableName"');
   const greetingCode = markdown(greetingSource, greeting.source, 'greeting')
-    .replaceAll('EditableName', '<span data-greeting-slot>Mira</span>');
+    .replaceAll('EditableName', '<span data-greeting-slot></span>');
   const notes = contentFiles('home/notes').map(readDocument).sort((a, b) => a.order - b.order);
   return `<main id="main" tabindex="0" class="home">
     <section class="hero">
@@ -66,7 +66,7 @@ export function home() {
       <div class="section-heading"><h2 id="learn-kalm">Learn Kalm</h2></div>
       <div class="start-content">
         <p>${dialectText('Start with a word counter. Add file input, handle errors, and finish with tests. Eight small steps, one useful program.', 'Start with a word counter in a single script. Add file input and handle errors, then explore project mode for reusable APIs and native tests.')}</p>
-        <a class="button" href="/learn/">Follow the learning path ${icon('arrow-right')}</a>
+        <a class="button" data-home-navigation href="/learn/">Follow the learning path ${icon('arrow-right')}</a>
       </div>
     </section>
   </main>`;

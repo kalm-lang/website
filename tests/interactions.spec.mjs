@@ -11,21 +11,21 @@ test('appearance popover preserves the header and page position and saves scroll
     await page.evaluate(() => window.scrollTo({ top: 300, behavior: 'instant' }));
     const before = await page.locator('.site-header-inner').boundingBox();
     const scroll = await page.evaluate(() => window.scrollY);
-    const button = await page.locator('kalm-theme-toggle .theme-trigger').boundingBox();
+    const button = await page.locator('kalm-settings-menu .settings-trigger').boundingBox();
     // Locator.click scrolls sticky targets into their original document position.
     // A pointer click exercises the browser interaction without that extra step.
     await page.mouse.click(button.x + button.width / 2, button.y + button.height / 2);
-    await expect(page.locator('kalm-theme-toggle .theme-popover')).toBeVisible();
+    await expect(page.locator('kalm-settings-menu .settings-popover')).toBeVisible();
     expect(await page.locator('.site-header-inner').boundingBox()).toEqual(before);
     expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const choice = await page.getByRole('button', { name: 'Dark', exact: true }).boundingBox();
     await page.mouse.click(choice.x + choice.width / 2, choice.y + choice.height / 2);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(page.locator('kalm-theme-toggle .theme-popover')).toBeHidden();
+    await expect(page.locator('kalm-settings-menu .settings-popover')).toBeHidden();
     expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
   }
-  await page.locator('kalm-theme-toggle .theme-trigger').click();
+  await page.locator('kalm-settings-menu .settings-trigger').click();
   const toggle = page.getByRole('switch', { name: 'Custom scrollbar' });
   await expect(toggle).toBeChecked();
   await toggle.click();
@@ -33,11 +33,11 @@ test('appearance popover preserves the header and page position and saves scroll
   await expect(page.locator('.document-scrollbar')).toBeHidden();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-scrollbar-style', 'native');
-  await page.locator('kalm-theme-toggle .theme-trigger').click();
+  await page.locator('kalm-settings-menu .settings-trigger').click();
   await page.getByRole('switch', { name: 'Custom scrollbar' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-scrollbar-style', 'custom');
   await page.keyboard.press('Escape');
-  await expect(page.locator('kalm-theme-toggle .theme-trigger')).toBeFocused();
+  await expect(page.locator('kalm-settings-menu .settings-trigger')).toBeFocused();
   expect(errors).toEqual([]);
 });
 

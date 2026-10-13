@@ -10,7 +10,7 @@ test('both settings menus share appearance, toggle behavior and viewport-safe mo
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/');
     const preferences = page.getByRole('button', { name: 'Code preferences', exact: true });
-    const theme = page.locator('kalm-theme-toggle .theme-trigger');
+    const theme = page.locator('kalm-settings-menu .settings-trigger');
     const alignment = await preferences.evaluate(e => {
       const b = e.getBoundingClientRect(), title = document.querySelector('.brand').getBoundingClientRect();
       return { gap: b.left - title.right, centers: Math.abs(b.top + b.height / 2 - title.top - title.height / 2) };
@@ -34,12 +34,12 @@ test('both settings menus share appearance, toggle behavior and viewport-safe mo
     await preferences.click();
     await expect(panel).toBeHidden();
     await theme.click();
-    await expect(page.locator('kalm-theme-toggle .theme-popover')).toBeVisible();
-    expect(await page.locator('kalm-theme-toggle .theme-popover').evaluate(e => {
+    await expect(page.locator('kalm-settings-menu .settings-popover')).toBeVisible();
+    expect(await page.locator('kalm-settings-menu .settings-popover').evaluate(e => {
       const s = getComputedStyle(e); return [s.padding, s.borderRadius, s.borderColor, s.backgroundColor, s.boxShadow];
     })).toEqual(appearance);
     await theme.click();
-    await expect(page.locator('kalm-theme-toggle .theme-popover')).toBeHidden();
+    await expect(page.locator('kalm-settings-menu .settings-popover')).toBeHidden();
     await preferences.click();
     await panel.locator('summary').click();
     await expect(panel.locator('[data-preference="os"][data-value="windows"]')).toBeVisible();

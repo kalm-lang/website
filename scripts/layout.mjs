@@ -27,11 +27,10 @@ export function layout(title, body, section = '') {
   <header class="site-header">
     <div class="site-header-inner">
     <a class="brand" href="/" aria-label="Kalm home">kalm</a>
-    <kalm-dialect-toggle></kalm-dialect-toggle>
     ${section ? `<button class="topic-trigger" type="button" aria-label="Browse ${section} topics" title="Browse ${section} topics" aria-expanded="false" aria-controls="section-navigation">${icon({ docs: 'book-open', examples: 'code-xml', learn: 'route' }[section])}</button>` : ''}
     <kalm-site-nav><button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation">${icon('menu')}<span>Menu</span></button>${mainNavigation(section)}</kalm-site-nav>
-    <kalm-theme-toggle><button class="theme-trigger" type="button" aria-label="Color theme: system"
-      title="Color theme: system" aria-expanded="false" aria-controls="theme-popover">${icon('monitor')}</button></kalm-theme-toggle>
+    <kalm-settings-menu><button class="settings-trigger" type="button" aria-label="Settings"
+      title="Settings" aria-expanded="false" aria-controls="settings-popover">${icon('settings')}</button></kalm-settings-menu>
     </div>
   </header>
   ${body}

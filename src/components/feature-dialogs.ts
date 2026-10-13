@@ -1,5 +1,5 @@
-import { gsap } from 'gsap';
-import { Flip } from 'gsap/Flip';
+import {gsap} from 'gsap';
+import {Flip} from 'gsap/Flip';
 
 gsap.registerPlugin(Flip);
 
@@ -29,6 +29,8 @@ export function enhanceFeatureDialogs() {
     let timeline: gsap.core.Timeline | undefined;
     let closing = false;
     let opening = false;
+    let openWidth = 0;
+    let openHeight = 0;
 
     const lockContent = () => {
       const bounds = back.getBoundingClientRect();
@@ -39,7 +41,9 @@ export function enhanceFeatureDialogs() {
     const finishOpen = () => {
       opening = false;
       delete dialog.dataset.transition;
-      gsap.set(dialog, { clearProps: 'transform,width,height' });
+      // Keep the dialog at the exact size used as the Flip destination. Letting
+      // its contents recalculate immediately here caused a visible snap.
+      gsap.set(dialog, { clearProps: 'transform', width: openWidth, height: openHeight });
       gsap.set(content, { clearProps: 'width,height' });
     };
     const finishClose = () => {
@@ -88,6 +92,10 @@ export function enhanceFeatureDialogs() {
       dialog.showModal();
       dialog.querySelector<HTMLElement>('.feature-close')?.focus({ preventScroll: true });
       if (reduced.matches) { gsap.set(surface, { rotationY: 180 }); return; }
+      const modalBounds = dialog.getBoundingClientRect();
+      openWidth = modalBounds.width;
+      openHeight = modalBounds.height;
+      gsap.set(dialog, { width: openWidth, height: openHeight });
       lockContent();
       const layoutState = Flip.getState(dialog);
       dialog.dataset.transition = 'opening';

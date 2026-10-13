@@ -54,7 +54,7 @@ html[data-theme='dark'] .shiki, html[data-theme='dark'] .shiki span { color: var
 .comparison-controls .source-tab-bar { padding: 0; }
 .comparison-layout { display: grid; place-items: center; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; background: transparent; }
 .comparison-layout .icon { width: 1.1rem; height: 1.1rem; }
-.copy-button { width: 5.5rem; flex: 0 0 5.5rem; }
+.copy-button { width: 5.5rem; flex: 0 0 5.5rem; justify-content: flex-end; padding-right: 0; }
 kalm-code-tabs > section > kalm-code-compare { margin: 0; border: 0; border-radius: 0; }
 kalm-code-tabs > .source-tab-bar { border-bottom: 0; }
 kalm-code-tabs > section > kalm-code-compare > .comparison-controls { border-bottom: 0; }

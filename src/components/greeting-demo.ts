@@ -51,6 +51,7 @@ export class GreetingDemo extends HTMLElement {
         this.input.autocomplete = 'off';
         this.input.spellcheck = false;
         this.input.setAttribute('aria-label', 'Greeting name');
+        this.input.hidden = true;
         slot.replaceWith(this.input);
       }
     }
@@ -60,13 +61,13 @@ export class GreetingDemo extends HTMLElement {
     if (!this.input || !this.output) return;
 
     this.touched = false;
-    this.input.value = names[Math.floor(Math.random() * names.length)];
+    this.input.value = '';
     this.resizeInput();
     this.input.addEventListener('input', this.onInput);
     this.input.addEventListener('focus', this.onFocus);
     this.addEventListener('kalm-source-change', this.onDialect);
     this.scheduleGreeting(650);
-    this.scheduleNameChange();
+    this.scheduleNameChange(0);
   }
 
   disconnectedCallback() {
@@ -134,22 +135,22 @@ export class GreetingDemo extends HTMLElement {
     typeNext();
   }
 
-  private scheduleNameChange() {
+  private scheduleNameChange(delay = 20_000) {
     clearTimeout(this.nameTimer);
     if (this.touched || !this.input) return;
-    this.nameTimer = setTimeout(() => this.changeName(), 20_000);
+    this.nameTimer = setTimeout(() => this.changeName(), delay);
   }
 
   private changeName() {
     if (this.touched || !this.input) return;
-    const current = this.input.value;
-    const options = names.filter(name => name !== current);
+    const options = names.filter(name => name !== this.input!.value);
     const next = options[Math.floor(Math.random() * options.length)];
     const update = () => {
       if (this.touched || !this.input) return;
       this.input.value = next;
       this.resizeInput();
       this.input.classList.remove('is-changing');
+      this.input.hidden = false;
       this.scheduleGreeting(320);
       this.scheduleNameChange();
     };
@@ -161,6 +162,7 @@ export class GreetingDemo extends HTMLElement {
     this.input.classList.add('is-changing');
     this.nameSwapTimer = setTimeout(update, 160);
   }
+
 }
 
 customElements.define('kalm-greeting-demo', GreetingDemo);

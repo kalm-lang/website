@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 const paths = ['/', '/docs/quick-start/', '/docs/specifications/1.1/', '/examples/layout/', '/learn/07-files/'];
 const fitsViewport = page => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
@@ -9,7 +9,7 @@ test('phone, tablet, and desktop layouts keep content within the viewport', asyn
     await page.setViewportSize({ width, height: 900 });
     for (const path of paths) {
       await page.goto(path);
-      await expect(page.getByLabel('Color theme')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
       if (path === '/') {
         for (const summary of await page.locator('.feature summary').all()) await summary.click();
       }
@@ -66,7 +66,7 @@ test('small screens remain usable with enlarged text and touch sized controls', 
     expect(await fitsViewport(page), `${path} with enlarged text`).toBe(true);
   }
   await page.goto('/');
-  for (const selector of ['.menu-button', 'kalm-theme-toggle .theme-trigger', '.copy-button']) {
+  for (const selector of ['.menu-button', 'kalm-settings-menu .settings-trigger', '.copy-button']) {
     const target = page.locator(selector).first();
     await expect(target).toBeVisible();
     expect((await target.boundingBox()).height).toBeGreaterThanOrEqual(44);

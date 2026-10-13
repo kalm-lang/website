@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 test('mobile topics are closed before enhancement and appearance has no scrollbar setting', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -19,7 +19,7 @@ test('mobile topics are closed before enhancement and appearance has no scrollba
     await page.waitForLoadState('load');
     await page.unroute('**/*', handler);
   }
-  await page.locator('kalm-theme-toggle .theme-trigger').click();
+  await page.locator('kalm-settings-menu .settings-trigger').click();
   await expect(page.getByRole('switch', { name: 'Custom scrollbar' })).toHaveCount(0);
   await expect(page.locator('.document-scrollbar')).toBeHidden();
 });
@@ -60,7 +60,7 @@ test('main focus is outlined only through Tab or the skip link', async ({ page }
   await expect(main).toBeFocused();
   await expect(main).not.toHaveAttribute('data-main-focus', '');
   await expect(main).toHaveCSS('outline-style', 'none');
-  await page.locator('kalm-theme-toggle .theme-trigger').focus();
+  await page.locator('kalm-settings-menu .settings-trigger').focus();
   await page.keyboard.press('Tab');
   await expect(main).toBeFocused();
   await expect(main).toHaveAttribute('data-main-focus', '');

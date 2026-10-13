@@ -1,13 +1,38 @@
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Braces, Check, ChevronDown,
-  CircleHelp, CodeXml, Copy, FileCode, Layers, Link, Menu, Monitor, Moon, Plus,
-  Route, Search, Sun, Terminal, Timer, X, Columns2, SlidersHorizontal } from 'lucide';
+import {
+    ArrowLeft,
+    ArrowRight,
+    ArrowUpRight,
+    BookOpen,
+    Braces,
+    Check,
+    ChevronDown,
+    CircleHelp,
+    CodeXml,
+    Columns2,
+    Copy,
+    FileCode,
+    Layers,
+    Link,
+    Menu,
+    Monitor,
+    Moon,
+    Plus,
+    Route,
+    Search,
+    Settings,
+    SlidersHorizontal,
+    Sun,
+    Terminal,
+    Timer,
+    X
+} from 'lucide';
 
 const nodes = { 'arrow-left': ArrowLeft, 'arrow-right': ArrowRight, 'arrow-up-right': ArrowUpRight,
   'book-open': BookOpen, braces: Braces, check: Check, 'chevron-down': ChevronDown,
   'circle-help': CircleHelp, 'code-xml': CodeXml, copy: Copy, 'file-code': FileCode,
   layers: Layers, link: Link, menu: Menu, monitor: Monitor, moon: Moon, plus: Plus,
   route: Route, search: Search, sun: Sun, terminal: Terminal, timer: Timer, x: X,
-  'columns-2': Columns2, 'sliders-horizontal': SlidersHorizontal };
+  'columns-2': Columns2, 'sliders-horizontal': SlidersHorizontal, settings: Settings };
 
 // Render the same Lucide nodes at build time and during browser enhancement.
 // All SVGs are decorative; their enclosing controls provide accessible names.
