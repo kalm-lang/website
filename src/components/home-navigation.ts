@@ -6,7 +6,9 @@ export function enhanceHomeNavigation() {
   window.addEventListener('kalm-home-navigation', ((
     event: CustomEvent<{ event: MouseEvent; url: string }>,
   ) => {
-    if (native || reduced()) return;
+    const url = new URL(event.detail.url);
+    const rootNavigation = url.origin === location.origin && url.pathname === '/';
+    if ((native && url.origin === location.origin && !rootNavigation) || reduced()) return;
     event.detail.event.preventDefault();
     if (leaving) return;
     leaving = true;
@@ -23,7 +25,7 @@ export function enhanceHomeNavigation() {
   try {
     const path = sessionStorage.getItem('kalm-home-arrival');
     sessionStorage.removeItem('kalm-home-arrival');
-    if (path === location.pathname && !native && !reduced())
+    if (path === location.pathname && (!native || location.pathname === '/') && !reduced())
       gsap.from('#main', {
         opacity: 0,
         y: 5,

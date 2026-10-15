@@ -1,8 +1,8 @@
 export function installHomeNavigation() {
-  let eligible = false;
+  let forceFallback = false;
   const accept = (event) => {
     const link =
-      event.target instanceof Element ? event.target.closest('a[data-home-navigation]') : null;
+      event.target instanceof Element ? event.target.closest('a[href]') : null;
     if (
       !link ||
       event.button !== 0 ||
@@ -16,18 +16,25 @@ export function installHomeNavigation() {
     )
       return null;
     const target = new URL(link.href);
-    return location.pathname === '/' && target.origin === location.origin && target.pathname !== '/'
-      ? target
-      : null;
+    if (target.protocol !== 'http:' && target.protocol !== 'https:') return null;
+    if (
+      target.origin === location.origin &&
+      target.pathname === location.pathname &&
+      target.search === location.search
+    )
+      return null;
+    return target;
   };
   document.addEventListener('click', (event) => {
     const target = accept(event);
-    eligible = Boolean(target);
     if (!target) return;
-    try {
-      sessionStorage.setItem('kalm-home-arrival', target.pathname);
-    } catch {
-      /* Optional arrival motion. */
+    forceFallback = target.origin === location.origin && target.pathname === '/';
+    if (target.origin === location.origin) {
+      try {
+        sessionStorage.setItem('kalm-home-arrival', target.pathname);
+      } catch {
+        /* Optional arrival motion. */
+      }
     }
     window.dispatchEvent(
       new CustomEvent('kalm-home-navigation', { detail: { event, url: target.href } }),
@@ -36,11 +43,11 @@ export function installHomeNavigation() {
   window.addEventListener('pageswap', (event) => {
     if (
       event.viewTransition &&
-      (!eligible || matchMedia('(prefers-reduced-motion: reduce)').matches)
+      (forceFallback || matchMedia('(prefers-reduced-motion: reduce)').matches)
     )
       event.viewTransition.skipTransition();
   });
   window.addEventListener('pageshow', () => {
-    eligible = false;
+    forceFallback = false;
   });
 }
