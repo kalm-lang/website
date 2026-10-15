@@ -36,6 +36,11 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
 .document-scrollbar[data-dragging] .document-scrollbar-thumb { border-radius: 9px; }
 .document-scrollbar[data-open] .document-scrollbar-thumb,
 .document-scrollbar[data-dragging] .document-scrollbar-thumb { filter: brightness(1.08); }
+.document-scrollbar[data-elastic] .document-scrollbar-thumb {
+  border-radius: 999px;
+  filter: brightness(1.18);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--accent) 34%, transparent);
+}
 @media (forced-colors: active) {
   .document-scrollbar { border-color: CanvasText; background: Canvas; box-shadow: none; }
   .document-scrollbar-thumb { border-color: Canvas; background: Highlight; }

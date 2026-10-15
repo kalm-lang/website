@@ -174,7 +174,7 @@ export function enhanceDocumentScrollbar() {
     const compression = Math.max(-.045, Math.min(.34, elastic.amount / 160 * .34));
     const position = scrollRange ? Math.min(1, Math.max(0, surface.scrollTop / scrollRange)) * travel : 0;
     thumb.style.height = `${thumbHeight}px`;
-    thumb.style.transform = `translateY(${position}px) scaleY(${1 - compression})`;
+    thumb.style.transform = `translateY(${position}px) scaleX(${1 + compression * .55}) scaleY(${1 - compression})`;
   };
   const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
   const move = (event: PointerEvent) => {
