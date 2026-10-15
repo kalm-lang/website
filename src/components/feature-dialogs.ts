@@ -49,6 +49,21 @@ export function enhanceFeatureDialogs() {
     const finishClose = () => {
       timeline?.kill();
       timeline = undefined;
+      // Restore the real card in the same task that removes the dialog from
+      // the top layer. The native `close` event is queued, so deferring this
+      // until that event briefly exposes the dashed placeholder.
+      card.dataset.cardReturning = '';
+      delete trigger.dataset.cardOpen;
+      delete card.dataset.cardOpen;
+      if (card.matches(':hover')) {
+        card.addEventListener('pointerleave', () => delete card.dataset.cardReturning, { once: true });
+      } else {
+        requestAnimationFrame(() => delete card.dataset.cardReturning);
+      }
+      if (!document.querySelector('dialog.feature-dialog[open]')) {
+        delete root.dataset.dialogOpen;
+        root.style.removeProperty('--dialog-scrollbar-gap');
+      }
       dialog.close();
     };
     const close = () => {
@@ -76,6 +91,7 @@ export function enhanceFeatureDialogs() {
       if (dialog.open) return;
       closing = false;
       opening = false;
+      delete card.dataset.cardReturning;
       const bounds = card.getBoundingClientRect();
       const cardRadius = getComputedStyle(card).borderRadius;
       const copy = trigger.cloneNode(true) as HTMLElement;
