@@ -138,7 +138,7 @@ export function enhanceDocumentScrollbar() {
         sizeTween = gsap.to(dimensions, {
           height: trackHeight, width: trackWidth,
           duration: expanded ? (viewportSettling ? .52 : .62) : .46,
-          ease: expanded ? 'elastic.out(1, 0.62)' : 'power3.out',
+          ease: expanded ? 'elastic.out(1, 0.62)' : 'back.out(1.15)',
           onUpdate: render, onComplete: render,
         });
       }
@@ -165,7 +165,7 @@ export function enhanceDocumentScrollbar() {
         homeScrollbarRevealTimer = setTimeout(() => {
           homeScrollbarRevealTimer = undefined;
           if (!root.hasAttribute('data-home-scrollbar-fade') || !track.hasAttribute('data-visible') || track.hidden) return;
-          track.style.transition = 'none';
+          track.style.transition = 'background-color .16s ease, padding .18s ease';
           track.style.opacity = '0';
           track.style.visibility = 'visible';
           root.removeAttribute('data-home-scrollbar-fade');

@@ -22,7 +22,7 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
   transition: opacity .14s ease, background .16s ease, padding .18s ease; }
 .document-scrollbar[data-visible] { opacity: .9; pointer-events: auto; }
 html[data-home-scrollbar-fade] .document-scrollbar {
-  opacity: 0 !important; visibility: hidden !important; transition: none !important;
+  opacity: 0 !important; visibility: hidden !important;
 }
 .document-scrollbar[data-visible]:hover, .document-scrollbar[data-open],
 .document-scrollbar[data-scrolling], .document-scrollbar[data-dragging] { opacity: 1; }
