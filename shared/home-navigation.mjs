@@ -42,6 +42,9 @@ export function installHomeNavigation() {
     if (target.origin === location.origin) {
       try {
         sessionStorage.setItem('kalm-home-arrival', target.pathname);
+        if (location.pathname === '/' && target.pathname !== '/') {
+          sessionStorage.setItem('kalm-home-to-section', target.pathname);
+        }
       } catch {
         /* Optional arrival motion. */
       }

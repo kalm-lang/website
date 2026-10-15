@@ -50,8 +50,10 @@ html:not([data-js-enhanced]) #main:focus-visible { outline: 2px solid var(--acce
 .sidebar { view-transition-name: section-sidebar; }
 .site-header { view-transition-name: site-header; }
 ::view-transition-old(site-header), ::view-transition-new(site-header) { animation: none; }
+::view-transition-group(section-sidebar) { animation: none; }
 ::view-transition-old(section-sidebar) { display: none; }
 ::view-transition-new(section-sidebar) { animation: none; }
+html[data-home-to-section]::view-transition-new(section-sidebar) { animation: sidebar-in .22s ease-out .08s both; }
 ::view-transition-old(page-content) { animation: page-out .16s ease-in both; }
 html:has(.home)::view-transition-old(page-content) { animation: page-out .12s ease-in both; }
 ::view-transition-new(page-content) { animation: page-in .22s ease-out .08s both; }
@@ -60,5 +62,6 @@ html[data-home-intro]::view-transition-new(page-content) { animation: none; }
 ::view-transition-new(document-scrollbar) { animation: scrollbar-in .22s ease-out both; }
 @keyframes page-out { to { opacity: 0; transform: translateY(-5px); } }
 @keyframes page-in { from { opacity: 0; transform: translateY(5px); } }
+@keyframes sidebar-in { from { opacity: 0; } }
 @keyframes scrollbar-out { to { opacity: 0; } }
 @keyframes scrollbar-in { from { opacity: 0; } }
