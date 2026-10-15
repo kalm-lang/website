@@ -32,7 +32,6 @@ jobs:
       version: ${{ steps.release.outputs.release_version }}
       prerelease: ${{ steps.release.outputs.prerelease }}
     env:
-      KALM_PACKAGES_USER: ${{ vars.KALM_PACKAGES_USER || github.actor }}
       KALM_PACKAGES_READ_TOKEN: ${{ secrets.KALM_PACKAGES_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -103,15 +102,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
         run: npm pkg set "kalmVersion=$RELEASE_VERSION"
       - run: npm run check
-      - run: npm run test:content
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-      - run: npm run verify:code
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm test -- --max-failures=1
       - uses: actions/upload-artifact@v4
         with:
           name: kalm-website

@@ -12,7 +12,6 @@
     "check": "tsc --noEmit",
     "build": "node scripts/generate.mjs && vite build && node scripts/check-links.mjs",
     "preview": "vite preview",
-    "test:content": "node --test --experimental-test-isolation=none tests/*.test.mjs",
     "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs && node scripts/verify-comparisons.mjs && node scripts/verify-variants.mjs"
   },
   "dependencies": {

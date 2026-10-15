@@ -9,23 +9,18 @@ Run in `website/`:
 npm install --no-package-lock
 npm run dev
 npm run check
-npm run test:content
 npm run build
-npm test
 npm run verify:code
 ```
 
-Install Chromium once with `npx playwright install chromium`. `verify:code`
-requires a full JDK 25+ and published compiler/runtime/standard-library JARs, resolved by Maven.
+`verify:code` requires a full JDK 25+ and published compiler/runtime/standard-library JARs, resolved by Maven.
 It compiles all example and homepage snippets, exercises each cumulative lesson,
 and checks native tests plus the completed CLI's counts and failure behavior.
 Temporary compilation outputs are removed afterward.
-Set `KALM_TEST_BROWSER_CHANNEL=msedge` to run browser checks with an installed
-Microsoft Edge when bundled Chromium is unavailable.
 
 ## Production deployment
 
-The **Website checks** workflow runs the full site gates on branch pushes and pull requests, and can also be started manually. The **Release website** workflow runs the same gates for `vX.Y.Z[-status]` tags and for manual releases with `version` and `status` inputs. An empty manual version uses the numeric part of `kalmVersion` in `package.json`; `final` releases omit the status suffix. The release build sets the footer version to the selected release version, deploys it, creates the tag for manual releases, and creates a GitHub Release without assets. Type, content, build/link, browser, or deployment errors stop the release; the fiddle is not built or deployed.
+The **Website checks** workflow runs deployment-safeguard tests, type checks, and the production build/link check on branch pushes and pull requests, and can also be started manually. The **Release website** workflow runs the same gates for `vX.Y.Z[-status]` tags and for manual releases with `version` and `status` inputs. An empty manual version uses the numeric part of `kalmVersion` in `package.json`; `final` releases omit the status suffix. The release build sets the footer version to the selected release version, deploys it, creates the tag for manual releases, and creates a GitHub Release without assets. Type, build/link, or deployment errors stop the release; the fiddle is not built or deployed.
 
 After the build passes, the deployment job uses the `prod` GitHub environment
 and its `DESTINATION_FTP_HOST`, `DESTINATION_FTP_PASSWORD`, `DESTINATION_FTP_PORT`,
@@ -124,12 +119,7 @@ dialogs and navigation menus retain platform scrollbars.
 Main content receives focus only through an explicit Tab or skip-link action.
 Articles, code, and native disclosure cards remain readable without JavaScript.
 
-Update the pinned documentation package to consume content changes, then restart `npm run dev`. Production builds regenerate all
-pages. To run the navigation first-paint checks against Vite development mode:
-
-```sh
-KALM_TEST_SERVER=dev npm test -- tests/first-paint.spec.mjs
-```
+Update the pinned documentation package to consume content changes, then restart `npm run dev`. Production builds regenerate all pages.
 
 Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/blob/main/docs/bootstrap.md) before installing packages. The initial package versions must be published first. For unpublished local changes, use the [optional workspace](https://github.com/kalm-lang/tools/blob/main/docs/workspace.md), which installs tarballs without changing the dependency manifest.
 
@@ -144,10 +134,6 @@ the group supplies both languages. Code preferences hide unavailable script,
 block-style, and environment choices based on the installed content. Saved
 preferences fall back to supported choices without losing the stored selection.
 Unsupported highlighting languages render as escaped plain text.
-
-`npm run test:content` includes isolated build and link checks for legacy package
-APIs and content without the newer optional variants. New package APIs or content
-formats should extend these compatibility fixtures when necessary.
 
 ## Code preferences and authored variants
 

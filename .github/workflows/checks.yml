@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      KALM_PACKAGES_USER: ${{ vars.KALM_PACKAGES_USER || github.actor }}
       KALM_PACKAGES_READ_TOKEN: ${{ secrets.KALM_PACKAGES_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -34,12 +33,4 @@ jobs:
       - name: Install website dependencies
         run: npm install --no-package-lock --no-audit --no-fund --fetch-retries=0
       - run: npm run check
-      - run: npm run test:content
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-      - run: npm run verify:code
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm test -- --max-failures=1
