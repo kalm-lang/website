@@ -47,8 +47,11 @@ html:not([data-js-enhanced]) #main:focus-visible { outline: 2px solid var(--acce
 @view-transition { navigation: auto; }
 :root { view-transition-name: none; }
 #main { view-transition-name: page-content; }
+.sidebar { view-transition-name: section-sidebar; }
 .site-header { view-transition-name: site-header; }
 ::view-transition-old(site-header), ::view-transition-new(site-header) { animation: none; }
+::view-transition-old(section-sidebar) { display: none; }
+::view-transition-new(section-sidebar) { animation: none; }
 ::view-transition-old(page-content) { animation: page-out .16s ease-in both; }
 ::view-transition-new(page-content) { animation: page-in .22s ease-out both; }
 ::view-transition-old(document-scrollbar) { animation: scrollbar-out .16s ease-in both; }
