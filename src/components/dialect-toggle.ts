@@ -25,7 +25,6 @@ export class CodePreferences {
     }
     this.panel.insertAdjacentHTML('beforeend',
       '<div class="code-settings-content">' +
-      '<h2 class="popover-heading">Code preferences</h2>' +
       choices('dialect', 'Language', [['kalm', 'Kalm'], ['kalms', 'Kalm Script']]) +
       choices('style', 'Blocks', [['indentation', 'Indentation'], ['braces', 'Braces']]) +
       '<details class="preference-environment"><summary class="theme-option">Environment' + icon('chevron-down') + '</summary><div class="environment-fields">' +

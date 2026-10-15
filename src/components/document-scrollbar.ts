@@ -68,10 +68,8 @@ export function enhanceDocumentScrollbar() {
       return;
     }
     const expanded = track.hasAttribute('data-open') || dragging;
-    const pending = track.hasAttribute('data-pending-close');
-    const factor = pending ? .96 : 1;
-    const trackHeight = Math.min(expanded ? 560 : 160, viewportHeight * (expanded ? .65 : .22)) * factor;
-    const trackWidth = (expanded ? 24 : 18) * factor;
+    const trackHeight = Math.min(expanded ? 560 : 160, viewportHeight * (expanded ? .65 : .22));
+    const trackWidth = expanded ? 24 : 18;
     if (trackHeight !== targetHeight || trackWidth !== targetWidth) {
       const immediate = targetHeight < 0 || dragging || reduced.matches || track.hasAttribute('data-resizing');
       targetHeight = trackHeight; targetWidth = trackWidth;
@@ -83,15 +81,24 @@ export function enhanceDocumentScrollbar() {
         track.style.borderRadius = Math.min(12, dimensions.width/2)+'px'; measure();
       };
       if (immediate) { dimensions.height = trackHeight; dimensions.width = trackWidth; render(); }
-      else sizeTween = gsap.to(dimensions, {
-        inertia: {
-          height: { velocity: velocityHeight, end: trackHeight },
-          width: { velocity: velocityWidth, end: trackWidth },
-          duration: pending ? .14 : expanded ? .22 : .26,
-        },
-        onUpdate: render,
-        onComplete: render,
-      });
+      else {
+        const bounceHeight = expanded ? trackHeight + 24 : Math.max(120, trackHeight - 18);
+        const bounceWidth = expanded ? trackWidth + 3 : Math.max(16, trackWidth - 2);
+        sizeTween = gsap.to(dimensions, {
+          inertia: {
+            height: { velocity: velocityHeight, end: bounceHeight },
+            width: { velocity: velocityWidth, end: bounceWidth },
+            duration: expanded ? .22 : .26,
+          },
+          onUpdate: render,
+          onComplete: () => {
+            sizeTween = gsap.to(dimensions, {
+              height: trackHeight, width: trackWidth, duration: .46, ease: 'elastic.out(1, 0.55)',
+              onUpdate: render, onComplete: render,
+            });
+          },
+        });
+      }
     }
     track.style.top = `${(viewport?.offsetTop ?? 0) + viewportHeight / 2}px`;
     // Anchor the right edge so expansion grows inward without shifting the gutter.

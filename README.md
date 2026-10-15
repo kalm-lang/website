@@ -203,8 +203,9 @@ multiline bodies. Standalone Java 25 programs use compact main methods; packaged
 sources, reusable APIs, and class demonstrations retain explicit classes.
 
 GSAP/Flip animates card turns and code changes; InertiaPlugin preserves velocity
-through interrupted scrollbar changes. Reduced motion preserves the 350 ms
-closing grace period while bypassing movement. Homepage content links use native
+through interrupted scrollbar changes. Pointer exit keeps the scrollbar open
+for a 350 ms re-entry grace period, then animates it closed; reduced motion
+skips movement but preserves that grace period. Homepage content links use native
 cross-document View Transitions with a GSAP fallback. Sidebar scroll positions
 are stored per section and mobile/desktop surface in session storage.
 
