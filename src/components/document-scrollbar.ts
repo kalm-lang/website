@@ -1,6 +1,4 @@
 import { gsap } from 'gsap';
-import { InertiaPlugin } from 'gsap/InertiaPlugin';
-gsap.registerPlugin(InertiaPlugin);
 
 // Keep the document as the scroll surface so wheel, touch, anchors, and keyboard
 // navigation stay native. The overlay only replaces the document's gutter.
@@ -28,6 +26,9 @@ export function enhanceDocumentScrollbar() {
   let scrollTimer: ReturnType<typeof setTimeout>;
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
   let elasticTimer: ReturnType<typeof setTimeout> | undefined;
+  let viewportTimer: ReturnType<typeof setTimeout> | undefined;
+  let viewportChanging = false;
+  let viewportSettling = false;
   let sizeTween: gsap.core.Tween | undefined;
   let elasticTween: gsap.core.Tween | undefined;
   const elastic = {amount: 0};
@@ -36,7 +37,6 @@ export function enhanceDocumentScrollbar() {
   let targetHeight = -1;
   let targetWidth = -1;
   const dimensions = {height:160,width:18};
-  const velocity = InertiaPlugin.track(dimensions, 'height,width')[0];
   let outsideWindow = false;
   let pointerX = 0, pointerY = 0;
   let graceBounds: DOMRect | undefined;
@@ -123,11 +123,10 @@ export function enhanceDocumentScrollbar() {
     const expanded = track.hasAttribute('data-open') || dragging;
     const trackHeight = Math.min(expanded ? 560 : 160, viewportHeight * (expanded ? .65 : .22));
     const trackWidth = expanded ? 24 : 18;
-    if (trackHeight !== targetHeight || trackWidth !== targetWidth) {
-      const immediate = targetHeight < 0 || dragging || reduced.matches || track.hasAttribute('data-resizing');
+    const expansionChanged = targetWidth < 0 || (targetWidth === 24) !== expanded;
+    if ((!viewportChanging || expansionChanged) && (trackHeight !== targetHeight || trackWidth !== targetWidth)) {
+      const immediate = (!viewportSettling && targetHeight < 0) || dragging || reduced.matches || track.hasAttribute('data-resizing');
       targetHeight = trackHeight; targetWidth = trackWidth;
-      const velocityHeight = velocity.get('height');
-      const velocityWidth = velocity.get('width');
       sizeTween?.kill();
       const render = () => {
         track.style.height = dimensions.height+'px'; track.style.width = dimensions.width+'px';
@@ -135,21 +134,11 @@ export function enhanceDocumentScrollbar() {
       };
       if (immediate) { dimensions.height = trackHeight; dimensions.width = trackWidth; render(); }
       else {
-        const bounceHeight = expanded ? trackHeight + 24 : Math.max(120, trackHeight - 18);
-        const bounceWidth = expanded ? trackWidth + 3 : Math.max(16, trackWidth - 2);
         sizeTween = gsap.to(dimensions, {
-          inertia: {
-            height: { velocity: velocityHeight, end: bounceHeight },
-            width: { velocity: velocityWidth, end: bounceWidth },
-            duration: expanded ? .22 : .26,
-          },
-          onUpdate: render,
-          onComplete: () => {
-            sizeTween = gsap.to(dimensions, {
-              height: trackHeight, width: trackWidth, duration: .46, ease: 'elastic.out(1, 0.55)',
-              onUpdate: render, onComplete: render,
-            });
-          },
+          height: trackHeight, width: trackWidth,
+          duration: expanded ? (viewportSettling ? .52 : .62) : .46,
+          ease: expanded ? 'elastic.out(1, 0.62)' : 'power3.out',
+          onUpdate: render, onComplete: render,
         });
       }
     }
@@ -261,14 +250,25 @@ export function enhanceDocumentScrollbar() {
   window.addEventListener('touchend', () => { touchY = undefined; releaseEdgeOverscroll(); }, { passive: true });
   window.addEventListener('touchcancel', () => { touchY = undefined; releaseEdgeOverscroll(); }, { passive: true });
   const viewportChange = () => {
-    // Zoom and viewport changes must fit immediately, even during expansion.
-    track.dataset.resizing = '';
-    cancelClose(); sizeTween?.kill(); targetHeight = -1; targetWidth = -1;
+    // Ignore repeated size retargets during zoom, but let an open/close state
+    // change animate immediately. Reconcile dimensions when the viewport settles.
+    viewportChanging = true;
+    graceBounds = undefined;
     releaseEdgeOverscroll();
     endDrag();
-    delete track.dataset.open;
     update();
-    requestAnimationFrame(() => { delete track.dataset.resizing; });
+    clearTimeout(viewportTimer);
+    viewportTimer = setTimeout(() => {
+      viewportChanging = false;
+      viewportTimer = undefined;
+      // Retarget with one spring after zoom so interrupted dimensions settle
+      // smoothly instead of snapping or replaying the two-stage close.
+      sizeTween?.kill();
+      targetHeight = targetWidth = -1;
+      viewportSettling = true;
+      update();
+      viewportSettling = false;
+    }, 120);
   };
   window.addEventListener('resize', viewportChange, { passive: true });
   window.visualViewport?.addEventListener('resize', viewportChange, { passive: true });
