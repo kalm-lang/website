@@ -175,6 +175,14 @@ export function enhanceDocumentScrollbar() {
     const position = scrollRange ? Math.min(1, Math.max(0, surface.scrollTop / scrollRange)) * travel : 0;
     thumb.style.height = `${thumbHeight}px`;
     thumb.style.transform = `translateY(${position}px) scaleX(${1 + compression * .55}) scaleY(${1 - compression})`;
+    if (elasticEdge) {
+      const horizontalRadius = thumb.offsetWidth / 2;
+      const verticalRadius = Math.min(thumbHeight / 2,
+        horizontalRadius * (1 + compression * .55) / Math.max(.5, 1 - compression));
+      thumb.style.borderRadius = `${horizontalRadius}px / ${verticalRadius}px`;
+    } else {
+      thumb.style.removeProperty('border-radius');
+    }
   };
   const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
   const move = (event: PointerEvent) => {

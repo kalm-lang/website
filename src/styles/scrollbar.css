@@ -19,12 +19,12 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
   opacity: 0; pointer-events: none; transform: translate(-100%, -50%);
   view-transition-name: document-scrollbar;
   touch-action: none; user-select: none; cursor: grab;
-  transition: opacity .14s ease, background .16s ease; }
+  transition: opacity .14s ease, background .16s ease, padding .18s ease; }
 .document-scrollbar[data-visible] { opacity: .9; pointer-events: auto; }
 .document-scrollbar[data-visible]:hover, .document-scrollbar[data-open],
 .document-scrollbar[data-scrolling], .document-scrollbar[data-dragging] { opacity: 1; }
 .document-scrollbar[data-open], .document-scrollbar[data-dragging] {
-  width: 24px; height: min(65dvh, 560px); border-radius: 12px; }
+  width: 24px; height: min(65dvh, 560px); padding: 4px; border-radius: 12px; }
 .document-scrollbar[data-dragging] { transition: none; cursor: grabbing; }
 .document-scrollbar[data-resizing] { transition: none; }
 .document-scrollbar-thumb { width: 100%; border: 1px solid color-mix(in srgb, var(--accent-ink) 25%, transparent);
@@ -38,6 +38,7 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
 .document-scrollbar[data-dragging] .document-scrollbar-thumb { filter: brightness(1.08); }
 .document-scrollbar[data-elastic] .document-scrollbar-thumb {
   border-radius: 999px;
+  transition: filter .16s ease;
 }
 @media (forced-colors: active) {
   .document-scrollbar { border-color: CanvasText; background: Canvas; box-shadow: none; }
