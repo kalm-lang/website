@@ -137,8 +137,8 @@ export function enhanceDocumentScrollbar() {
       else {
         sizeTween = gsap.to(dimensions, {
           height: trackHeight, width: trackWidth,
-          duration: expanded ? (viewportSettling ? .52 : .62) : .46,
-          ease: expanded ? 'elastic.out(1, 0.62)' : 'back.out(1.15)',
+          duration: expanded ? (viewportSettling ? .28 : .32) : .32,
+          ease: expanded ? 'back.out(1.35)' : 'back.out(1.15)',
           onUpdate: render, onComplete: render,
         });
       }
