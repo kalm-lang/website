@@ -14,6 +14,7 @@ export function enhanceHomeNavigation() {
     leaving = true;
     const target =
       document.querySelector('dialog[open] .card-turn-back') || document.querySelector('#main');
+    const scrollbar = document.querySelector('.document-scrollbar');
     gsap.to(target, {
       opacity: 0,
       y: -5,
@@ -21,6 +22,7 @@ export function enhanceHomeNavigation() {
       ease: 'power2.in',
       onComplete: () => location.assign(event.detail.url),
     });
+    gsap.to(scrollbar, { opacity: 0, duration: 0.16, ease: 'power2.in' });
   }) as EventListener);
   try {
     const path = sessionStorage.getItem('kalm-home-arrival');
@@ -33,6 +35,13 @@ export function enhanceHomeNavigation() {
         ease: 'power2.out',
         clearProps: 'opacity,transform',
       });
+    if (path === location.pathname && (!native || location.pathname === '/') && !reduced())
+      gsap.from('.document-scrollbar', {
+        opacity: 0,
+        duration: 0.22,
+        ease: 'power2.out',
+        clearProps: 'opacity',
+      });
   } catch {
     /* No arrival animation is required for navigation to work. */
   }
@@ -41,5 +50,7 @@ export function enhanceHomeNavigation() {
     if (!event.persisted) return;
     gsap.killTweensOf('#main');
     gsap.set('#main', { clearProps: 'opacity,transform' });
+    gsap.killTweensOf('.document-scrollbar');
+    gsap.set('.document-scrollbar', { clearProps: 'opacity' });
   });
 }

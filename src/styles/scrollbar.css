@@ -17,6 +17,7 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
   border: 1px solid var(--line); border-radius: 9px;
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   opacity: 0; pointer-events: none; transform: translate(-100%, -50%);
+  view-transition-name: document-scrollbar;
   touch-action: none; user-select: none; cursor: grab;
   transition: opacity .14s ease, background .16s ease; }
 .document-scrollbar[data-visible] { opacity: .9; pointer-events: auto; }
@@ -29,6 +30,8 @@ html:not([data-scrollbar-style='native']) :is(pre, .table-scroll):not(dialog *):
 .document-scrollbar-thumb { width: 100%; border: 1px solid color-mix(in srgb, var(--accent-ink) 25%, transparent);
   border-radius: 6px; background: var(--accent);
   transition: border-radius .24s ease, filter .16s ease; }
+.document-scrollbar[data-elastic='top'] .document-scrollbar-thumb { transform-origin: center top; }
+.document-scrollbar[data-elastic='bottom'] .document-scrollbar-thumb { transform-origin: center bottom; }
 .document-scrollbar[data-open] .document-scrollbar-thumb,
 .document-scrollbar[data-dragging] .document-scrollbar-thumb { border-radius: 9px; }
 .document-scrollbar[data-open] .document-scrollbar-thumb,

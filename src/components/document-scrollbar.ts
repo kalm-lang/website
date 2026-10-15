@@ -27,7 +27,12 @@ export function enhanceDocumentScrollbar() {
   let thumbHeight = 0;
   let scrollTimer: ReturnType<typeof setTimeout>;
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  let elasticTimer: ReturnType<typeof setTimeout> | undefined;
   let sizeTween: gsap.core.Tween | undefined;
+  let elasticTween: gsap.core.Tween | undefined;
+  const elastic = {amount: 0};
+  let elasticTarget = 0;
+  let elasticEdge: 'top' | 'bottom' | undefined;
   let targetHeight = -1;
   let targetWidth = -1;
   const dimensions = {height:160,width:18};
@@ -43,6 +48,58 @@ export function enhanceDocumentScrollbar() {
     track.dataset.pendingClose = '';
     closeTimer = setTimeout(() => { cancelClose(); delete track.dataset.open; update(); }, 350);
     update();
+  };
+  const releaseEdgeOverscroll = () => {
+    clearTimeout(elasticTimer);
+    elasticTimer = undefined;
+    elasticTween?.kill();
+    elasticTarget = 0;
+    if (elastic.amount === 0) return;
+    if (reduced.matches) {
+      elastic.amount = 0;
+      elasticEdge = undefined;
+      delete track.dataset.elastic;
+      schedule();
+      return;
+    }
+    elasticTween = gsap.to(elastic, {
+      amount: 0,
+      duration: .86,
+      ease: 'elastic.out(1, 0.72)',
+      onUpdate: schedule,
+      onComplete: () => {
+        elasticTween = undefined;
+        elasticEdge = undefined;
+        delete track.dataset.elastic;
+        schedule();
+      },
+    });
+  };
+  const pullAtEdge = (distance: number) => {
+    const surface = document.scrollingElement;
+    if (!surface || reduced.matches || distance === 0) return;
+    const range = Math.max(0, surface.scrollHeight - surface.clientHeight);
+    const atBottom = distance > 0 && surface.scrollTop >= range - 1;
+    const atTop = distance < 0 && surface.scrollTop <= 1;
+    if (!atBottom && !atTop) return;
+    const edge = atBottom ? 'bottom' : 'top';
+    clearTimeout(elasticTimer);
+    elasticTween?.kill();
+    elasticTween = undefined;
+    if (elasticEdge !== edge) {
+      elastic.amount = 0;
+      elasticTarget = 0;
+    }
+    elasticEdge = edge;
+    elasticTarget = Math.min(240, Math.max(elasticTarget, elastic.amount) + Math.min(Math.abs(distance), 120) * .35);
+    track.dataset.elastic = edge;
+    elasticTween = gsap.to(elastic, {
+      amount: elasticTarget,
+      duration: .14,
+      ease: 'power2.out',
+      onUpdate: schedule,
+    });
+    elasticTimer = setTimeout(releaseEdgeOverscroll, 120);
   };
 
   const update = () => {
@@ -114,8 +171,10 @@ export function enhanceDocumentScrollbar() {
     thumbHeight = Math.min(height * .65, Math.max(32, height * surface.clientHeight / surface.scrollHeight));
     travel = Math.max(0, height - thumbHeight);
     trackTop = track.getBoundingClientRect().top + track.clientTop + padding;
+    const compression = Math.max(-.045, Math.min(.34, elastic.amount / 160 * .34));
+    const position = scrollRange ? Math.min(1, Math.max(0, surface.scrollTop / scrollRange)) * travel : 0;
     thumb.style.height = `${thumbHeight}px`;
-    thumb.style.transform = `translateY(${scrollRange ? Math.min(1, Math.max(0, surface.scrollTop / scrollRange)) * travel : 0}px)`;
+    thumb.style.transform = `translateY(${position}px) scaleY(${1 - compression})`;
   };
   const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
   const move = (event: PointerEvent) => {
@@ -171,15 +230,33 @@ export function enhanceDocumentScrollbar() {
   track.addEventListener('pointercancel', endDrag);
   track.addEventListener('lostpointercapture', endDrag);
   window.addEventListener('scroll', () => {
+    const surface = document.scrollingElement;
+    if (surface) {
+      const range = Math.max(0, surface.scrollHeight - surface.clientHeight);
+      if ((elasticEdge === 'bottom' && surface.scrollTop < range - 1) ||
+          (elasticEdge === 'top' && surface.scrollTop > 1)) releaseEdgeOverscroll();
+    }
     track.dataset.scrolling = '';
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => { delete track.dataset.scrolling; }, 700);
     schedule();
   }, { passive: true });
+  window.addEventListener('wheel', event => pullAtEdge(event.deltaY), { passive: true });
+  let touchY: number | undefined;
+  window.addEventListener('touchstart', event => { touchY = event.touches[0]?.clientY; }, { passive: true });
+  window.addEventListener('touchmove', event => {
+    const y = event.touches[0]?.clientY;
+    if (y === undefined || touchY === undefined) return;
+    pullAtEdge(touchY - y);
+    touchY = y;
+  }, { passive: true });
+  window.addEventListener('touchend', () => { touchY = undefined; releaseEdgeOverscroll(); }, { passive: true });
+  window.addEventListener('touchcancel', () => { touchY = undefined; releaseEdgeOverscroll(); }, { passive: true });
   const viewportChange = () => {
     // Zoom and viewport changes must fit immediately, even during expansion.
     track.dataset.resizing = '';
     cancelClose(); sizeTween?.kill(); targetHeight = -1; targetWidth = -1;
+    releaseEdgeOverscroll();
     endDrag();
     delete track.dataset.open;
     update();
