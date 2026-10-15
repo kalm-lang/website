@@ -1,4 +1,48 @@
 import { gsap } from 'gsap';
+
+const homeIntroTargets =
+  '.hero h1, .hero-description, .hero .actions .button, .hero-sample, .notes-section .section-heading, .feature, .start-box .section-heading, .start-content > *';
+
+function animateHomeArrival() {
+  gsap.timeline({
+    defaults: { ease: 'power3.out' },
+    onComplete: () => {
+      gsap.set(homeIntroTargets, { clearProps: 'opacity,visibility,transform,filter' });
+      delete document.documentElement.dataset.homeIntro;
+    },
+  })
+    .fromTo('.hero h1',
+      { autoAlpha: 0, y: 34, filter: 'blur(8px)' },
+      { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.85 },
+    )
+    .fromTo('.hero-description',
+      { autoAlpha: 0, y: 22 },
+      { autoAlpha: 1, y: 0, duration: 0.62 },
+      '-=0.48',
+    )
+    .fromTo('.hero .actions .button',
+      { autoAlpha: 0, y: 18 },
+      { autoAlpha: 1, y: 0, duration: 0.56, stagger: 0.1 },
+      '-=0.38',
+    )
+    .fromTo('.hero-sample',
+      { autoAlpha: 0, y: 38, scale: 0.965, rotateY: -5, transformPerspective: 1200 },
+      { autoAlpha: 1, y: 0, scale: 1, rotateY: 0, duration: 1 },
+      '-=0.82',
+    )
+    .fromTo('.notes-section .section-heading, .feature',
+      { autoAlpha: 0, y: 24 },
+      { autoAlpha: 1, y: 0, duration: 0.65, stagger: 0.075 },
+      '-=0.35',
+    )
+    .fromTo('.start-box .section-heading, .start-content > *',
+      { autoAlpha: 0, y: 22 },
+      { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 },
+      '-=0.3',
+    )
+    .timeScale(1.4);
+}
+
 export function enhanceHomeNavigation() {
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   let leaving = false;
@@ -27,7 +71,8 @@ export function enhanceHomeNavigation() {
   try {
     const path = sessionStorage.getItem('kalm-home-arrival');
     sessionStorage.removeItem('kalm-home-arrival');
-    if (path === location.pathname && (!native || location.pathname === '/') && !reduced())
+    if (location.pathname === '/' && !reduced()) animateHomeArrival();
+    else if (path === location.pathname && (!native || location.pathname === '/') && !reduced()) {
       gsap.from('#main', {
         opacity: 0,
         y: 5,
@@ -35,13 +80,12 @@ export function enhanceHomeNavigation() {
         ease: 'power2.out',
         clearProps: 'opacity,transform',
       });
-    if (path === location.pathname && (!native || location.pathname === '/') && !reduced())
       gsap.from('.document-scrollbar', {
         opacity: 0,
         duration: 0.22,
-        ease: 'power2.out',
         clearProps: 'opacity',
       });
+    }
   } catch {
     /* No arrival animation is required for navigation to work. */
   }

@@ -24,6 +24,7 @@ export function enhanceDocumentScrollbar() {
   let trackTop = 0;
   let thumbHeight = 0;
   let scrollTimer: ReturnType<typeof setTimeout>;
+  let homeScrollbarRevealTimer: ReturnType<typeof setTimeout> | undefined;
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
   let elasticTimer: ReturnType<typeof setTimeout> | undefined;
   let viewportTimer: ReturnType<typeof setTimeout> | undefined;
@@ -155,7 +156,32 @@ export function enhanceDocumentScrollbar() {
     const padding = parseFloat(style.paddingTop);
     const height = Math.max(0, track.clientHeight - padding - parseFloat(style.paddingBottom));
     scrollRange = Math.max(0, surface.scrollHeight - surface.clientHeight);
-    track.toggleAttribute('data-visible', scrollRange > 8);
+    const visible = scrollRange > 8;
+    if (!visible) track.removeAttribute('data-visible');
+    else if (!track.hasAttribute('data-visible')) {
+      const shouldFadeHomeScrollbar = root.hasAttribute('data-home-scrollbar-fade');
+      track.setAttribute('data-visible', '');
+      if (shouldFadeHomeScrollbar) {
+        homeScrollbarRevealTimer = setTimeout(() => {
+          homeScrollbarRevealTimer = undefined;
+          if (!root.hasAttribute('data-home-scrollbar-fade') || !track.hasAttribute('data-visible') || track.hidden) return;
+          track.style.transition = 'none';
+          track.style.opacity = '0';
+          track.style.visibility = 'visible';
+          root.removeAttribute('data-home-scrollbar-fade');
+          const fade = track.animate([{ opacity: 0 }, { opacity: 0.9 }], {
+            duration: 700,
+            easing: 'ease-out',
+          });
+          fade.onfinish = () => {
+            fade.cancel();
+            track.style.removeProperty('opacity');
+            track.style.removeProperty('visibility');
+            track.style.removeProperty('transition');
+          };
+        }, 650);
+      }
+    }
     // Leave visible travel even when a page is only slightly longer than the viewport.
     thumbHeight = Math.min(height * .65, Math.max(32, height * surface.clientHeight / surface.scrollHeight));
     travel = Math.max(0, height - thumbHeight);

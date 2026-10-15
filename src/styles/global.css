@@ -54,6 +54,7 @@ html:not([data-js-enhanced]) #main:focus-visible { outline: 2px solid var(--acce
 ::view-transition-new(section-sidebar) { animation: none; }
 ::view-transition-old(page-content) { animation: page-out .16s ease-in both; }
 ::view-transition-new(page-content) { animation: page-in .22s ease-out both; }
+html[data-home-intro]::view-transition-new(page-content) { animation: none; }
 ::view-transition-old(document-scrollbar) { animation: scrollbar-out .16s ease-in both; }
 ::view-transition-new(document-scrollbar) { animation: scrollbar-in .22s ease-out both; }
 @keyframes page-out { to { opacity: 0; transform: translateY(-5px); } }
