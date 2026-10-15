@@ -21,8 +21,18 @@ export function installHomeNavigation() {
       target.origin === location.origin &&
       target.pathname === location.pathname &&
       target.search === location.search
-    )
+    ) {
+      // The home link otherwise reloads the page and restarts the intro animation.
+      if (location.pathname === '/' && link.classList.contains('brand')) {
+        event.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+        window.dispatchEvent(new Event('kalm-home-replay'));
+      }
       return null;
+    }
     return target;
   };
   document.addEventListener('click', (event) => {

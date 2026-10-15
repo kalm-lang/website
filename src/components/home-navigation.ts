@@ -80,6 +80,11 @@ export function enhanceHomeNavigation() {
     });
     gsap.to(scrollbar, { opacity: 0, duration: 0.16, ease: 'power2.in' });
   }) as EventListener);
+  window.addEventListener('kalm-home-replay', () => {
+    if (location.pathname !== '/') return;
+    clearHomeArrival();
+    if (!reduced()) animateHomeArrival();
+  });
   try {
     const path = sessionStorage.getItem('kalm-home-arrival');
     sessionStorage.removeItem('kalm-home-arrival');
