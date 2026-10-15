@@ -37,10 +37,6 @@ export function enhanceDocumentScrollbar() {
   let graceBounds: DOMRect | undefined;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const cancelClose = () => { clearTimeout(closeTimer); closeTimer = undefined; delete track.dataset.pendingClose; graceBounds = undefined; };
-  const collapse = () => {
-    if (dragging) return;
-    cancelClose(); delete track.dataset.open; update();
-  };
   const beginClose = () => {
     if (closeTimer || dragging || !track.hasAttribute('data-open')) return;
     graceBounds = track.getBoundingClientRect();
@@ -134,7 +130,7 @@ export function enhanceDocumentScrollbar() {
     delete root.dataset.scrollbarDragging;
     if (track.hasPointerCapture(pointerId)) track.releasePointerCapture(pointerId);
     const bounds = track.getBoundingClientRect();
-    if (outsideWindow) collapse();
+    if (outsideWindow) beginClose();
     else if (pointerX < bounds.left - 12 || pointerX > bounds.right + 12 || pointerY < bounds.top - 12 || pointerY > bounds.bottom + 12) beginClose();
     schedule();
   };
@@ -151,8 +147,8 @@ export function enhanceDocumentScrollbar() {
       beginClose();
     } else if (closeTimer) { cancelClose(); update(); }
   }, { passive: true });
-  document.addEventListener('pointerleave', event => { if (!event.relatedTarget) { outsideWindow = true; collapse(); } });
-  window.addEventListener('blur', () => { outsideWindow = true; collapse(); });
+  document.addEventListener('pointerleave', event => { if (!event.relatedTarget) { outsideWindow = true; beginClose(); } });
+  window.addEventListener('blur', () => { outsideWindow = true; beginClose(); });
   track.addEventListener('pointerdown', event => {
     if (event.button !== 0 || scrollRange <= 8) return;
     event.preventDefault();
