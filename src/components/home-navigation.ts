@@ -3,12 +3,23 @@ import { gsap } from 'gsap';
 const homeIntroTargets =
   '.hero h1, .hero-description, .hero .actions .button, .hero-sample, .notes-section .section-heading, .feature, .start-box .section-heading, .start-content > *';
 
+let homeArrival: gsap.core.Timeline | undefined;
+
+function clearHomeArrival() {
+  if (!homeArrival) return;
+  homeArrival.kill();
+  gsap.set(homeIntroTargets, { clearProps: 'opacity,visibility,transform,filter' });
+  delete document.documentElement.dataset.homeIntro;
+  homeArrival = undefined;
+}
+
 function animateHomeArrival() {
-  gsap.timeline({
+  homeArrival = gsap.timeline({
     defaults: { ease: 'power3.out' },
     onComplete: () => {
       gsap.set(homeIntroTargets, { clearProps: 'opacity,visibility,transform,filter' });
       delete document.documentElement.dataset.homeIntro;
+      homeArrival = undefined;
     },
   })
     .fromTo('.hero h1',
@@ -52,6 +63,7 @@ export function enhanceHomeNavigation() {
   ) => {
     const url = new URL(event.detail.url);
     const rootNavigation = url.origin === location.origin && url.pathname === '/';
+    if (location.pathname === '/' && url.origin === location.origin && !rootNavigation) clearHomeArrival();
     if ((native && url.origin === location.origin && !rootNavigation) || reduced()) return;
     event.detail.event.preventDefault();
     if (leaving) return;
