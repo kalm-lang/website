@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 
 const homeIntroTargets =
-  '.setup-wizard, .hero h1, .hero-description, .hero .actions .button, .hero-sample, .notes-section .section-heading, .feature, .start-box .section-heading, .start-content > *';
+  '.setup-wizard, .setup-welcome, .setup-welcome-line, .setup-wizard-inner, .hero h1, .hero-description, .hero .actions .button, .hero-sample, .notes-section .section-heading, .feature, .start-box .section-heading, .start-content > *';
 
 let homeArrival: gsap.core.Timeline | undefined;
 
@@ -9,19 +9,24 @@ function clearHomeArrival() {
   if (!homeArrival) return;
   homeArrival.kill();
   gsap.set(homeIntroTargets, { clearProps: 'opacity,visibility,transform,filter' });
+  document.querySelector('.setup-wizard')?.removeAttribute('data-welcome');
   delete document.documentElement.dataset.homeIntro;
   homeArrival = undefined;
 }
 
 function animateHomeArrival() {
+  const setupWizard = document.querySelector<HTMLElement>('.setup-wizard:not([hidden])');
+  const welcome = setupWizard?.dataset.welcome === 'true';
   homeArrival = gsap.timeline({
     defaults: { ease: 'power3.out' },
     onComplete: () => {
       gsap.set(homeIntroTargets, { clearProps: 'opacity,visibility,transform,filter' });
+      setupWizard?.removeAttribute('data-welcome');
       delete document.documentElement.dataset.homeIntro;
       homeArrival = undefined;
     },
-  })
+  });
+  homeArrival
     .fromTo('.hero h1',
       { autoAlpha: 0, y: 34, filter: 'blur(8px)' },
       { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.85 },
@@ -50,12 +55,43 @@ function animateHomeArrival() {
       { autoAlpha: 0, y: 22 },
       { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 },
       '-=0.3',
-    )
-    .fromTo('.setup-wizard',
+    );
+  if (setupWizard) {
+    homeArrival.fromTo(setupWizard,
       { autoAlpha: 0, y: -12 },
       { autoAlpha: 1, y: 0, duration: 0.58 },
-    )
-    .timeScale(1.4);
+    );
+    if (welcome) {
+      homeArrival
+        .fromTo(setupWizard.querySelector('.setup-welcome'),
+          { autoAlpha: 0, y: 8, filter: 'blur(5px)', scale: 0.98 },
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', scale: 1, duration: 0.7, ease: 'power3.out' },
+          '<+=0.06',
+        )
+        .to({}, { duration: 0.9 })
+        .to(setupWizard.querySelector('[data-welcome-line="welcome"]'),
+          { autoAlpha: 0, y: -14, filter: 'blur(4px)', duration: 0.52, ease: 'power2.inOut' },
+        )
+        .fromTo(setupWizard.querySelector('[data-welcome-line="setup"]'),
+          { autoAlpha: 0, y: 14, filter: 'blur(4px)' },
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.58, ease: 'power2.inOut' },
+          '-=0.24',
+        )
+        .to({}, { duration: 1 })
+        .to(setupWizard.querySelector('[data-welcome-line="setup"]'),
+          { autoAlpha: 0, y: -14, filter: 'blur(4px)', duration: 0.52, ease: 'power2.inOut' },
+        )
+        .fromTo(setupWizard.querySelector('.setup-wizard-inner'),
+          { autoAlpha: 0, y: 12 },
+          { autoAlpha: 1, y: 0, duration: 0.62, ease: 'power2.out' },
+          '-=0.2',
+        )
+        .call(() => {
+          setupWizard.removeAttribute('data-welcome');
+        });
+    }
+  }
+  homeArrival.timeScale(1.4);
 }
 
 export function enhanceHomeNavigation() {

@@ -11,21 +11,26 @@ class SetupWizard extends HTMLElement {
     try {
       if (localStorage.getItem(completeKey) === 'true') return;
     } catch { /* Keep the setup available when storage is disabled. */ }
+    try {
+      if (location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.dataset.welcome = 'true';
+      }
+    } catch { /* Welcome is optional when storage is disabled. */ }
     const preferences = JSON.parse(document.documentElement.dataset.codePreferences || '{}');
     if (preferences.os !== 'auto') {
       preferences.os = 'auto';
       applyPreferences(preferences);
     }
     this.hidden = false;
-    this.addEventListener('click', this.click);
+    this.addEventListener('click', this.handleClick);
     this.sync();
   }
 
   disconnectedCallback() {
-    this.removeEventListener('click', this.click);
+    this.removeEventListener('click', this.handleClick);
   }
 
-  private readonly click = (event: MouseEvent) => {
+  private readonly handleClick = (event: MouseEvent) => {
     if (!(event.target instanceof Element)) return;
     if (event.target.closest('[data-setup-dismiss]')) {
       this.dismiss();
