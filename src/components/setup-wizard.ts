@@ -44,6 +44,8 @@ class SetupWizard extends HTMLElement {
       applyPreferences(record);
       this.sync();
       window.dispatchEvent(new Event('kalm-dialect-change'));
+      if (this.step === 2) this.dismiss();
+      else this.showStep(this.step + 1);
       return;
     }
     if (event.target.closest('[data-setup-back]')) {

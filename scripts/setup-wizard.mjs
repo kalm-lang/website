@@ -4,7 +4,7 @@ export function setupWizard() {
   return `<kalm-setup-wizard class="setup-wizard" aria-labelledby="setup-title" hidden>
     <div class="setup-progress" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" aria-valuetext="Step 1 of 3"></div>
     <div class="setup-welcome" aria-hidden="true">
-      <span class="setup-welcome-line" data-welcome-line="welcome">Welcome</span>
+      <span class="setup-welcome-line" data-welcome-line="welcome">Hi there.</span>
       <span class="setup-welcome-line" data-welcome-line="setup">Let’s set this up</span>
     </div>
     <div class="setup-wizard-inner">

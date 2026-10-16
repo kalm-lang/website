@@ -60,6 +60,7 @@ function animateHomeArrival() {
     homeArrival.fromTo(setupWizard,
       { autoAlpha: 0, y: -12 },
       { autoAlpha: 1, y: 0, duration: 0.58 },
+      '-=0.45',
     );
     if (welcome) {
       homeArrival
@@ -68,18 +69,18 @@ function animateHomeArrival() {
           { autoAlpha: 1, y: 0, filter: 'blur(0px)', scale: 1, duration: 0.7, ease: 'power3.out' },
           '<+=0.06',
         )
-        .to({}, { duration: 0.9 })
+        .to({}, { duration: 1.8 })
         .to(setupWizard.querySelector('[data-welcome-line="welcome"]'),
-          { autoAlpha: 0, y: -14, filter: 'blur(4px)', duration: 0.52, ease: 'power2.inOut' },
+          { autoAlpha: 0, y: -12, filter: 'blur(4px)', duration: 0.48, ease: 'power2.inOut' },
         )
         .fromTo(setupWizard.querySelector('[data-welcome-line="setup"]'),
           { autoAlpha: 0, y: 14, filter: 'blur(4px)' },
-          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.58, ease: 'power2.inOut' },
-          '-=0.24',
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.68, ease: 'power2.out' },
+          '-=0.18',
         )
-        .to({}, { duration: 1 })
+        .to({}, { duration: 3.4 })
         .to(setupWizard.querySelector('[data-welcome-line="setup"]'),
-          { autoAlpha: 0, y: -14, filter: 'blur(4px)', duration: 0.52, ease: 'power2.inOut' },
+          { autoAlpha: 0, y: -10, filter: 'blur(3px)', duration: 0.58, ease: 'power2.inOut' },
         )
         .fromTo(setupWizard.querySelector('.setup-wizard-inner'),
           { autoAlpha: 0, y: 12 },
@@ -104,12 +105,15 @@ export function enhanceHomeNavigation() {
     const url = new URL(event.detail.url);
     const rootNavigation = url.origin === location.origin && url.pathname === '/';
     if (location.pathname === '/' && url.origin === location.origin && !rootNavigation) clearHomeArrival();
-    if ((native && url.origin === location.origin && !rootNavigation) || reduced()) return;
+    if ((native && url.origin === location.origin && !rootNavigation && location.pathname !== '/') || reduced()) return;
     event.detail.event.preventDefault();
     if (leaving) return;
     leaving = true;
-    const target =
-      document.querySelector('dialog[open] .card-turn-back') || document.querySelector('#main');
+    const dialog = document.querySelector('dialog[open] .card-turn-back');
+    const target = dialog || [
+      document.querySelector('#main'),
+      document.querySelector('.setup-wizard'),
+    ];
     const scrollbar = document.querySelector('.document-scrollbar');
     gsap.to(target, {
       opacity: 0,
