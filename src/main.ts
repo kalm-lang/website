@@ -9,6 +9,7 @@ import {enhanceFeatureDialogs} from './components/feature-dialogs';
 import {enhanceSectionNavigation} from './components/section-nav';
 import {enhanceDocumentScrollbar} from './components/document-scrollbar';
 import {enhanceMainFocus} from './components/main-focus';
+import './components/setup-wizard';
 
 enhanceFeatureDialogs();
 enhanceSectionNavigation();

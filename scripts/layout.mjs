@@ -7,6 +7,7 @@ import {escape} from './code.mjs';
 import {lessonNavigation, mainNavigation, sidebar} from './navigation.mjs';
 import {icon} from '../shared/icons.mjs';
 import {applyPreferences} from '../shared/preferences.mjs';
+import {setupWizard} from './setup-wizard.mjs';
 
 const version = JSON.parse(readFileSync(resolve(repository, 'package.json'), 'utf8')).kalmVersion;
 export function layout(title, body, section = '') {
@@ -33,6 +34,7 @@ export function layout(title, body, section = '') {
       title="Settings" aria-expanded="false" aria-controls="settings-popover">${icon('settings')}</button></kalm-settings-menu>
     </div>
   </header>
+  ${setupWizard()}
   ${body}
   <footer class="site-footer">
     <a href="https://github.com/kalm-lang">kalm-lang</a>
