@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 
 const homeIntroTargets =
-  '.hero h1, .hero-description, .hero .actions .button, .hero-sample, .notes-section .section-heading, .feature, .start-box .section-heading, .start-content > *';
+  '.setup-wizard, .hero h1, .hero-description, .hero .actions .button, .hero-sample, .notes-section .section-heading, .feature, .start-box .section-heading, .start-content > *';
 
 let homeArrival: gsap.core.Timeline | undefined;
 
@@ -50,6 +50,10 @@ function animateHomeArrival() {
       { autoAlpha: 0, y: 22 },
       { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 },
       '-=0.3',
+    )
+    .fromTo('.setup-wizard',
+      { autoAlpha: 0, y: -12 },
+      { autoAlpha: 1, y: 0, duration: 0.58 },
     )
     .timeScale(1.4);
 }
