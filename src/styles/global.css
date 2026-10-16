@@ -1,6 +1,7 @@
 @import './tokens.css';
 @import './shell.css';
 @import './home.css';
+@import '/src/styles/setup.css';
 @import './articles.css';
 @import './content.css';
 @import './components.css';
