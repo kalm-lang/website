@@ -69,9 +69,10 @@ class CodeCompare extends HTMLElement {
       const expand = this.sideBySide && !home && !modal;
       const width = expand ? Math.max(normalWidth, availableWidth) : normalWidth;
       this.style.width = expand ? width + 'px' : '';
-      this.dataset.stacked = String(
-        modal || width < 57 * parseFloat(getComputedStyle(document.documentElement).fontSize),
-      );
+      const splitWidth = !home && !modal ? Math.max(normalWidth, availableWidth) : normalWidth;
+      const stacked =
+        modal || splitWidth < 57 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+      this.dataset.stacked = String(stacked);
       const explanation = this.querySelector<HTMLElement>('.script-unavailable');
       if (explanation)
         explanation.hidden =
@@ -106,10 +107,13 @@ class CodeCompare extends HTMLElement {
         summary.textContent =
           (active?.dataset.language === 'kalms' ? 'Kalm Script' : 'Kalm') + ' / Java';
       }
-      this.querySelector('[data-comparison-layout]')?.setAttribute(
-        'aria-pressed',
-        String(this.sideBySide),
-      );
+      const layoutButton = this.querySelector<HTMLButtonElement>('[data-comparison-layout]');
+      if (layoutButton) {
+        const iconName = stacked ? 'rows-2' : 'columns-2';
+        if (!layoutButton.querySelector('.icon-' + iconName))
+          layoutButton.innerHTML = icon(iconName);
+        layoutButton.setAttribute('aria-pressed', String(this.sideBySide));
+      }
       this.dispatchEvent(new Event('kalm-source-change', { bubbles: true }));
       if (focused instanceof HTMLInputElement && focused.hasAttribute('data-greeting-name'))
         focused.focus({ preventScroll: true });

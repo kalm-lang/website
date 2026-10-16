@@ -18,6 +18,7 @@ import {
     Moon,
     Plus,
     Route,
+    Rows2,
     Search,
     Settings,
     SlidersHorizontal,
@@ -32,7 +33,7 @@ const nodes = { 'arrow-left': ArrowLeft, 'arrow-right': ArrowRight, 'arrow-up-ri
   'circle-help': CircleHelp, 'code-xml': CodeXml, copy: Copy, 'file-code': FileCode,
   layers: Layers, link: Link, menu: Menu, monitor: Monitor, moon: Moon, plus: Plus,
   route: Route, search: Search, sun: Sun, terminal: Terminal, timer: Timer, x: X,
-  'columns-2': Columns2, 'sliders-horizontal': SlidersHorizontal, settings: Settings };
+  'columns-2': Columns2, 'rows-2': Rows2, 'sliders-horizontal': SlidersHorizontal, settings: Settings };
 
 // Render the same Lucide nodes at build time and during browser enhancement.
 // All SVGs are decorative; their enclosing controls provide accessible names.
