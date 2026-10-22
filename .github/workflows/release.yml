@@ -97,7 +97,7 @@ jobs:
         run: npm pkg set "kalmVersion=$RELEASE_VERSION"
       - run: npm run check
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: kalm-website
           path: dist
