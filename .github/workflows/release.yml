@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: write
+  packages: read
 
 concurrency:
   group: website-release
@@ -32,7 +33,7 @@ jobs:
       version: ${{ steps.release.outputs.release_version }}
       prerelease: ${{ steps.release.outputs.prerelease }}
     env:
-      KALM_PACKAGES_READ_TOKEN: ${{ secrets.KALM_PACKAGES_READ_TOKEN }}
+      KALM_PACKAGES_READ_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,13 +52,6 @@ jobs:
           INPUT_STATUS: ${{ inputs.status }}
           WEBSITE_TAG: ${{ github.ref_name }}
         run: node scripts/resolve-release-version.mjs >> "$GITHUB_OUTPUT"
-      - name: Require package-read credentials
-        shell: bash
-        run: |
-          if [[ -z "$KALM_PACKAGES_READ_TOKEN" ]]; then
-            echo '::error::Set KALM_PACKAGES_READ_TOKEN before releasing the website.'
-            exit 1
-          fi
       - name: Reject an existing release or conflicting tag
         env:
           GH_TOKEN: ${{ github.token }}

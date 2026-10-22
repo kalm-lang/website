@@ -123,7 +123,7 @@ Update the pinned documentation package to consume content changes, then restart
 
 Configure [GitHub Packages authentication](https://github.com/kalm-lang/tools/blob/main/docs/bootstrap.md) before installing packages. The initial package versions must be published first. For unpublished local changes, use the [optional workspace](https://github.com/kalm-lang/tools/blob/main/docs/workspace.md), which installs tarballs without changing the dependency manifest.
 
-Code rendering uses `@kalm-lang/syntax-highlighting`, independently of documentation assets. Configure `KALM_PACKAGES_READ_TOKEN` to read this package and the documentation/specification packages. The optional tools workspace installs local tarballs before registry bootstrap. The shared API also works in browsers for future fiddle development.
+Code rendering uses `@kalm-lang/syntax-highlighting`, independently of documentation assets. GitHub Actions uses its built-in `GITHUB_TOKEN`; no repository secret is needed. Grant the website repository Actions read access to the syntax-highlighting, documentation, and specification packages in each package's **Manage Actions access** settings. For local installs, configure a GitHub Packages token with read access as `KALM_PACKAGES_READ_TOKEN`. The optional tools workspace installs local tarballs before registry bootstrap. The shared API also works in browsers for future fiddle development.
 
 Older `@kalm-lang/*` releases are supported through their core package APIs
 (`documents`, specification `versions`, and `createKalmHighlighter`). Package
