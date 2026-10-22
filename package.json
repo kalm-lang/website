@@ -15,24 +15,24 @@
     "verify:code": "node scripts/stage-compiler.mjs && node scripts/verify-examples.mjs && node scripts/verify-learn.mjs && node scripts/verify-comparisons.mjs && node scripts/verify-variants.mjs"
   },
   "dependencies": {
-    "@floating-ui/dom": "1.7.4",
+    "@floating-ui/dom": "1.8.0",
     "@kalm-lang/documentation": "1.1.0",
     "@kalm-lang/specification": "1.1.0-full",
     "cross-spawn": "7.0.6",
-    "gsap": "3.13.0",
+    "gsap": "3.15.0",
     "lit": "3.3.3",
-    "lucide": "1.52.0",
+    "lucide": "1.59.0",
     "markdown-it-container": "4.0.0"
   },
   "devDependencies": {
     "@kalm-lang/syntax-highlighting": "1.1.0",
     "@shikijs/langs": "4.5.0",
-    "@types/node": "26.6.4",
-    "markdown-it": "15.0.2",
+    "@types/node": "26.6.5",
+    "markdown-it": "15.0.3",
     "prettier": "3.9.10",
     "prettier-plugin-java": "2.11.0",
     "typescript": "7.0.2",
-    "vite": "8.3.2"
+    "vite": "8.3.4"
   },
   "kalmVersion": "0.1.0-SNAPSHOT"
 }
