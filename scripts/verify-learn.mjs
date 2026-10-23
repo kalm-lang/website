@@ -61,7 +61,11 @@ try {
   if (process.platform !== 'win32') {
   writeFileSync(resolve(root, 'unreadable.txt'), 'private');
   chmodSync(resolve(root, 'unreadable.txt'), 0);
-  if (process.getuid?.() !== 0) execute(['unreadable.txt'], 1, 'Could not read file');
+  try {
+    if (process.getuid?.() !== 0) execute(['unreadable.txt'], 1, 'Could not read file');
+  } finally {
+    chmodSync(resolve(root, 'unreadable.txt'), 0o600);
+  }
   }
   }
   console.log('Verified authored styles of cumulative lessons, native tests, counts, input failures, and usage errors.');
