@@ -9,6 +9,7 @@ import { tabsPlugin, fences, sourceInfo } from './tabs.mjs';
 import { compilerCommand, verificationTimeout } from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
+const only = process.argv.slice(2);
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-variants-'));
 const groups = (tokens) =>
   tokens.flatMap((t) =>
@@ -39,7 +40,7 @@ for (const route of [
   ...contentFiles('home')
     .filter((f) => f.endsWith('.md') && !f.endsWith('learning.md'))
     .map(readDocument),
-]) {
+].filter(route => !only.length || only.includes(route.path ?? route.source))) {
   const tokens = md.parse(route.content, {});
   const primary = new Set(fences(tokens, 'kalm', 'all'));
   for (const group of groups(tokens)) {

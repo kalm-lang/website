@@ -9,6 +9,10 @@ import {fences, tabsPlugin} from './tabs.mjs';
 import {compilerCommand, verificationTimeout} from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
+const only = process.argv.slice(2);
+const selected = route => !only.length || only.includes(route.path ?? route.source);
+const lessons = !only.length || routes.some(route => route.lesson && selected(route))
+  ? routes.filter(route => route.lesson) : [];
 const home = contentFiles('home').filter(file => file.endsWith('.md')).map(readDocument);
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-comparisons-'));
 const java = process.env.KALM_JAVA_COMMAND || 'java';
@@ -23,7 +27,7 @@ function run(command, args, cwd) {
 }
 function comparisons(tokens) { return tokens.flatMap(token => token.type === 'code_compare' ? [token] : token.children && token.type !== 'inline' ? comparisons(token.children) : []); }
 try {
-  for (const route of [...routes.filter(route => !route.specification), ...home]) {
+  for (const route of [...routes.filter(route => !route.specification), ...home].filter(selected)) {
     const tokens = md.parse(route.content, {});
     const groups = comparisons(tokens);
     const primaryBlocks = new Set(fences(tokens, 'kalm', 'all'));
@@ -66,7 +70,7 @@ try {
   mkdirSync(project);
   writeFileSync(resolve(project, 'notes.txt'), 'a quiet\nmorning\n');
   const outputs = ['Text stats', '3 words: a quiet morning', 'Will read notes.txt', '3 words', '3 words', '2 lines / 3 words', '2 lines / 3 words', '2 lines / 3 words'];
-  for (const route of routes.filter(route => route.lesson)) {
+  for (const route of lessons) {
     const blocks = fences(md.parse(route.content, {}), 'kalm', 'all').filter(t => t.info.startsWith('java'));
     if (!blocks.length) continue;
     for (const token of blocks) {
@@ -77,8 +81,8 @@ try {
     const output = run(java, ['-cp', resolve(project, 'classes'), 'stats.App', ...(route.lesson === 3 || route.lesson >= 7 ? ['notes.txt'] : [])], project);
     if (!output.includes(outputs[route.lesson - 1])) throw new Error(`Java lesson ${route.lesson} produced ${JSON.stringify(output)}`);
   }
-  if (routes.some(route => route.lesson === 8 && fences(md.parse(route.content, {}), 'kalm', 'all').some(t => t.info.startsWith('java'))))
+  if (lessons.some(route => route.lesson === 8 && fences(md.parse(route.content, {}), 'kalm', 'all').some(t => t.info.startsWith('java'))))
     run(java, ['-cp', [resolve(project, 'classes'), libraries].join(delimiter), 'org.junit.platform.console.ConsoleLauncher', 'execute', '--scan-classpath', '--disable-banner', '--fail-if-no-tests'], project);
 } finally { rmSync(root, { recursive: true, force: true }); }
 if (failures.length) throw new Error(failures.join('\n'));
-console.log(`Verified ${verified} comparisons, script counterparts, and cumulative Java lessons.`);
+console.log(`Verified ${verified} comparisons and script counterparts; ${lessons.length} cumulative Java lessons.`);
