@@ -6,7 +6,7 @@ import MarkdownIt from 'markdown-it';
 import {routes} from './routes.mjs';
 import {contentFiles, readDocument, repository} from './content.mjs';
 import {fences, tabsPlugin} from './tabs.mjs';
-import {compilerCommand} from './compiler-command.mjs';
+import {compilerCommand, verificationTimeout} from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
 const home = contentFiles('home').filter(file => file.endsWith('.md')).map(readDocument);
@@ -17,7 +17,7 @@ const libraries = resolve(repository, 'build-support/target/lib/*');
 let verified = 0;
 const failures = [];
 function run(command, args, cwd) {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', timeout: 30_000 });
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8', timeout: verificationTimeout });
   if (result.status !== 0) throw new Error(`${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
   return result.stdout;
 }

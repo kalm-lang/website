@@ -4,7 +4,7 @@ import {resolve} from 'node:path';
 import {contentCapabilities} from './capabilities.mjs';
 
 const { documents, assets = {} } = documentation;
-const { versions = {}, drafts = {} } = specification;
+const { versions = {}, drafts = {}, changes = {} } = specification;
 export const capabilities = contentCapabilities(documents);
 
 // Logical package paths are stable across installations and support authored relative links.
@@ -43,5 +43,16 @@ export function specifications() {
       source: `specification/${record.file}`, content: record.markdown.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '').replace(/^\s*# [^\n]+\r?\n/, ''),
       section: 'docs', group: 'Specifications', specification: true };
   });
-  return routes.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }) || (a.status === 'final' ? -1 : b.status === 'final' ? 1 : a.status.localeCompare(b.status)));
+  for (const record of Object.values(changes)) {
+    const { version, status } = record.metadata;
+    const identity = version + (status === 'final' ? '' : `-${status}`);
+    routes.push({ title: `${identity} changes`, version, status, order: 0,
+      path: `/docs/specifications/${identity}/changes/`, source: `specification/${record.file}`,
+      content: record.markdown.replace(/^\s*# [^\n]+\r?\n/, ''),
+      section: 'docs', group: 'Specifications', specification: true });
+  }
+  return routes.sort((a, b) =>
+    b.version.localeCompare(a.version, undefined, { numeric: true }) ||
+    Number(b.status === 'final') - Number(a.status === 'final') ||
+    a.status.localeCompare(b.status) || a.path.localeCompare(b.path));
 }

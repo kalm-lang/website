@@ -6,7 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { routes } from './routes.mjs';
 import { repository, contentRoot, readDocument, contentFiles } from './content.mjs';
 import { tabsPlugin, fences } from './tabs.mjs';
-import { compilerCommand } from './compiler-command.mjs';
+import { compilerCommand, verificationTimeout } from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
 const only = process.argv.slice(2);
@@ -40,7 +40,7 @@ try {
         '--source-root', kalm, '--java-source-root', java,
         '--generated-sources', resolve(project, 'generated'), '--output', resolve(project, 'classes'),
         '--reports', resolve(project, 'reports'), '--html-reports', resolve(project, 'html')],
-      { cwd: project, encoding: 'utf8', timeout: 30_000 });
+      { cwd: project, encoding: 'utf8', timeout: verificationTimeout });
       if (result.status !== 0) failures.push(`${route.path}\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
       else compiled++;
     }

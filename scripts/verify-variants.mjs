@@ -6,7 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { routes } from './routes.mjs';
 import { contentFiles, readDocument } from './content.mjs';
 import { tabsPlugin, fences, sourceInfo } from './tabs.mjs';
-import { compilerCommand } from './compiler-command.mjs';
+import { compilerCommand, verificationTimeout } from './compiler-command.mjs';
 
 const md = new MarkdownIt().use(tabsPlugin);
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-variants-'));
@@ -26,7 +26,7 @@ function run(args, cwd) {
     let output = '';
     child.stdout.on('data', (data) => (output += data));
     child.stderr.on('data', (data) => (output += data));
-    const timer = setTimeout(() => child.kill(), 30000);
+    const timer = setTimeout(() => child.kill(), verificationTimeout);
     child.on('error', reject);
     child.on('close', (code) => {
       clearTimeout(timer);

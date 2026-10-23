@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import MarkdownIt from 'markdown-it';
 import {routes} from './routes.mjs';
 import {capabilities, repository} from './content.mjs';
-import {compilerCommand} from './compiler-command.mjs';
+import {compilerCommand, verificationTimeout} from './compiler-command.mjs';
 import {fences, tabsPlugin} from './tabs.mjs';
 
 const root = mkdtempSync(resolve(tmpdir(), 'kalm-learn-'));
@@ -14,7 +14,7 @@ const tests = resolve(root, 'src/test/kalm/stats');
 const md = new MarkdownIt().use(tabsPlugin);
 const java = process.env.KALM_JAVA_COMMAND ?? 'java';
 function run(command, args, expectedStatus = 0, expectedText = '') {
-  const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 30_000 });
+  const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: verificationTimeout });
   if (result.status !== expectedStatus || !result.stdout.includes(expectedText)) {
     throw new Error(`${command} ${args.join(' ')}\nExpected status ${expectedStatus} and ${JSON.stringify(expectedText)}\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
   }

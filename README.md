@@ -14,6 +14,8 @@ npm run verify:code
 ```
 
 `verify:code` requires a full JDK 25+ and published compiler/runtime/standard-library JARs, resolved by Maven.
+Set `KALM_VERIFICATION_TIMEOUT_MS` to increase the per-command timeout on slower hosts
+(default `30000`, maximum `600000`). `KALM_CLI_COMMAND` selects a staged CLI executable.
 It compiles all example and homepage snippets, exercises each cumulative lesson,
 and checks native tests plus the completed CLI's counts and failure behavior.
 Temporary compilation outputs are removed afterward.

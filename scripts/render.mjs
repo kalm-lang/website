@@ -10,11 +10,13 @@ export { code, escape, repository };
 
 export function markdown(source, sourcePath, namespace = 'article') {
   const md = new MarkdownIt({ html: false }).use(tabsPlugin);
+  const edition = sourcePath.startsWith('specification/') && !sourcePath.includes('v1.2.') ? 'legacy' : '1.2';
+  const renderCode = (source, language, label) => code(source, language, label, edition);
   const slugs = new Map();
   let group = 0;
   md.renderer.rules.fence = (tokens, i) => {
     const {language, label} = sourceInfo(tokens[i].info);
-    return code(tokens[i].content, language, label);
+    return renderCode(tokens[i].content, language, label);
   };
   md.renderer.rules.code_tabs = (tokens, i) => {
     const id = `${namespace}-tabs-${group++}`;
@@ -38,7 +40,7 @@ export function markdown(source, sourcePath, namespace = 'article') {
       <div class="comparison-controls"></div><div class="comparison-panes">${token.children.filter(t => !home || token.meta.presentation === 'showcase' || !t.info.startsWith('java')).map((t,index) => {
         const {language,label,style,os,shell,pane,dialect} = sourceInfo(t.info);
         const suffix = seen.has(language) ? '-'+index : ''; seen.add(language);
-        return `<section id="${id}-${language}${suffix}" data-language="${language}" data-style="${style || ''}" data-os="${os || ''}" data-shell="${shell || ''}" data-dialect="${dialect || ''}" data-pane="${escape(pane || '')}" aria-label="${escape(pane || (language === 'kalms' ? 'Kalm Script' : language === 'java' ? 'Java' : language === 'kalm' ? 'Kalm' : 'Terminal'))}">${code(t.content, language, token.meta.presentation === 'showcase' && pane ? pane : label)}</section>`;
+        return `<section id="${id}-${language}${suffix}" data-language="${language}" data-style="${style || ''}" data-os="${os || ''}" data-shell="${shell || ''}" data-dialect="${dialect || ''}" data-pane="${escape(pane || '')}" aria-label="${escape(pane || (language === 'kalms' ? 'Kalm Script' : language === 'java' ? 'Java' : language === 'kalm' ? 'Kalm' : 'Terminal'))}">${renderCode(t.content, language, token.meta.presentation === 'showcase' && pane ? pane : label)}</section>`;
       }).join('')}</div>${explanation ? `<p class="script-unavailable" hidden><strong>Kalm Script unavailable — showing Kalm</strong><span>${escape(explanation)}</span></p>` : ''}</kalm-code-compare><script>{const selectSources=${selectSources.toString()};(${initializeSources.toString()})(${JSON.stringify(id)},${JSON.stringify(token.meta).replaceAll('<','\\u003c')})}</script>`;
   };
   md.renderer.rules.code_dialect = (tokens, i) => `<div class="dialect-content" data-dialect="${tokens[i].meta.dialect}">${md.renderer.render(tokens[i].children, md.options, {})}</div>`;

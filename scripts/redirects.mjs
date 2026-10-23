@@ -15,6 +15,7 @@ export function redirects() {
       [`/tutorial/${slug}/`, lesson([1, 2, 6, 7, 8, 8][index])]),
     ['/examples/hello/', '/examples/functions/'], ['/examples/mixed/', '/examples/java-calls/'],
     ['/examples/task-report/', '/learn/'],
+    ['/examples/choose/', '/examples/match/'],
   ].filter(([, target]) => routes.some(route => route.path === target));
 }
 export function redirectPage(target) {
