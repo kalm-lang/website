@@ -8,18 +8,21 @@ function sunlight() {
     return `<path d="M 0 0 L ${x} -${y} L ${x} ${y} Z" transform="rotate(${-70 + index * 140 / 13})"/>`;
   }).join('');
   return `<div class="setup-sunlight" aria-hidden="true" hidden>
+    <div class="setup-launch-label"></div>
+    <div class="setup-ray-window">
     <svg class="setup-sunlight-rays" viewBox="-1000 -1000 2000 2000" focusable="false">
       <defs>
         <radialGradient id="setup-sunlight-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1000">
-          <stop offset="0" stop-color="currentColor" stop-opacity="0"/>
-          <stop offset=".08" stop-color="currentColor" stop-opacity=".7"/>
-          <stop offset=".28" stop-color="currentColor"/>
+          <stop offset="0" stop-color="currentColor"/>
+          <stop offset=".12" stop-color="currentColor" stop-opacity=".95"/>
+          <stop offset=".35" stop-color="currentColor" stop-opacity=".7"/>
           <stop offset=".74" stop-color="currentColor" stop-opacity=".28"/>
           <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
         </radialGradient>
       </defs>
       <g fill="url(#setup-sunlight-fade)">${rays}</g>
     </svg>
+    </div>
   </div>`;
 }
 

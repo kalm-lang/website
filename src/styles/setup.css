@@ -29,6 +29,7 @@
 .setup-start:hover { filter: none; transform: none; }
 .setup-start .icon { width: .8rem; height: .8rem; transition: transform .15s cubic-bezier(.22,.75,.25,1); }
 .setup-start:hover .icon { transform: translateX(3px); }
+.setup-wizard:has(.setup-dialog[open]) .setup-start { visibility: hidden; }
 .setup-finish .icon { width: .95rem; height: .95rem; }
 .setup-dialog { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none;
   margin: 0; padding: 0; border: 0; overflow: hidden; color: var(--ink); background: transparent;
@@ -39,9 +40,14 @@
   margin: auto; padding: 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none;
   background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 32px 110px #0004; }
 .setup-dialog-surface::-webkit-scrollbar { display: none; }
+.setup-dialog-surface::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  opacity: var(--setup-edge-light, 0); box-shadow: inset 0 0 0 1px var(--accent), inset 0 0 26px color-mix(in srgb, var(--accent) 16%, transparent); }
 .setup-dialog::backdrop { background: rgb(18 20 17 / var(--setup-backdrop-alpha)); backdrop-filter: blur(var(--setup-backdrop-blur)); }
 .setup-sunlight { position: absolute; inset: 0; overflow: hidden; pointer-events: none; color: var(--accent); }
+.setup-ray-window { position: absolute; inset: 0; overflow: hidden; }
 .setup-sunlight-rays { position: absolute; display: block; max-width: none; opacity: 0; transform-origin: center; }
+.setup-launch-label { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; color: var(--accent-ink); white-space: nowrap; }
 .setup-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.6rem .75rem;
   color: var(--muted); font: .7rem/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .setup-dialog-progress { height: 2px; margin: 0 1.8rem; background: var(--soft); overflow: hidden; }
