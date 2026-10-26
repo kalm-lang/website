@@ -10,8 +10,13 @@ class SetupWizard extends HTMLElement {
   private busy = false;
   private readonly chosenSettings = new Set<string>();
   private dialog!: HTMLDialogElement;
+  private surface!: HTMLElement;
+  private sunlight!: HTMLElement;
+  private rays!: SVGSVGElement;
   private animation?: gsap.core.Timeline;
-  private reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private transition?: 'opening' | 'closing';
+  private readonly motion = matchMedia('(prefers-reduced-motion: reduce)');
+  private reduced = () => this.motion.matches;
 
   connectedCallback() {
     try {
@@ -19,6 +24,9 @@ class SetupWizard extends HTMLElement {
     } catch { /* Setup also works without storage. */ }
     if (location.pathname === '/' && !this.reduced()) this.dataset.welcome = 'true';
     this.dialog = this.querySelector<HTMLDialogElement>('dialog')!;
+    this.surface = this.dialog.querySelector<HTMLElement>('.setup-dialog-surface')!;
+    this.sunlight = this.dialog.querySelector<HTMLElement>('.setup-sunlight')!;
+    this.rays = this.dialog.querySelector<SVGSVGElement>('.setup-sunlight-rays')!;
     const preferences = this.preferences();
     if (preferences.os !== 'auto') applyPreferences({...preferences, os: 'auto'});
     this.renderShells();
@@ -28,14 +36,23 @@ class SetupWizard extends HTMLElement {
     this.addEventListener('click', this.handleClick);
     this.dialog.addEventListener('cancel', this.handleCancel);
     this.dialog.addEventListener('close', this.handleClosed);
+    window.addEventListener('resize', this.settleAnimation, {passive: true});
+    window.visualViewport?.addEventListener('resize', this.settleAnimation, {passive: true});
+    this.motion.addEventListener('change', this.handleMotionChange);
   }
 
   disconnectedCallback() {
     this.animation?.kill();
+    this.animation = undefined;
+    this.transition = undefined;
     this.removeEventListener('click', this.handleClick);
     this.dialog?.removeEventListener('cancel', this.handleCancel);
     this.dialog?.removeEventListener('close', this.handleClosed);
+    window.removeEventListener('resize', this.settleAnimation);
+    window.visualViewport?.removeEventListener('resize', this.settleAnimation);
+    this.motion.removeEventListener('change', this.handleMotionChange);
     if (this.dialog?.open) this.dialog.close();
+    if (this.dialog) this.resetPresentation();
     this.unlockPage();
   }
 
@@ -45,8 +62,33 @@ class SetupWizard extends HTMLElement {
 
   private readonly handleCancel = (event: Event) => { event.preventDefault(); this.close(); };
   private readonly handleClosed = () => {
+    // A queued close event can arrive after the dialog has already reopened.
+    if (this.dialog.open) return;
+    this.animation?.kill();
+    this.animation = undefined;
+    this.transition = undefined;
+    this.resetPresentation();
+    this.setBusy(false);
     this.unlockPage();
     if (this.step === 3) this.dismiss();
+    if (this.isConnected) {
+      const trigger = this.step === 3
+        ? document.querySelector<HTMLElement>('.settings-trigger')
+        : this.querySelector<HTMLElement>('[data-setup-open]');
+      trigger?.focus({preventScroll: true});
+    }
+  };
+
+  private readonly settleAnimation = () => {
+    const animation = this.animation;
+    if (!this.dialog?.open || !animation) return;
+    animation.progress(1);
+    animation.kill();
+    if (this.animation === animation) this.animation = undefined;
+  };
+
+  private readonly handleMotionChange = () => {
+    if (this.reduced()) this.settleAnimation();
   };
 
   private readonly handleClick = (event: MouseEvent) => {
@@ -55,7 +97,7 @@ class SetupWizard extends HTMLElement {
     if (event.target.closest('[data-setup-open]')) { this.open(); return; }
     if (event.target.closest('[data-setup-close], [data-setup-finish]')) { this.close(); return; }
     if (event.target === this.dialog) {
-      const rect = this.dialog.getBoundingClientRect();
+      const rect = this.surface.getBoundingClientRect();
       if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) this.close();
       return;
     }
@@ -74,50 +116,93 @@ class SetupWizard extends HTMLElement {
   private open() {
     if (this.dialog.open) return;
     this.animation?.kill();
+    this.animation = undefined;
+    this.resetPresentation();
     this.busy = false;
     this.showStep(this.step, false);
+    const trigger = this.querySelector<HTMLElement>('[data-setup-open]')!.getBoundingClientRect();
+    const origin = {x: trigger.left + trigger.width / 2, y: trigger.top + trigger.height / 2};
     const root = document.documentElement;
-    root.style.setProperty('--dialog-scrollbar-gap', `${innerWidth - root.clientWidth}px`);
+    root.style.setProperty('--dialog-scrollbar-gap', `${Math.max(0, innerWidth - root.clientWidth)}px`);
     root.dataset.dialogOpen = '';
+    if (!this.reduced()) {
+      // Set initial styles before showModal to avoid a fully painted first frame.
+      gsap.set(this.dialog, {'--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px'});
+      gsap.set(this.surface, {opacity: 0, scale: .97, y: 12});
+    }
     this.dialog.showModal();
     this.focusHeading();
     if (this.reduced()) return;
-    this.setDialogOrigin();
+    this.positionSunlight(origin);
+    this.sunlight.hidden = false;
+    this.transition = 'opening';
     this.setBusy(true);
-    this.animation = gsap.timeline({onComplete: () => { this.setBusy(false); this.focusHeading(); }});
+    this.animation = gsap.timeline({onComplete: () => {
+      this.animation = undefined;
+      this.transition = undefined;
+      this.resetPresentation();
+      this.setBusy(false);
+      this.focusHeading();
+    }});
     this.animation
-      .fromTo(this.dialog,
-        {autoAlpha: 0, scale: .88, y: 28, rotationX: -5, filter: 'blur(5px)', '--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px'},
-        {autoAlpha: 1, scale: 1, y: 0, rotationX: 0, filter: 'blur(0px)', '--setup-backdrop-alpha': .58, '--setup-backdrop-blur': '6px', duration: .7, ease: 'expo.out', clearProps: 'transform,filter,transformOrigin'},
-      )
-      .fromTo(this.dialog.querySelectorAll('.setup-dialog-header, .setup-stage, .setup-dialog-footer'),
-        {autoAlpha: 0, y: 18}, {autoAlpha: 1, y: 0, duration: .45, stagger: .065, ease: 'power3.out', clearProps: 'opacity,visibility,transform'}, .14)
+      .fromTo(this.rays, {opacity: 0}, {opacity: .16, duration: .25, ease: 'power2.out'}, 0)
+      .to(this.rays, {scale: 1, duration: .65, ease: 'power3.out'}, 0)
+      .to(this.dialog, {'--setup-backdrop-alpha': .58, '--setup-backdrop-blur': '6px', duration: .55, ease: 'power2.out'}, .1)
+      .to(this.surface, {opacity: 1, scale: 1, y: 0, duration: .55, ease: 'power3.out'}, .1)
+      .fromTo(this.dialog.querySelectorAll('.setup-dialog-header, [data-setup-step]:not([hidden]) h2, [data-setup-step]:not([hidden]) .setup-description'),
+        {opacity: 0, y: 6}, {opacity: 1, y: 0, duration: .38, stagger: .035, ease: 'power2.out'}, .25)
       .fromTo(this.dialog.querySelectorAll('[data-setup-step]:not([hidden]) .setup-choice'),
-        {autoAlpha: 0, y: 16, scale: .97}, {autoAlpha: 1, y: 0, scale: 1, duration: .5, stagger: .08, ease: 'power3.out', clearProps: 'opacity,visibility,transform'}, .25);
+        {opacity: 0, y: 6}, {opacity: 1, y: 0, duration: .35, stagger: .02, ease: 'power2.out'}, .31)
+      .to(this.rays, {opacity: 0, duration: .4, ease: 'power2.inOut'}, .45);
   }
 
   private close() {
-    if (!this.dialog.open) return;
+    if (!this.dialog.open || this.transition === 'closing') return;
     this.animation?.kill();
+    this.animation = undefined;
+    this.transition = 'closing';
+    this.sunlight.hidden = true;
     this.setBusy(true);
     const finish = () => {
+      this.animation = undefined;
+      this.transition = undefined;
       this.dialog.close();
+      this.resetPresentation();
       this.setBusy(false);
-      gsap.set(this.dialog, {clearProps: 'opacity,visibility,transform,transformOrigin,filter'});
-      this.dialog.style.removeProperty('--setup-backdrop-alpha');
-      this.dialog.style.removeProperty('--setup-backdrop-blur');
-      gsap.set(this.dialog.querySelectorAll('.setup-stage, .setup-dialog-header, .setup-dialog-footer, .setup-choice'), {clearProps: 'opacity,visibility,transform'});
+      this.unlockPage();
     };
     if (this.reduced()) { finish(); return; }
-    this.setDialogOrigin();
-    this.animation = gsap.timeline({onComplete: finish}).to(this.dialog,
-      {autoAlpha: 0, scale: .88, y: 28, rotationX: -5, '--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px', duration: .32, ease: 'expo.in'});
+    this.animation = gsap.timeline({onComplete: finish})
+      .to(this.surface, {opacity: 0, scale: .985, y: 4, duration: .22, ease: 'power2.inOut'}, 0)
+      .to(this.dialog, {'--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px', duration: .22, ease: 'power2.inOut'}, 0);
   }
 
-  private setDialogOrigin() {
-    const trigger = this.querySelector<HTMLElement>('[data-setup-open]')!.getBoundingClientRect();
-    const bounds = this.dialog.getBoundingClientRect();
-    gsap.set(this.dialog, {transformOrigin: `${trigger.left + trigger.width / 2 - bounds.left}px ${trigger.top + trigger.height / 2 - bounds.top}px`});
+  private positionSunlight(origin: {x: number; y: number}) {
+    const viewport = this.dialog.getBoundingClientRect();
+    const radius = Math.hypot(
+      Math.max(Math.abs(origin.x - viewport.left), Math.abs(viewport.right - origin.x)),
+      Math.max(Math.abs(origin.y - viewport.top), Math.abs(viewport.bottom - origin.y)),
+    );
+    // Use layout coordinates so the card's entrance transform cannot move the aim.
+    const angle = Math.atan2(
+      viewport.top + this.surface.offsetTop + this.surface.offsetHeight / 2 - origin.y,
+      viewport.left + this.surface.offsetLeft + this.surface.offsetWidth / 2 - origin.x,
+    ) * 180 / Math.PI;
+    gsap.set(this.rays, {
+      left: origin.x - viewport.left - radius, top: origin.y - viewport.top - radius,
+      width: radius * 2, height: radius * 2, rotation: angle, scale: .12,
+    });
+  }
+
+  private resetPresentation() {
+    this.sunlight.hidden = true;
+    gsap.killTweensOf(this.dialog.querySelector('.setup-success'));
+    gsap.set(this.rays, {clearProps: 'all'});
+    gsap.set(this.surface, {clearProps: 'opacity,visibility,transform'});
+    gsap.set(this.dialog.querySelectorAll('.setup-dialog-header, .setup-stage, [data-setup-step] h2, .setup-description, .setup-choice, .setup-success'),
+      {clearProps: 'opacity,visibility,transform'});
+    this.dialog.style.removeProperty('--setup-backdrop-alpha');
+    this.dialog.style.removeProperty('--setup-backdrop-blur');
   }
 
   private showStep(next: number, animate = true) {

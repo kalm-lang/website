@@ -1,5 +1,28 @@
 import {icon} from '../shared/icons.mjs';
 
+function sunlight() {
+  const rays = Array.from({length: 14}, (_, index) => {
+    const halfWidth = (index % 3 === 0 ? 2.6 : 1.8) * Math.PI / 180;
+    const x = (Math.cos(halfWidth) * 1000).toFixed(2);
+    const y = (Math.sin(halfWidth) * 1000).toFixed(2);
+    return `<path d="M 0 0 L ${x} -${y} L ${x} ${y} Z" transform="rotate(${-70 + index * 140 / 13})"/>`;
+  }).join('');
+  return `<div class="setup-sunlight" aria-hidden="true" hidden>
+    <svg class="setup-sunlight-rays" viewBox="-1000 -1000 2000 2000" focusable="false">
+      <defs>
+        <radialGradient id="setup-sunlight-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1000">
+          <stop offset="0" stop-color="currentColor" stop-opacity="0"/>
+          <stop offset=".08" stop-color="currentColor" stop-opacity=".7"/>
+          <stop offset=".28" stop-color="currentColor"/>
+          <stop offset=".74" stop-color="currentColor" stop-opacity=".28"/>
+          <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g fill="url(#setup-sunlight-fade)">${rays}</g>
+    </svg>
+  </div>`;
+}
+
 function choice(setting, value, title, description, example) {
   return `<button class="setup-choice" type="button" data-setup-choice="${setting}" data-value="${value}" aria-pressed="false">
     <span class="setup-choice-heading"><strong>${title}</strong>${icon('arrow-right')}</span>
@@ -22,6 +45,8 @@ export function setupWizard() {
       <button class="setup-start" type="button" data-setup-open aria-haspopup="dialog" aria-controls="setup-dialog">Let’s set up ${icon('arrow-up-right')}</button>
     </div>
     <dialog class="setup-dialog" id="setup-dialog" aria-labelledby="setup-heading-language" aria-describedby="setup-description-language">
+      ${sunlight()}
+      <div class="setup-dialog-surface">
       <div class="setup-dialog-header"><span>Setup</span><button class="setup-icon-button" type="button" data-setup-close aria-label="Close setup" title="Close setup">${icon('x')}</button></div>
       <div class="setup-dialog-progress" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0"><span></span></div>
       <div class="setup-stage">
@@ -57,6 +82,7 @@ export function setupWizard() {
         <button class="setup-icon-button" type="button" data-setup-back aria-label="Previous step" title="Previous step">${icon('arrow-left')}</button>
         <span data-setup-position>1 of 3</span>
         <button class="setup-icon-button" type="button" data-setup-next aria-label="Next step" title="Next step">${icon('arrow-right')}</button>
+      </div>
       </div>
     </dialog>
   </kalm-setup-wizard>`;
