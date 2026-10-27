@@ -163,7 +163,7 @@ class SetupWizard extends HTMLElement {
         ...travel,
       }, travelStart)
       // Keep the pattern still; only its visible front follows the card.
-      .to(lightSweep, {progress: 1, ...travel, onUpdate: () => reveal.clip(lightSweep.progress)}, travelStart)
+      .to(lightSweep, {progress: 1, ...travel, onUpdate: () => reveal.mask(lightSweep.progress)}, travelStart)
       .to(this.surface, {backgroundColor: reveal.background, borderColor: reveal.border, duration: .4, ease: 'power2.inOut'}, .12)
       .fromTo(this.dialog.querySelectorAll('.setup-dialog-header, .setup-dialog-progress, .setup-stage, .setup-dialog-footer'),
         {opacity: 0, y: 6}, {opacity: 1, y: 0, duration: .33, stagger: .02, ease: 'power2.out'}, .4)
@@ -231,7 +231,7 @@ class SetupWizard extends HTMLElement {
     const dy = center.y - origin.y;
     const distance = Math.hypot(dx, dy);
     const direction = distance > .01 ? {x: dx / distance, y: dy / distance} : {x: 0, y: 1};
-    const clip = (progress: number) => {
+    const mask = (progress: number) => {
       const front = {
         x: origin.x - viewport.left + dx * progress,
         y: origin.y - viewport.top + dy * progress,
@@ -241,39 +241,22 @@ class SetupWizard extends HTMLElement {
       const leadingEdge = (Math.abs(direction.x) * width + Math.abs(direction.y) * height) / 2;
       front.x += direction.x * leadingEdge;
       front.y += direction.y * leadingEdge;
-      const corners = [{x: 0, y: 0}, {x: viewport.width, y: 0}, {x: viewport.width, y: viewport.height}, {x: 0, y: viewport.height}];
-      const polygon: {x: number; y: number}[] = [];
-      // Keep light strictly beyond the card's leading edge, including its sides.
-      for (let index = 0; index < corners.length; index++) {
-        const start = corners[index];
-        const end = corners[(index + 1) % corners.length];
-        const startDistance = (start.x - front.x) * direction.x + (start.y - front.y) * direction.y;
-        const endDistance = (end.x - front.x) * direction.x + (end.y - front.y) * direction.y;
-        if (startDistance >= 0) polygon.push(start);
-        if ((startDistance >= 0) !== (endDistance >= 0)) {
-          const fraction = startDistance / (startDistance - endDistance);
-          polygon.push({x: start.x + (end.x - start.x) * fraction, y: start.y + (end.y - start.y) * fraction});
-        }
-      }
-      this.rayWindow.style.clipPath = polygon.length >= 3
-        ? `polygon(${polygon.map(point => `${point.x.toFixed(2)}px ${point.y.toFixed(2)}px`).join(',')})`
-        : 'polygon(0 0, 0 0, 0 0)';
-      // Feather only the forward side of the cut, leaving no light behind it.
-      const span = Math.abs(direction.x) * viewport.width + Math.abs(direction.y) * viewport.height;
-      const start = (viewport.width * direction.x + viewport.height * direction.y - span) / 2;
-      const boundary = front.x * direction.x + front.y * direction.y - start;
-      const angle = Math.atan2(direction.x, -direction.y) * 180 / Math.PI;
-      this.rayWindow.style.maskImage = `linear-gradient(${angle}deg, transparent ${boundary}px, #000 ${boundary + 8 + 16 * progress}px)`;
+      // Bow the shadow toward the middle of the fan so the outer rays stay longest.
+      // Its circle contains the light source and follows the card's leading edge.
+      const shadowRadius = (distance * progress + leadingEdge) * .65;
+      const shadowX = front.x - direction.x * shadowRadius;
+      const shadowY = front.y - direction.y * shadowRadius;
+      const feather = Math.max(24, Math.min(width, height) * .12);
+      this.rayWindow.style.maskImage = `radial-gradient(circle ${shadowRadius}px at ${shadowX}px ${shadowY}px, transparent ${Math.max(0, shadowRadius - feather)}px, #000 ${shadowRadius + feather}px)`;
     };
-    clip(0);
-    return {background, border, clip};
+    mask(0);
+    return {background, border, mask};
   }
 
   private resetPresentation() {
     this.sunlight.hidden = true;
     gsap.killTweensOf(this.dialog.querySelector('.setup-success'));
     gsap.set(this.rays, {clearProps: 'all'});
-    this.rayWindow.style.removeProperty('clip-path');
     this.rayWindow.style.removeProperty('mask-image');
     gsap.set(this.launchLabel, {clearProps: 'all'});
     this.launchLabel.replaceChildren();
