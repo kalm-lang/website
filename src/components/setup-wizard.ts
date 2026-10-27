@@ -152,8 +152,8 @@ class SetupWizard extends HTMLElement {
       this.focusHeading();
     }});
     this.animation
-      .fromTo(this.rays, {opacity: 0}, {opacity: .14, duration: .16, ease: 'power2.out'}, 0)
-      .to(this.rays, {opacity: 0, duration: .54, ease: 'power2.inOut'}, .18)
+      .fromTo(this.rays, {opacity: 0}, {opacity: .14, duration: .24, ease: 'sine.inOut'}, 0)
+      .to(this.rays, {opacity: 0, duration: .54, ease: 'power2.inOut'}, .26)
       .to(this.dialog, {'--setup-backdrop-alpha': .58, '--setup-backdrop-blur': '6px', duration: .55, ease: 'power2.out'}, .1)
       .to(this.launchLabel, {opacity: 0, duration: .1, ease: 'power2.in'}, travelStart)
       .to(this.surface, {
@@ -225,7 +225,7 @@ class SetupWizard extends HTMLElement {
     });
     gsap.set(this.rays, {
       left: origin.x - viewport.left - radius, top: origin.y - viewport.top - radius,
-      width: radius * 2, height: radius * 2, rotation: angle, scale: 1, x: 0, y: 0,
+      width: radius * 2, height: radius * 2, rotation: angle, scale: 1, x: 0, y: 0, opacity: 0,
     });
     const dx = center.x - origin.x;
     const dy = center.y - origin.y;
