@@ -10,8 +10,15 @@ class SetupWizard extends HTMLElement {
   private busy = false;
   private readonly chosenSettings = new Set<string>();
   private dialog!: HTMLDialogElement;
+  private surface!: HTMLElement;
+  private sunlight!: HTMLElement;
+  private rays!: SVGSVGElement;
+  private rayWindow!: HTMLElement;
+  private launchLabel!: HTMLElement;
   private animation?: gsap.core.Timeline;
-  private reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private transition?: 'opening' | 'closing';
+  private readonly motion = matchMedia('(prefers-reduced-motion: reduce)');
+  private reduced = () => this.motion.matches;
 
   connectedCallback() {
     try {
@@ -19,6 +26,11 @@ class SetupWizard extends HTMLElement {
     } catch { /* Setup also works without storage. */ }
     if (location.pathname === '/' && !this.reduced()) this.dataset.welcome = 'true';
     this.dialog = this.querySelector<HTMLDialogElement>('dialog')!;
+    this.surface = this.dialog.querySelector<HTMLElement>('.setup-dialog-surface')!;
+    this.sunlight = this.dialog.querySelector<HTMLElement>('.setup-sunlight')!;
+    this.rays = this.dialog.querySelector<SVGSVGElement>('.setup-sunlight-rays')!;
+    this.rayWindow = this.dialog.querySelector<HTMLElement>('.setup-ray-window')!;
+    this.launchLabel = this.dialog.querySelector<HTMLElement>('.setup-launch-label')!;
     const preferences = this.preferences();
     if (preferences.os !== 'auto') applyPreferences({...preferences, os: 'auto'});
     this.renderShells();
@@ -28,14 +40,23 @@ class SetupWizard extends HTMLElement {
     this.addEventListener('click', this.handleClick);
     this.dialog.addEventListener('cancel', this.handleCancel);
     this.dialog.addEventListener('close', this.handleClosed);
+    window.addEventListener('resize', this.settleAnimation, {passive: true});
+    window.visualViewport?.addEventListener('resize', this.settleAnimation, {passive: true});
+    this.motion.addEventListener('change', this.handleMotionChange);
   }
 
   disconnectedCallback() {
     this.animation?.kill();
+    this.animation = undefined;
+    this.transition = undefined;
     this.removeEventListener('click', this.handleClick);
     this.dialog?.removeEventListener('cancel', this.handleCancel);
     this.dialog?.removeEventListener('close', this.handleClosed);
+    window.removeEventListener('resize', this.settleAnimation);
+    window.visualViewport?.removeEventListener('resize', this.settleAnimation);
+    this.motion.removeEventListener('change', this.handleMotionChange);
     if (this.dialog?.open) this.dialog.close();
+    if (this.dialog) this.resetPresentation();
     this.unlockPage();
   }
 
@@ -45,8 +66,33 @@ class SetupWizard extends HTMLElement {
 
   private readonly handleCancel = (event: Event) => { event.preventDefault(); this.close(); };
   private readonly handleClosed = () => {
+    // A queued close event can arrive after the dialog has already reopened.
+    if (this.dialog.open) return;
+    this.animation?.kill();
+    this.animation = undefined;
+    this.transition = undefined;
+    this.resetPresentation();
+    this.setBusy(false);
     this.unlockPage();
     if (this.step === 3) this.dismiss();
+    if (this.isConnected) {
+      const trigger = this.step === 3
+        ? document.querySelector<HTMLElement>('.settings-trigger')
+        : this.querySelector<HTMLElement>('[data-setup-open]');
+      trigger?.focus({preventScroll: true});
+    }
+  };
+
+  private readonly settleAnimation = () => {
+    const animation = this.animation;
+    if (!this.dialog?.open || !animation) return;
+    animation.progress(1);
+    animation.kill();
+    if (this.animation === animation) this.animation = undefined;
+  };
+
+  private readonly handleMotionChange = () => {
+    if (this.reduced()) this.settleAnimation();
   };
 
   private readonly handleClick = (event: MouseEvent) => {
@@ -55,7 +101,7 @@ class SetupWizard extends HTMLElement {
     if (event.target.closest('[data-setup-open]')) { this.open(); return; }
     if (event.target.closest('[data-setup-close], [data-setup-finish]')) { this.close(); return; }
     if (event.target === this.dialog) {
-      const rect = this.dialog.getBoundingClientRect();
+      const rect = this.surface.getBoundingClientRect();
       if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) this.close();
       return;
     }
@@ -74,50 +120,170 @@ class SetupWizard extends HTMLElement {
   private open() {
     if (this.dialog.open) return;
     this.animation?.kill();
+    this.animation = undefined;
+    this.resetPresentation();
     this.busy = false;
     this.showStep(this.step, false);
+    const button = this.querySelector<HTMLElement>('[data-setup-open]')!;
+    const trigger = button.getBoundingClientRect();
     const root = document.documentElement;
-    root.style.setProperty('--dialog-scrollbar-gap', `${innerWidth - root.clientWidth}px`);
+    root.style.setProperty('--dialog-scrollbar-gap', `${Math.max(0, innerWidth - root.clientWidth)}px`);
     root.dataset.dialogOpen = '';
+    if (!this.reduced()) {
+      // Set initial styles before showModal to avoid a fully painted first frame.
+      gsap.set(this.dialog, {'--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px'});
+      gsap.set(this.surface, {opacity: 0});
+    }
     this.dialog.showModal();
     this.focusHeading();
     if (this.reduced()) return;
-    this.setDialogOrigin();
+    const reveal = this.prepareReveal(button, trigger);
+    this.sunlight.hidden = false;
+    this.transition = 'opening';
     this.setBusy(true);
-    this.animation = gsap.timeline({onComplete: () => { this.setBusy(false); this.focusHeading(); }});
+    const travel = {duration: .6, ease: 'power3.inOut'};
+    const travelStart = .06;
+    const lightSweep = {progress: 0};
+    this.animation = gsap.timeline({onComplete: () => {
+      this.animation = undefined;
+      this.transition = undefined;
+      this.resetPresentation();
+      this.setBusy(false);
+      this.focusHeading();
+    }});
     this.animation
-      .fromTo(this.dialog,
-        {autoAlpha: 0, scale: .88, y: 28, rotationX: -5, filter: 'blur(5px)', '--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px'},
-        {autoAlpha: 1, scale: 1, y: 0, rotationX: 0, filter: 'blur(0px)', '--setup-backdrop-alpha': .58, '--setup-backdrop-blur': '6px', duration: .7, ease: 'expo.out', clearProps: 'transform,filter,transformOrigin'},
-      )
-      .fromTo(this.dialog.querySelectorAll('.setup-dialog-header, .setup-stage, .setup-dialog-footer'),
-        {autoAlpha: 0, y: 18}, {autoAlpha: 1, y: 0, duration: .45, stagger: .065, ease: 'power3.out', clearProps: 'opacity,visibility,transform'}, .14)
+      .fromTo(this.rays, {opacity: 0}, {opacity: .14, duration: .24, ease: 'sine.inOut'}, 0)
+      .to(this.rays, {opacity: 0, duration: .54, ease: 'power2.inOut'}, .26)
+      .to(this.dialog, {'--setup-backdrop-alpha': .58, '--setup-backdrop-blur': '6px', duration: .55, ease: 'power2.out'}, .1)
+      .to(this.launchLabel, {opacity: 0, duration: .1, ease: 'power2.in'}, travelStart)
+      .to(this.surface, {
+        x: 0, y: 0, scaleX: 1, scaleY: 1,
+        borderTopLeftRadius: '18px 18px', borderTopRightRadius: '18px 18px',
+        borderBottomLeftRadius: '18px 18px', borderBottomRightRadius: '18px 18px',
+        ...travel,
+      }, travelStart)
+      // Keep the pattern still; only its visible front follows the card.
+      .to(lightSweep, {progress: 1, ...travel, onUpdate: () => reveal.clip(lightSweep.progress)}, travelStart)
+      .to(this.surface, {backgroundColor: reveal.background, borderColor: reveal.border, duration: .4, ease: 'power2.inOut'}, .12)
+      .fromTo(this.dialog.querySelectorAll('.setup-dialog-header, .setup-dialog-progress, .setup-stage, .setup-dialog-footer'),
+        {opacity: 0, y: 6}, {opacity: 1, y: 0, duration: .33, stagger: .02, ease: 'power2.out'}, .4)
       .fromTo(this.dialog.querySelectorAll('[data-setup-step]:not([hidden]) .setup-choice'),
-        {autoAlpha: 0, y: 16, scale: .97}, {autoAlpha: 1, y: 0, scale: 1, duration: .5, stagger: .08, ease: 'power3.out', clearProps: 'opacity,visibility,transform'}, .25);
+        {opacity: 0, y: 6}, {opacity: 1, y: 0, duration: .33, stagger: .02, ease: 'power2.out'}, .45)
+      .to(this.surface, {'--setup-edge-light': .6, duration: .22, ease: 'power2.out'}, .3)
+      .to(this.surface, {'--setup-edge-light': 0, duration: .33, ease: 'power2.inOut'}, .52);
   }
 
   private close() {
-    if (!this.dialog.open) return;
+    if (!this.dialog.open || this.transition === 'closing') return;
     this.animation?.kill();
+    this.animation = undefined;
+    this.transition = 'closing';
+    this.sunlight.hidden = true;
     this.setBusy(true);
     const finish = () => {
+      this.animation = undefined;
+      this.transition = undefined;
       this.dialog.close();
+      this.resetPresentation();
       this.setBusy(false);
-      gsap.set(this.dialog, {clearProps: 'opacity,visibility,transform,transformOrigin,filter'});
-      this.dialog.style.removeProperty('--setup-backdrop-alpha');
-      this.dialog.style.removeProperty('--setup-backdrop-blur');
-      gsap.set(this.dialog.querySelectorAll('.setup-stage, .setup-dialog-header, .setup-dialog-footer, .setup-choice'), {clearProps: 'opacity,visibility,transform'});
+      this.unlockPage();
     };
     if (this.reduced()) { finish(); return; }
-    this.setDialogOrigin();
-    this.animation = gsap.timeline({onComplete: finish}).to(this.dialog,
-      {autoAlpha: 0, scale: .88, y: 28, rotationX: -5, '--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px', duration: .32, ease: 'expo.in'});
+    this.animation = gsap.timeline({onComplete: finish})
+      .to(this.surface, {opacity: 0, scale: .985, y: 4, duration: .22, ease: 'power2.inOut'}, 0)
+      .to(this.dialog, {'--setup-backdrop-alpha': 0, '--setup-backdrop-blur': '0px', duration: .22, ease: 'power2.inOut'}, 0);
   }
 
-  private setDialogOrigin() {
-    const trigger = this.querySelector<HTMLElement>('[data-setup-open]')!.getBoundingClientRect();
-    const bounds = this.dialog.getBoundingClientRect();
-    gsap.set(this.dialog, {transformOrigin: `${trigger.left + trigger.width / 2 - bounds.left}px ${trigger.top + trigger.height / 2 - bounds.top}px`});
+  private prepareReveal(button: HTMLElement, trigger: DOMRect) {
+    const viewport = this.dialog.getBoundingClientRect();
+    const card = this.surface.getBoundingClientRect();
+    const origin = {x: trigger.left + trigger.width / 2, y: trigger.top + trigger.height / 2};
+    const center = {x: card.left + card.width / 2, y: card.top + card.height / 2};
+    const radius = Math.hypot(
+      Math.max(Math.abs(origin.x - viewport.left), Math.abs(viewport.right - origin.x)),
+      Math.max(Math.abs(origin.y - viewport.top), Math.abs(viewport.bottom - origin.y)),
+    );
+    const angle = Math.atan2(center.y - origin.y, center.x - origin.x) * 180 / Math.PI;
+    const buttonStyle = getComputedStyle(button);
+    const cardStyle = getComputedStyle(this.surface);
+    const background = cardStyle.backgroundColor;
+    const border = cardStyle.borderTopColor;
+    const scaleX = trigger.width / card.width;
+    const scaleY = trigger.height / card.height;
+    const corner = parseFloat(buttonStyle.borderTopLeftRadius);
+    this.launchLabel.replaceChildren(...Array.from(button.childNodes, node => node.cloneNode(true)));
+    gsap.set(this.launchLabel, {
+      left: trigger.left - viewport.left, top: trigger.top - viewport.top, width: trigger.width, height: trigger.height,
+      font: buttonStyle.font, gap: buttonStyle.gap, padding: buttonStyle.padding, opacity: 1,
+    });
+    const launchCorner = `${corner / scaleX}px ${corner / scaleY}px`;
+    gsap.set(this.surface, {
+      opacity: 1, x: trigger.left - card.left, y: trigger.top - card.top, scaleX, scaleY, transformOrigin: '0 0',
+      borderTopLeftRadius: launchCorner, borderTopRightRadius: launchCorner,
+      borderBottomLeftRadius: launchCorner, borderBottomRightRadius: launchCorner,
+      backgroundColor: buttonStyle.backgroundColor, borderColor: buttonStyle.borderTopColor,
+    });
+    gsap.set(this.rays, {
+      left: origin.x - viewport.left - radius, top: origin.y - viewport.top - radius,
+      width: radius * 2, height: radius * 2, rotation: angle, scale: 1, x: 0, y: 0, opacity: 0,
+    });
+    const dx = center.x - origin.x;
+    const dy = center.y - origin.y;
+    const distance = Math.hypot(dx, dy);
+    const direction = distance > .01 ? {x: dx / distance, y: dy / distance} : {x: 0, y: 1};
+    const clip = (progress: number) => {
+      const front = {
+        x: origin.x - viewport.left + dx * progress,
+        y: origin.y - viewport.top + dy * progress,
+      };
+      const width = trigger.width + (card.width - trigger.width) * progress;
+      const height = trigger.height + (card.height - trigger.height) * progress;
+      const leadingEdge = (Math.abs(direction.x) * width + Math.abs(direction.y) * height) / 2;
+      front.x += direction.x * leadingEdge;
+      front.y += direction.y * leadingEdge;
+      const corners = [{x: 0, y: 0}, {x: viewport.width, y: 0}, {x: viewport.width, y: viewport.height}, {x: 0, y: viewport.height}];
+      const polygon: {x: number; y: number}[] = [];
+      // Keep light strictly beyond the card's leading edge, including its sides.
+      for (let index = 0; index < corners.length; index++) {
+        const start = corners[index];
+        const end = corners[(index + 1) % corners.length];
+        const startDistance = (start.x - front.x) * direction.x + (start.y - front.y) * direction.y;
+        const endDistance = (end.x - front.x) * direction.x + (end.y - front.y) * direction.y;
+        if (startDistance >= 0) polygon.push(start);
+        if ((startDistance >= 0) !== (endDistance >= 0)) {
+          const fraction = startDistance / (startDistance - endDistance);
+          polygon.push({x: start.x + (end.x - start.x) * fraction, y: start.y + (end.y - start.y) * fraction});
+        }
+      }
+      this.rayWindow.style.clipPath = polygon.length >= 3
+        ? `polygon(${polygon.map(point => `${point.x.toFixed(2)}px ${point.y.toFixed(2)}px`).join(',')})`
+        : 'polygon(0 0, 0 0, 0 0)';
+      // Feather only the forward side of the cut, leaving no light behind it.
+      const span = Math.abs(direction.x) * viewport.width + Math.abs(direction.y) * viewport.height;
+      const start = (viewport.width * direction.x + viewport.height * direction.y - span) / 2;
+      const boundary = front.x * direction.x + front.y * direction.y - start;
+      const angle = Math.atan2(direction.x, -direction.y) * 180 / Math.PI;
+      this.rayWindow.style.maskImage = `linear-gradient(${angle}deg, transparent ${boundary}px, #000 ${boundary + 8 + 16 * progress}px)`;
+    };
+    clip(0);
+    return {background, border, clip};
+  }
+
+  private resetPresentation() {
+    this.sunlight.hidden = true;
+    gsap.killTweensOf(this.dialog.querySelector('.setup-success'));
+    gsap.set(this.rays, {clearProps: 'all'});
+    this.rayWindow.style.removeProperty('clip-path');
+    this.rayWindow.style.removeProperty('mask-image');
+    gsap.set(this.launchLabel, {clearProps: 'all'});
+    this.launchLabel.replaceChildren();
+    gsap.set(this.surface, {clearProps: 'opacity,visibility,transform,transformOrigin,borderRadius,backgroundColor,borderColor,--setup-edge-light'});
+    gsap.set(this.dialog.querySelectorAll('.setup-dialog-header, .setup-dialog-progress, .setup-stage, [data-setup-step] h2, .setup-description, .setup-choice, .setup-success'),
+      {clearProps: 'opacity,visibility,transform'});
+    // The completed step keeps its footer hidden independently of the reveal.
+    gsap.set(this.dialog.querySelector('.setup-dialog-footer'), {clearProps: 'opacity,transform'});
+    this.dialog.style.removeProperty('--setup-backdrop-alpha');
+    this.dialog.style.removeProperty('--setup-backdrop-blur');
   }
 
   private showStep(next: number, animate = true) {
